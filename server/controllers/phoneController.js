@@ -1,0 +1,45 @@
+const db = require('../db');
+const uuid = require('uuid');
+const path = require('path');
+const ApiError = require('../error/ApiError');
+
+class PhoneController {
+  async getOne(req, res, next) {
+    const {id} = req.params;
+    if(!id) {
+      return next(ApiError.badRequest('Enter ID!'))
+    }
+    const qeury = await db.query('SELECT * FROM phone WHERE phone_id=$1', [id]);
+    const data = qeury.rows[0]
+    return res.json(data)
+  }
+
+  async getAll(req, res) {
+    const qeury = await db.query('SELECT * FROM phone');
+    const data = qeury.rows
+    return res.json(data)
+  }
+
+  async create(req, res, next) {
+    try {
+      const {name, weight, diagonal, ram, memory, price, manufacturer_id, color, camera} = req.body;
+      const {img} = req.files;
+      let filename = uuid.v4()+ ".jpg"
+      
+      const qeury = await db.query(`INSERT INTO 
+        public.phone( weight, diagonal, ram, memory, price, manufacturer_id, name, color, camera, image)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10);`, [weight, diagonal, ram, memory, price, manufacturer_id, name, color, camera, filename], (err, res) => {
+          if(!err) {
+            img.mv(path.resolve(__dirname, '..','static', filename))
+          }
+          console.log(err);
+        });
+      return res.json(req.body)
+    }
+    catch(err) {
+      next(ApiError.badRequest(err.message));
+    }
+  }
+}
+
+module.exports = new PhoneController();
