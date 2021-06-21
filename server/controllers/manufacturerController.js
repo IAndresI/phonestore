@@ -20,8 +20,7 @@ class ManufacturerController {
             if(filename)img.mv(path.resolve(__dirname, '..','static', filename))
             return res.json(req.body)
           }
-          next(ApiError.badRequest(err));
-          return res.status(500)
+          return next(ApiError.badRequest(err));
         });
     }
     catch(err) {
@@ -35,7 +34,7 @@ class ManufacturerController {
       return res.json(data)
     }
     catch(err) {
-      next(ApiError.badRequest(err.message));
+      return next(ApiError.badRequest(err.message));
     }
   }
   async getOne(req, res, next) {
