@@ -48,7 +48,7 @@ class UserController {
       let client;
       const qeury = await db.query(`SELECT password FROM client WHERE email=$1`,[email], async (err,resp) => {
         client=resp.rows[0];
-        if(bcrypt.compareSync(password, client?.password)) {
+        if(bcrypt.compareSync(password, client.password ? client.password : null )) {
           const token = generateJwt(client.client_id, client.email)
           return res.json({token})
         }
