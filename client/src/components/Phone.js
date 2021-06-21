@@ -21,14 +21,14 @@ const useStyles = makeStyles({
 });
 
 export default function Phone({phone}) {
-  const {image, name, price, manufacturer, id} = phone
+  const {image, name, price, manufacturer, phone_id} = phone
   const classes = useStyles();
   const history = useHistory();
 
-  const imagePath = `http://localhost:5000/${image}`
+  const imagePath = `${process.env.REACT_APP_API_URL}/${image ? image : "phone.jpg"}`
   return (
     <Card className={classes.root}>
-      <CardActionArea onClick={() => history.push(PHONE_ROUTE+`/${id}`)}>
+      <CardActionArea onClick={() => history.push(PHONE_ROUTE+`/${phone_id}`)}>
         <CardMedia
           width={300}
           height={300}

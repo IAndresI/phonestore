@@ -1,22 +1,23 @@
 import {
-  $host,
-  $authHost
+  $host
 } from './index'
-import jwt_decode from 'jwt-decode'
 
-export const registration = async (email, password) => {
-  const {data} = await $host.post('api/user/registration', {email, password});
+export const createPhone = async (formData) => {
+  const {data} = await $host.post('api/phone/', formData);
   return data;
 }
 
-export const login = async (email, password) => {
-  const {data} = await $host.post('api/user/login', {email, password});
-  localStorage.setItem("token", data.token)
-  return jwt_decode(data.token);
+export const getOnePhones = async (id) => {
+  const {data} = await $host.get('api/phone/'+id);
+  return data;
 }
 
-export const check = async () => {
-  const {data} = await $authHost.get('api/user/auth');
-  localStorage.setItem("token", data.token)
-  return jwt_decode(data.token);
+export const getAllPhones = async () => {
+  const {data} = await $host.get('api/phone/');
+  return data;
+}
+
+export const getMaximumPrice = async () => {
+  const {data} = await $host.get('api/phone/maximum_price');
+  return data;
 }

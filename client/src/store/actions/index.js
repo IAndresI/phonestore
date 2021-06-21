@@ -74,6 +74,20 @@ const onLogout = () => {
   };
 };
 
+const fetchingPhones = (phones) => {
+  return {
+    type: "FETCH_ALL_PHONE",
+    payload: phones
+  }
+};
+
+const fetchingManufacturer = (manufacturer) => {
+  return {
+    type: "FETCH_ALL_MANUFACTURER",
+    payload: manufacturer
+  }
+};
+
 export {
   fetchingBooks,
   onAddedToCart,
@@ -82,5 +96,7 @@ export {
   onManufacturerChange,
   onPriceChange,
   onLogin,
-  onLogout
+  onLogout,
+  fetchingPhones,
+  fetchingManufacturer
 };

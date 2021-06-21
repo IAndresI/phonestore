@@ -23,7 +23,6 @@ import { useForm } from "react-hook-form";
 import Alert from '@material-ui/lab/Alert';
 import {onLogin} from '../store/actions'
 import { InputLabel, MenuItem, Select } from '@material-ui/core';
-import {useHistory} from 'react-router-dom';
 
 function Copyright() {
   return (

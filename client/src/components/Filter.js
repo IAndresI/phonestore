@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
@@ -7,6 +7,7 @@ import Divider from '@material-ui/core/Divider';
 import { Slider } from '@material-ui/core';
 import { useDispatch, useSelector } from 'react-redux';
 import { onManufacturerChange, onPriceChange } from '../store/actions';
+import { getMaximumPrice } from '../http/phoneAPI';
 
 const useStyles = makeStyles({
   root: {
@@ -26,14 +27,14 @@ function valuetext(value) {
 }
 
 
-const Filter = () => {
+const Filter = ({manufacturer}) => {
   const dispatch = useDispatch();
   const currentFilter = useSelector(state => state.filter)
-  const manufacturer = useSelector(state => state.phone.manufacturer)
+  const [maximumPrice, setMaximumPrice] = useState(400000)
 
   const classes = useStyles();
   const [selectedManufacturer, setSelectedManufacturer] = React.useState(null);
-  const [price, setPrice] = React.useState([0, 40000]);
+  const [price, setPrice] = React.useState([0, 400000]);
 
   const handleChange = (event, newValue) => {
     setPrice(newValue);
@@ -44,6 +45,13 @@ const Filter = () => {
     setSelectedManufacturer(id);
     dispatch(onManufacturerChange(id));
   };
+
+  useEffect(() => {
+    // getMaximumPrice().then(data => {
+    //   setMaximumPrice(data)
+    // })
+  }, [])
+
   return (
     <div className={classes.root}>
       <List component="nav" aria-label="secondary mailbox folder">
@@ -57,8 +65,8 @@ const Filter = () => {
                 selected: classes.selected
               }}
               button
-              selected={e.id === currentFilter.manufacturer}
-              onClick={(event) => handleListItemClick(event, e.id)}
+              selected={e.manufacturer_id === currentFilter.manufacturer}
+              onClick={(event) => handleListItemClick(event, e.manufacturer_id)}
             >
               <ListItemText primary={e.name} />
             </ListItem>
@@ -69,7 +77,7 @@ const Filter = () => {
       <h2>Price</h2>
       <Slider
         value={currentFilter.price || price}
-        max={40000}
+        max={maximumPrice}
         className={classes.range}
         onChange={handleChange}
         valueLabelDisplay="on"
