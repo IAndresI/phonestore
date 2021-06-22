@@ -29,8 +29,8 @@ class PhoneController {
   async getMaximumPirce(req, res,next) {
     try {
       const qeury = await db.query('SELECT MAX(price) FROM phone');
-      const data = qeury.rows
-      return res.json(data)
+      const [{max}] = qeury.rows
+      return res.json(max)
     }
     catch(err) {
       return next(ApiError.badRequest(err.message));

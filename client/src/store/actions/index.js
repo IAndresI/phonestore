@@ -88,6 +88,13 @@ const fetchingManufacturer = (manufacturer) => {
   }
 };
 
+const fetchingCart = (cartItems) => {
+  return {
+    type: "FETCH_ALL_CART",
+    payload: cartItems
+  }
+};
+
 export {
   fetchingBooks,
   onAddedToCart,
@@ -98,5 +105,6 @@ export {
   onLogin,
   onLogout,
   fetchingPhones,
-  fetchingManufacturer
+  fetchingManufacturer,
+  fetchingCart
 };

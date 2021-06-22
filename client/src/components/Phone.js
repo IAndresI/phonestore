@@ -12,7 +12,7 @@ const useStyles = makeStyles({
   root: {
     maxWidth: 265,
     width: "100%",
-    margin: "20px 20px"
+    margin: "15px 15px"
   },
   media: {
     height: 200,

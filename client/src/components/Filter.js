@@ -14,11 +14,17 @@ const useStyles = makeStyles({
     width: 300,
   },
   range: {
-    paddingTop: "40px"
+    paddingTop: 60,
   },
   selected: {
     backgroundColor: "#0d6efd !important",
     color: "#ffffff"
+  },
+  valueLabel: {
+    width: 50
+  },
+  "PrivateValueLabel-circle-18": {
+    width: 50
   }
 });
 
@@ -47,9 +53,9 @@ const Filter = ({manufacturer}) => {
   };
 
   useEffect(() => {
-    // getMaximumPrice().then(data => {
-    //   setMaximumPrice(data)
-    // })
+    getMaximumPrice().then(data => {
+      setMaximumPrice(data.slice(1, data.length).replace(",",""));
+    })
   }, [])
 
   return (

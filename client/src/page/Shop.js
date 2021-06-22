@@ -25,8 +25,8 @@ const Shop = () => {
   return (
     <Layout>
       <h1>Shop</h1>
-      <Grid container spacing={1}>
-        <Grid container item md={3}>
+      <Grid style={{flexWrap: "nowrap"}} container spacing={1}>
+        <Grid style={{marginRight: 30}} container item md={3}>
           <Filter manufacturer={manufacturer}/>
         </Grid>
         <Grid container item md={9}>
