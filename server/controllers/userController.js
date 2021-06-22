@@ -17,14 +17,13 @@ class UserController {
   async create(req, res, next) {
     try {
       const {password, date_of_birth, email, phone, first_name, last_name, gender} = req.body;
+      const hashedPassword = await bcrypt.hash(password, 5)
       let img;
       let filename = null;
       if(req.files) {
-        img = req.files.img;
+        img = req.files.image;
         filename = uuid.v4()+ ".jpg"
       }
-
-      const hashedPassword = await bcrypt.hash(password, 5)
       
       const qeury = await db.query(`INSERT INTO public.client(
         password, date_of_birth, email, phone, first_name, last_name, gender, image)
@@ -46,11 +45,16 @@ class UserController {
     try {
       const {email, password} = req.body;
       let client;
-      const qeury = await db.query(`SELECT password FROM client WHERE email=$1`,[email], async (err,resp) => {
-        client=resp.rows[0];
-        if(bcrypt.compareSync(password, client.password ? client.password : null )) {
-          const token = generateJwt(client.client_id, client.email)
-          return res.json({token})
+      const qeury = await db.query(`SELECT password,email,client_id FROM client WHERE email=$1`,[email], async (err,resp) => {
+        if(resp.rows[0]) {
+          client=resp.rows[0];
+          if(bcrypt.compareSync(password, client.password || undefined)) {
+            const token = generateJwt(client.client_id, client.email)
+            return res.json({token});
+          }
+          else {
+            return next(ApiError.internalError('Incorrect email or password!'))
+          }
         }
         else {
           return next(ApiError.internalError('Incorrect email or password!'))
@@ -63,11 +67,8 @@ class UserController {
   }
 
   async auth(req, res, next) {
-    const {id} = req.query;
-    if(!id) {
-      return next(ApiError.badRequest('Enter ID!'))
-    }
-    res.json(query)
+    const token = generateJwt(req.user.id, req.user.email)
+    res.json({token})
   }
 }
 

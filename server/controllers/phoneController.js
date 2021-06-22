@@ -21,9 +21,20 @@ class PhoneController {
       return res.json(data)
     }
     catch(err) {
-      next(ApiError.badRequest(err.message));
+      return next(ApiError.badRequest(err.message));
     }
     
+  }
+
+  async getMaximumPirce(req, res,next) {
+    try {
+      const qeury = await db.query('SELECT MAX(price) FROM phone');
+      const data = qeury.rows
+      return res.json(data)
+    }
+    catch(err) {
+      return next(ApiError.badRequest(err.message));
+    }
   }
 
   async create(req, res, next) {
@@ -43,12 +54,11 @@ class PhoneController {
             if(filename)img.mv(path.resolve(__dirname, '..','static', filename))
             return res.json(req.body)
           }
-          next(ApiError.badRequest(err));
-          return res.status(500)
+          return next(ApiError.badRequest(err));
         });
     }
     catch(err) {
-      next(ApiError.badRequest(err.message));
+      return next(ApiError.badRequest(err.message));
     }
   }
 }
