@@ -1,9 +1,15 @@
 export default function cartReducer(state, action) {
   if(state === undefined) return {
+    cartId: null,
     cartList: [],
     totalPrice: 0
   };
   switch (action.type) {
+    case "FETCH_ALL_CART":
+      return {
+        ...state.cart,
+        cartList: action.payload
+      }
     case "ADD_CART_ITEM":
       return updateCart(action.payload, state, 1);
     case "DELETE_CART_ITEM":

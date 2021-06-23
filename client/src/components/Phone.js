@@ -12,7 +12,7 @@ const useStyles = makeStyles({
   root: {
     maxWidth: 265,
     width: "100%",
-    margin: "20px 20px"
+    margin: "15px 15px"
   },
   media: {
     height: 200,
@@ -34,7 +34,7 @@ export default function Phone({phone}) {
           height={300}
           className={classes.media}
           image={imagePath}
-          title="Contemplative Reptile"
+          title={name}
         />
         <CardContent>
           <Typography gutterBottom variant="h5" component="h2">

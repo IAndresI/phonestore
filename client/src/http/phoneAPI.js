@@ -17,7 +17,7 @@ export const getAllPhones = async () => {
   return data;
 }
 
-export const getMaximumPrice = async () => {
-  const {data} = await $host.get('api/phone/maximum_price');
+export const getMinMaxPirce = async () => {
+  const {data} = await $host.get('api/phone/min_max_price');
   return data;
 }

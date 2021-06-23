@@ -26,11 +26,11 @@ class PhoneController {
     
   }
 
-  async getMaximumPirce(req, res,next) {
+  async getMinMaxPirce(req, res,next) {
     try {
-      const qeury = await db.query('SELECT MAX(price) FROM phone');
-      const data = qeury.rows
-      return res.json(data)
+      const qeury = await db.query('select * from get_min_max_price();');
+      const [data] = qeury.rows
+      return res.json(data);
     }
     catch(err) {
       return next(ApiError.badRequest(err.message));
@@ -44,15 +44,15 @@ class PhoneController {
       let filename = null;
       if(req.files) {
         img = req.files.img;
-        filename = uuid.v4()+ ".jpg"
+        filename = uuid.v4()+ ".jpg";
       }
       
       const qeury = await db.query(`INSERT INTO 
         public.phone( weight, diagonal, ram, memory, price, manufacturer_id, name, color, camera, image)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10);`, [weight, diagonal, ram, memory, price, manufacturer_id, name, color, camera, filename], (err, res) => {
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10);`, [weight, diagonal, ram, memory, price, manufacturer_id, name, color, camera, filename], (err) => {
           if(!err) {
-            if(filename)img.mv(path.resolve(__dirname, '..','static', filename))
-            return res.json(req.body)
+            if(filename)img.mv(path.resolve(__dirname, '..','static', filename));
+            return res.json(req.body);
           }
           return next(ApiError.badRequest(err));
         });

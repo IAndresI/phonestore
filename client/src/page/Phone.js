@@ -41,7 +41,7 @@ export default function Phone() {
         <CardMedia
           className={classes.media}
           image={imagePath}
-          title="Contemplative Reptile"
+          title={phone.name}
         />
       </Grid>
       <Button 

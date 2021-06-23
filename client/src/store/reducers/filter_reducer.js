@@ -1,7 +1,7 @@
 export default function phoneListReducer(state, action) {
   if(state === undefined) return {
     manufacturer: null,
-    price: null
+    price: 0
   };
   switch (action.type) {
     case "SET_MANUFACTURER":

@@ -5,9 +5,9 @@ const db = require('../db');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
-function generateJwt(id, email) {
+function generateJwt(id, email, cart_id) {
   return jwt.sign(
-    {id, email}, 
+    {id, email, cart_id}, 
     process.env.SECRET_KEY, 
     {expiresIn: '24h'}
   )
@@ -45,12 +45,13 @@ class UserController {
     try {
       const {email, password} = req.body;
       let client;
-      const qeury = await db.query(`SELECT password,email,client_id FROM client WHERE email=$1`,[email], async (err,resp) => {
+      const qeury = await db.query(`SELECT a.password,a.email,a.client_id,b.cart_id FROM client a INNER JOIN cart b ON b.client_id=a.client_id WHERE a.email=$1`,[email], async (err,resp) => {
+        if(err) return next(ApiError.internalError('Incorrect'))
         if(resp.rows[0]) {
           client=resp.rows[0];
           if(bcrypt.compareSync(password, client.password || undefined)) {
-            const token = generateJwt(client.client_id, client.email)
-            return res.json({token});
+            const token = generateJwt(client.client_id, client.email, client.cart_id)
+            return res.json({token})
           }
           else {
             return next(ApiError.internalError('Incorrect email or password!'))
@@ -67,8 +68,23 @@ class UserController {
   }
 
   async auth(req, res, next) {
-    const token = generateJwt(req.user.id, req.user.email)
+    const token = generateJwt(req.user.id, req.user.email, req.user.cart_id)
     res.json({token})
+  }
+
+  async getProfile(req, res, next) {
+    try {
+      const {id} = req.params;
+      if(!id) {
+        return next(ApiError.badRequest('Enter ID!'))
+      }
+      const qeury = await db.query('SELECT * FROM client WHERE client_id=$1', [id]);
+      const data = qeury.rows
+      return res.json(data)
+    }
+    catch(err) {
+      next(ApiError.badRequest(err.message));
+    }
   }
 }
 

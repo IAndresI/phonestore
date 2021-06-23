@@ -15,7 +15,8 @@ import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import { Button } from '@material-ui/core';
 import { withRouter, Link} from 'react-router-dom';
 import { onLogout } from '../store/actions';
-
+import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
+import Badge from '@material-ui/core/Badge';
 
 const useStyles = makeStyles((theme) => ({
   grow: {
@@ -26,6 +27,8 @@ const useStyles = makeStyles((theme) => ({
   },
   title: {
     display: 'none',
+    textDecoration: 'none',
+    color: 'white',
     [theme.breakpoints.up('sm')]: {
       display: 'block',
     },
@@ -85,6 +88,7 @@ export default withRouter(function PrimarySearchAppBar({history}) {
 
   const dispatch = useDispatch()
   const isAuth = useSelector((state) => state.user.isAuth, shallowEqual)
+  const {cart_id, id} = useSelector((state) => state.user.user, shallowEqual)
 
   const classes = useStyles();
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -121,8 +125,10 @@ export default withRouter(function PrimarySearchAppBar({history}) {
       open={isMenuOpen}
       onClose={handleMenuClose}
     >
-      <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
-      <MenuItem onClick={handleMenuClose}>My account</MenuItem>
+      <MenuItem onClick={() => {
+        handleMenuClose();
+        history.push("/profile/"+id);
+      }}>Profile</MenuItem>
       <MenuItem onClick={() => {
         dispatch(onLogout());
         handleMenuClose();
@@ -145,17 +151,31 @@ export default withRouter(function PrimarySearchAppBar({history}) {
     >
       {
         isAuth ? (
-          <MenuItem onClick={handleProfileMenuOpen}>
-            <IconButton
-              aria-label="account of current user"
-              aria-controls="primary-search-account-menu"
-              aria-haspopup="true"
-              color="inherit"
-            >
-              <AccountCircle />
-            </IconButton>
-            <p>Profile</p>
-          </MenuItem>
+          <>
+            <MenuItem onClick={handleProfileMenuOpen}>
+              <IconButton
+                aria-label="account of current user"
+                aria-controls="primary-search-account-menu"
+                aria-haspopup="true"
+                color="inherit"
+              >
+                <AccountCircle />
+              </IconButton>
+              <p>Profile</p>
+            </MenuItem>
+            <MenuItem onClick={() => history.push("/cart/"+cart_id)}>
+              <IconButton 
+                aria-controls="primary-search-account-menu"
+                aria-haspopup="true"
+                aria-label="show" 
+                color="inherit">
+                <Badge badgeContent={17} color="secondary">
+                  <ShoppingCartIcon />
+                </Badge>
+              </IconButton>
+              <p>Cart</p>
+            </MenuItem>
+          </>
         )
         :
         (
@@ -186,8 +206,8 @@ export default withRouter(function PrimarySearchAppBar({history}) {
           >
             <MenuIcon />
           </IconButton>
-          <Link to="/">
-            <Typography className={classes.title} variant="h6" noWrap>
+          <Link className={classes.title} to="/">
+            <Typography variant="h6" noWrap>
               PhoneStore
             </Typography>
           </Link>
@@ -209,6 +229,11 @@ export default withRouter(function PrimarySearchAppBar({history}) {
             isAuth ? (
               <>
                 <div className={classes.sectionDesktop}>
+                  <IconButton onClick={() => history.push("/cart/"+cart_id)}  aria-label="show" color="inherit">
+                    <Badge badgeContent={17} color="secondary">
+                      <ShoppingCartIcon />
+                    </Badge>
+                  </IconButton>
                   <IconButton
                     edge="end"
                     aria-label="account of current user"
@@ -217,7 +242,9 @@ export default withRouter(function PrimarySearchAppBar({history}) {
                     onClick={handleProfileMenuOpen}
                     color="inherit"
                   >
-                    <AccountCircle />
+                    <Badge color="secondary">
+                      <AccountCircle />
+                    </Badge>
                   </IconButton>
                 </div>
                 <div className={classes.sectionMobile}>
