@@ -113,7 +113,7 @@ export default withRouter(function SignIn({location, history}) {
   if (isAuth) return <Redirect to="/"/> 
 
   return (
-    <Layout>
+    <section>
       <Container component="main" maxWidth="xs">
         <CssBaseline />
         <div className={classes.paper}>
@@ -277,6 +277,6 @@ export default withRouter(function SignIn({location, history}) {
           <Copyright />
         </Box>
       </Container>
-    </Layout>
+    </section>
   );
 })

@@ -1,30 +1,3 @@
-const booksLoaded = (books) => {
-  return {
-    type: "FETCH_BOOK_SUCCESS",
-    payload: books
-  };
-};
-
-const booksFailure = (error) => {
-  return {
-    type: "FETCH_BOOK_FAILURE",
-    payload: error
-  };
-};
-
-const booksLoading = () => {
-  return {
-    type: "FETCH_BOOK_LOADING",
-  };
-};
-
-const fetchingBooks  = (bookStoreService) => () => (dispatch) => {
-  dispatch(booksLoading());
-  bookStoreService.getBooks()
-    .then(data => dispatch(booksLoaded(data)))
-    .catch(error => dispatch(booksFailure(error)));
-};
-
 const onAddedToCart = (id) => {
   return {
     type: "ADD_CART_ITEM",
@@ -60,6 +33,13 @@ const onManufacturerChange = (manufacturer) => {
   };
 };
 
+const onColorChange = (color) => {
+  return {
+    type: "SET_COLORS",
+    payload: color
+  };
+};
+
 const onLogin = (user) => {
   return {
     type: "LOGIN",
@@ -74,10 +54,10 @@ const onLogout = () => {
   };
 };
 
-const fetchingPhones = (phones) => {
+const fetchingPhones = (data) => {
   return {
     type: "FETCH_ALL_PHONE",
-    payload: phones
+    payload: data
   }
 };
 
@@ -95,16 +75,40 @@ const fetchingCart = (cartItems) => {
   }
 };
 
+const fetchingColor = (colorList) => {
+  return {
+    type: "FETCH_ALL_COLORS",
+    payload: colorList
+  }
+}
+
+const onPageSet = (page) => {
+  return {
+    type: "SET_PAGE",
+    payload: page
+  }
+}
+
+const onLimitSet = (limit) => {
+  return {
+    type: "SET_LIMIT",
+    payload: limit
+  }
+}
+
 export {
-  fetchingBooks,
   onAddedToCart,
   onRemoveItemFromCart,
   onRemoveItemAllFromCart,
   onManufacturerChange,
+  onColorChange,
   onPriceChange,
   onLogin,
   onLogout,
   fetchingPhones,
   fetchingManufacturer,
-  fetchingCart
+  fetchingCart,
+  fetchingColor,
+  onPageSet,
+  onLimitSet
 };

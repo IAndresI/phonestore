@@ -19,9 +19,9 @@ const Cart = () => {
   }, [])
 
   return (
-    <Layout>
+    <section>
       {JSON.stringify(cartItems)}
-    </Layout>
+    </section>
   );
 };
 

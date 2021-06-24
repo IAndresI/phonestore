@@ -4,10 +4,10 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import Divider from '@material-ui/core/Divider';
-import { Button, Slider } from '@material-ui/core';
+import { Checkbox, Slider } from '@material-ui/core';
 import { useDispatch, useSelector } from 'react-redux';
-import { onManufacturerChange, onPriceChange } from '../store/actions';
-import { getMinMaxPirce } from '../http/phoneAPI';
+import { fetchingColor, onColorChange, onManufacturerChange, onPageSet, onPriceChange } from '../store/actions';
+import { getAllColor, getMinMaxPirce } from '../http/phoneAPI';
 
 const useStyles = makeStyles({
   root: {
@@ -37,53 +37,54 @@ function valuetext(value) {
 const Filter = ({manufacturer}) => {
   const dispatch = useDispatch();
   const currentFilter = useSelector(state => state.filter)
-  const [minMaxPrice, setMinMaxPrice] = useState([0, 0]);
+  const [minMaxPrice, setMinMaxPrice] = useState([0, 10000000]);
+  const [colorList, setColorList] = useState([]);
+  const [checkedManufacturer, setCheckedManufacturer] = useState([]);
+  const [checkedColor, setCheckedColor] = useState([]);
 
   const classes = useStyles();
-  const [selectedManufacturer, setSelectedManufacturer] = useState(null);
   const [price, setPrice] = useState([0, 10000000]);
 
   const handleChange = (event, newValue) => {
     setPrice(newValue);
     dispatch(onPriceChange(newValue))
+    dispatch(onPageSet(1))
   };
 
-  const handleListItemClick = (event, id) => {
-    setSelectedManufacturer(id);
-    dispatch(onManufacturerChange(id));
+  const handleToggle = (value, state, changeState, action, type) => () => {
+    const previewCurrentIndex = type ==="man" ? currentFilter.manufacturer : currentFilter.color
+    const currentIndex = previewCurrentIndex.indexOf(value) || state.indexOf(value);
+    const preview = type ==="man" ? [...currentFilter.manufacturer] : [...currentFilter.color]
+    const newChecked = preview || [...state];
+    if (currentIndex === -1) {
+      newChecked.push(value);
+      dispatch(action(newChecked));
+    } else {
+      newChecked.splice(currentIndex, 1);
+      dispatch(action(newChecked));
+    }
+    changeState(newChecked);
+    dispatch(onPageSet(1))
   };
 
   useEffect(() => {
     getMinMaxPirce().then(({min, max}) => {
-      setMinMaxPrice([parseInt(min.slice(1, min.length).replace(",","")),parseInt(max.slice(1, max.length).replace(",",""))]);
-    })
+      const minMax = [parseInt(min.slice(1, min.length).replace(",","")),parseInt(max.slice(1, max.length).replace(",",""))]
+      setMinMaxPrice(minMax);
+      dispatch(onPriceChange(minMax))
+    });
+    getAllColor().then((colors) => {
+      setColorList(colors);
+      dispatch(fetchingColor(colors))
+    });
   }, []);
+
 
   return (
     <div className={classes.root}>
-      <List component="nav" aria-label="secondary mailbox folder">
-        <h2>Manufacturer</h2>
-        {
-          manufacturer.map(e => (
-            <ListItem
-              key={e.id}
-              style={{borderRadius: "10px"}}
-              classes={{
-                selected: classes.selected
-              }}
-              button
-              selected={e.manufacturer_id === currentFilter.manufacturer}
-              onClick={(event) => handleListItemClick(event, e.manufacturer_id)}
-            >
-              <ListItemText primary={e.name} />
-            </ListItem>
-          ))
-        }
-      </List>
-      <Divider />
       <h2>Price</h2>
       <Slider
-        value={currentFilter.price || price}
+        value={price || currentFilter.price}
         max={minMaxPrice[1]}
         min={minMaxPrice[0]}
         step={100}
@@ -93,9 +94,49 @@ const Filter = ({manufacturer}) => {
         aria-labelledby="range-slider"
         getAriaValueText={valuetext}
       />
-      <Button className={classes.submit_button} variant="outlined" color="primary">
-        Search
-      </Button>
+      <Divider />
+      <List multiple component="nav" aria-label="manyfacturer filter">
+        <h2>Manufacturer</h2>
+        {
+          manufacturer.map(e => {
+            const labelId = `checkbox-list-label-${e.name}`;
+            return (
+              <ListItem key={e.name} role={undefined} dense button onClick={handleToggle(e.manufacturer_id, checkedManufacturer, setCheckedManufacturer, onManufacturerChange, "man")}>
+                <Checkbox
+                  edge="start"
+                  checked={checkedManufacturer.indexOf(e.manufacturer_id) !== -1 || currentFilter.manufacturer.includes(e.manufacturer_id)}
+                  tabIndex={-1}
+                  disableRipple
+                  inputProps={{ 'aria-labelledby': labelId }}
+                />
+                <ListItemText id={labelId} primary={e.name} />
+              </ListItem>
+            )
+          })
+        }
+      </List>
+      <Divider />
+      <List multiple component="nav" aria-label="colors filter">
+        <h2>Colors</h2>
+        {
+          colorList.map(e => {
+            const labelId = `checkbox-list-label-${e.name}`;
+            return (
+              <ListItem key={e.name} dense button onClick={handleToggle(e.color_id, checkedColor, setCheckedColor, onColorChange, "col")}>
+                <Checkbox
+                  edge="start"
+                  checked={checkedColor.indexOf(e.color_id) !== -1 || currentFilter.color.includes(e.color_id)}
+                  tabIndex={-1}
+                  disableRipple
+                  inputProps={{ 'aria-labelledby': labelId }}
+                />
+                <ListItemText id={labelId} primary={e.name} />
+              </ListItem>
+            )
+          })
+        }
+      </List>
+      <Divider />
     </div>
   );
 }

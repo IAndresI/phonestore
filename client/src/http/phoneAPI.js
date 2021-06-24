@@ -12,8 +12,13 @@ export const getOnePhones = async (id) => {
   return data;
 }
 
-export const getAllPhones = async () => {
-  const {data} = await $host.get('api/phone/');
+export const getAllPhones = async (page=1, limit=9, sort=null, color, manufacturers, price) => {
+  const {data} = await $host.get(`api/phone`, {params: {page, limit, sort, color, manufacturers, price}});
+  return data;
+}
+
+export const getAllColor = async () => {
+  const {data} = await $host.get('api/phone/color/');
   return data;
 }
 

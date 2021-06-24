@@ -11,9 +11,9 @@ const Profile = () => {
     })
   }, []);
   return (
-    <Layout>
+    <section>
       {JSON.stringify(profile)}
-    </Layout>
+    </section>
   );
 };
 

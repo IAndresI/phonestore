@@ -1,7 +1,7 @@
 import { Container } from '@material-ui/core';
 import React from 'react';
+import Footer from './Footer';
 import Header from './Header'
-
 
 const Layout = (props) => {
   return (
@@ -10,6 +10,7 @@ const Layout = (props) => {
       <Container>
         {props.children}
       </Container>
+      <Footer/>
     </>
   );
 };

@@ -3,9 +3,9 @@ import Layout from '../components/Layout';
 
 const Admin = () => {
   return (
-    <Layout>
+    <section>
       Admin
-    </Layout>
+    </section>
   );
 };
 

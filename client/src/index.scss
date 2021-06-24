@@ -28,14 +28,12 @@ code {
   left: calc(-50% - 13px);
 }
 
-#root .PrivateValueLabel-offset-16 {
-  top: -50px;
-}
-#root .PrivateValueLabel-offset-17 {
+#root [class^=PrivateValueLabel-offset-] {
   top: -50px;
 }
 
-#root .PrivateValueLabel-circle-17 {
+
+#root [class^=PrivateValueLabel-circle-] {
   width: 50px;
   height: 50px;
 }

@@ -13,48 +13,53 @@ export default function cartReducer(state, action) {
     case "ADD_CART_ITEM":
       return updateCart(action.payload, state, 1);
     case "DELETE_CART_ITEM":
-      return updateCart(action.payload, state, -1);
+      return //updateCart(action.payload, state, -1);
     case "DELETE_ALL_CART_ITEM":
       const cart = [...state.cart.cartList];
-      const bookIsInCartIndex = cart.findIndex(e => e.id === action.payload);
+      const phoneIsInCartIndex = cart.findIndex(e => e.phone_id === action.payload);
       const newCart = [
-        ...cart.slice(0, bookIsInCartIndex),
-        ...cart.slice(bookIsInCartIndex + 1)
+        ...cart.slice(0, phoneIsInCartIndex),
+        ...cart.slice(phoneIsInCartIndex + 1)
       ];
       return {
+        ...state.cart,
         cartList: newCart,
-        totalPrice: newCart.reduce((acc, book) => acc += book.total,0)
+        totalPrice: newCart.reduce((acc, phone) => acc += phone.total,0)
       };
     default:
       return state.cart;
   }
 }
 
-function updateCart(id, state, action) {
-  const book = [...state.books.booksList].find(book => book.id === id);
-  const bookInCart = [...state.cart.cartList].find(book => book.id === id);
-  if(bookInCart) {
-    const cartList = [...state.cart.cartList];
-    const bookIsInCartIndex = cartList.findIndex(e => e.id === id);
-    cartList[bookIsInCartIndex] = {...bookInCart, count: bookInCart.count + action, total: (bookInCart.count + action)*book.price};
-    console.log(cartList[bookIsInCartIndex].count <= 0);
-    if(cartList[bookIsInCartIndex].count <= 0) return {
-      cartList: [
-        ...cartList.slice(0, bookIsInCartIndex),
-        ...cartList.slice(bookIsInCartIndex + 1)
-      ],
-      totalPrice: cartList.reduce((acc, book) => acc += +book.total,0)
-    };
-    
-    return {
-      cartList: cartList,
-      totalPrice: cartList.reduce((acc, book) => acc += +book.total,0)
-    };
+function updateCart(payload, state, action) {
+
+  const stateCartList = state.cart.cartList;
+  const phoneInCart = stateCartList.find(e => e.phone_id === payload);
+
+  if(phoneInCart) {
+    const oldCartItem = {...phoneInCart, count: phoneInCart.count+action};
+    const oldIndex = stateCartList.findIndex(e => e.phone_id===oldCartItem.phone_id)
+    const newCartList = [...stateCartList.splice(0,oldIndex-1),oldCartItem,...stateCartList.splice(oldIndex,stateCartList.length-1)]
+    if(oldCartItem.count < 1) {
+      const cart = [...stateCartList];
+      cart.slice(oldIndex, 1)
+      return {
+        ...state.cart,
+        cartList: cart
+      }
+    }
+    else {
+      return {
+        ...state.cart,
+        cartList: newCartList
+      }
+    }
   }
-  const newItem = {id: book.id,name: book.name, count: 1, total: book.price};
-  const newCartList = [...state.cart.cartList, newItem];
-  return {
-    cartList: newCartList,
-    totalPrice: newCartList.reduce((acc, book) => acc += +book.total,0)
-  };
+  else {
+    const newCartItem = {phone_id: payload, count: 1};
+    return {
+      ...state.cart,
+      cartList: [...state.cart.cartList, newCartItem]
+    }
+  }
 }
