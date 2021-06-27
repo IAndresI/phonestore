@@ -1,4 +1,3 @@
-import { Container } from '@material-ui/core';
 import React from 'react';
 import Footer from './Footer';
 import Header from './Header'
@@ -6,11 +5,11 @@ import Header from './Header'
 const Layout = (props) => {
   return (
     <>
-      <Header />
-      <Container>
+      <Header className="header" />
+      <main className="main-content">
         {props.children}
-      </Container>
-      <Footer/>
+      </main>
+      <Footer className="footer"/>
     </>
   );
 };

@@ -7,6 +7,32 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+#root .makeStyles-grow-1 {
+  flex-grow: 0;
+}
+
+.header {
+  /* 0 flex-grow, 0 flex-shrink, auto flex-basis */
+  flex: 0 0 auto;
+}
+
+.main-content {
+  /* 1 flex-grow, 0 flex-shrink, auto flex-basis */
+  flex: 1 0 auto;
+}
+
+footer {
+  /* 0 flex-grow, 0 flex-shrink, auto flex-basis */
+  flex: 0 0 auto;
+}
+
+
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
@@ -36,4 +62,24 @@ code {
 #root [class^=PrivateValueLabel-circle-] {
   width: 50px;
   height: 50px;
+}
+
+.title {
+  font-size: 60px;
+  text-align: center;
+  margin: 0;
+  padding: 40px 0;
+  background: #3f51b5;
+  background: -webkit-linear-gradient(to bottom, #3f51b5 0.1%, #ffffff 90%, #ffffff 99%);
+  background: linear-gradient(to bottom, #3f51b5 0.1%, #ffffff 90%, #ffffff 99%);
+}
+
+.title.mini {
+  font-size: 30px;
+  text-align: center;
+  margin: 0;
+  padding: 40px 0;
+  background: #3f51b5;
+  background: -webkit-linear-gradient(to bottom, #3f51b5 0.1%, #ffffff 90%, #ffffff 99%);
+  background: linear-gradient(to bottom, #3f51b5 0.1%, #ffffff 90%, #ffffff 99%);
 }

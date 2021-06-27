@@ -16,30 +16,122 @@ class PhoneController {
 
   async getAll(req, res,next) {
     try {
-      const {page, limit, sort, color, manufacturers, price} = req.query;
+      const {page, limit, sort, color, manufacturers, price, ram,rom,camera, diagonal} = req.query;
       const offset = page*limit-limit;
-      const orderBy = `${sort ? `ORDER BY ph.price ${sort}` : ""}`;
+      const orderByArr = sort.split(' ')
+      const orderBy = `${sort ? `ORDER BY ph.${orderByArr[0]} ${orderByArr[1]}` : ""}`;
       const whereColor = color ? `AND col_det.color_id IN(${color.join(',')})` : "";
-      const whereManufacturer = manufacturers ? `AND ph.manufacturer_id IN(${manufacturers.join(',')})` : "";
-      const wherePrice = price ? `AND ph.price > ${price[0]}::money AND ph.price < ${price[1]}::money` : "";
+      const whereManufacturer = manufacturers ? `AND ph.manufacturer_name IN(${manufacturers.map(e=>`'${e}'`).join(',')})` : "";
+      const wherePrice = price ? `AND ph.price >= ${price[0]}::money AND ph.price <= ${price[1]}::money` : "";
+      const whereRam = ram ? `AND ph.ram IN(${ram.join(',')})` : "";
+      const whereRom = rom ? `AND ph.memory IN(${rom.join(',')})` : "";
+      const whereCamera = camera ? `AND cardinality(ph.camera) IN(${camera.join(',')})` : "";
+      const whereDiagonal = diagonal ? `AND ph.diagonal>=${diagonal[0]} AND ph.diagonal<=${diagonal[1]}` : "";
 
-      //console.log(`SELECT ph.* FROM phone ph INNER JOIN color_details col_det ON col_det.phone_id=ph.phone_id WHERE TRUE ${whereColor} ${whereManufacturer} ${wherePrice} GROUP BY ph.phone_id ${orderBy} LIMIT ${limit} OFFSET ${offset};`);
+      // console.log(`
+      //   SELECT DISTINCT ph.* 
+      //   FROM get_full_phones ph 
+      //   INNER JOIN color_details col_det ON col_det.phone_id=ph.phone_id 
+      //   WHERE TRUE ${whereColor} ${whereManufacturer} ${wherePrice} ${whereRam} ${whereRom} ${whereCamera} ${whereDiagonal}
+      //   ${orderBy} 
+      //   LIMIT ${limit} OFFSET ${offset};
+      // `);
 
-      const qeury = await db.query(`SELECT ph.* FROM phone ph INNER JOIN color_details col_det ON col_det.phone_id=ph.phone_id WHERE TRUE ${whereColor} ${whereManufacturer} ${wherePrice} GROUP BY ph.phone_id ${orderBy} LIMIT ${limit} OFFSET ${offset};`);
-      const countQeury = await db.query(`SELECT COUNT(*) FROM phone ph INNER JOIN color_details col_det ON col_det.phone_id=ph.phone_id WHERE TRUE ${whereColor} ${whereManufacturer} ${wherePrice} GROUP BY ph.phone_id;`);
+      const qeury = await db.query(`
+        SELECT DISTINCT ph.* 
+        FROM get_full_phones ph 
+        INNER JOIN color_details col_det ON col_det.phone_id=ph.phone_id 
+        WHERE TRUE ${whereColor} ${whereManufacturer} ${wherePrice} ${whereRam} ${whereRom} ${whereCamera} ${whereDiagonal}
+        ${orderBy} 
+        LIMIT ${limit} OFFSET ${offset};
+      `);
+      const countQeury = await db.query(`
+        SELECT COUNT(*) 
+        FROM get_full_phones ph 
+        INNER JOIN color_details col_det ON col_det.phone_id=ph.phone_id 
+        WHERE TRUE ${whereColor} ${whereManufacturer} ${wherePrice} ${whereRam} ${whereRom} ${whereCamera} ${whereDiagonal}
+        GROUP BY ph.phone_id;
+      `);
       return res.json({count: countQeury.rows.length,phones: qeury.rows})
     }
     catch(err) {
       return next(ApiError.badRequest(err.message));
     }
-    
+  }
+
+  async search(req, res,next) {
+    try {
+      const {searchText} = req.query;
+      const qeury = await db.query(`select * from get_full_phones WHERE lower(phone_name) LIKE '%${searchText}%' OR lower(manufacturer_name) LIKE '%${searchText}%';`);
+      const data = qeury.rows
+      return res.json(data)
+    }
+    catch(err) {
+      return next(ApiError.badRequest(err.message));
+    }
   }
 
   async getMinMaxPirce(req, res,next) {
     try {
       const qeury = await db.query('select * from get_min_max_price();');
       const [data] = qeury.rows
-      return res.json(data);
+      return data
+    }
+    catch(err) {
+      return next(ApiError.badRequest(err.message));
+    }
+  }
+
+  async getMinMaxDiagonal(req, res,next) {
+    try {
+      const qeury = await db.query('select * from get_min_max_diagonal();');
+      const [data] = qeury.rows
+      return data
+    }
+    catch(err) {
+      return next(ApiError.badRequest(err.message));
+    }
+  }
+
+  async getAllRam(req, res,next) {
+    try {
+      const qeury = await db.query('select * from get_all_ram;');
+      const data = qeury.rows
+      return data
+    }
+    catch(err) {
+      return next(ApiError.badRequest(err.message));
+    }
+  }
+
+  async getAllMemory(req, res,next) {
+    try {
+      const qeury = await db.query('select * from get_all_memory;');
+      const data = qeury.rows
+      return data
+    }
+    catch(err) {
+      return next(ApiError.badRequest(err.message));
+    }
+  }
+
+  async getAllManufacturer(req, res,next) {
+    try {
+      const qeury = await db.query('select * from manufacturer;');
+      const data = qeury.rows
+      return data
+    }
+    catch(err) {
+      return next(ApiError.badRequest(err.message));
+    }
+  }
+
+  async getAllCameraCount(req, res,next) {
+    try {
+      const qeury = await db.query('select * from get_all_camera_count;');
+      const data = qeury.rows
+      //return res.json(data);
+      return data
     }
     catch(err) {
       return next(ApiError.badRequest(err.message));
@@ -49,8 +141,34 @@ class PhoneController {
   async getAllColors(req, res,next) {
     try {
       const qeury = await db.query('select * from color;');
-      const data = qeury.rows
-      return res.json(data);
+      const data = qeury.rows;
+      //return res.json(data);
+      return data
+    }
+    catch(err) {
+      return next(ApiError.badRequest(err.message));
+    }
+  }
+
+  getAllFilter = async (req, res,next) => {
+    try {
+      const allColors = await this.getAllColors(req, res,next);
+      const allManufacturer = await this.getAllManufacturer(req, res,next);
+      const minMaxPirce = await this.getMinMaxPirce(req, res,next);
+      const minMaxDiagonal = await this.getMinMaxDiagonal(req, res,next);
+      const allCameraCount = await this.getAllCameraCount(req, res,next);
+      const allMemory = await this.getAllMemory(req, res,next);
+      const getAllRam = await this.getAllRam(req, res,next)
+      return res.json({
+          color: allColors,
+          price: minMaxPirce,
+          manufacturer: allManufacturer,
+          diagonal: minMaxDiagonal,
+          camera: allCameraCount, 
+          memory: allMemory,
+          ram: getAllRam
+        }
+      )
     }
     catch(err) {
       return next(ApiError.badRequest(err.message));

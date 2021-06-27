@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { fade, makeStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
@@ -17,7 +17,8 @@ import { withRouter, Link} from 'react-router-dom';
 import { onLogout } from '../store/actions';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 import Badge from '@material-ui/core/Badge';
-
+import { SEARCH_ROUTE } from '../utils/consts';
+import {onSearch} from '../store/actions'
 const useStyles = makeStyles((theme) => ({
   grow: {
     flexGrow: 1,
@@ -75,6 +76,7 @@ const useStyles = makeStyles((theme) => ({
     [theme.breakpoints.up('md')]: {
       display: 'flex',
     },
+    marginLeft: 'auto'
   },
   sectionMobile: {
     display: 'flex',
@@ -89,6 +91,7 @@ export default withRouter(function PrimarySearchAppBar({history}) {
   const dispatch = useDispatch()
   const isAuth = useSelector((state) => state.user.isAuth, shallowEqual)
   const {cart_id, id} = useSelector((state) => state.user.user, shallowEqual)
+  const cartItemsCount = useSelector((state) => state.cart.cartList, shallowEqual)
 
   const classes = useStyles();
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -151,7 +154,7 @@ export default withRouter(function PrimarySearchAppBar({history}) {
     >
       {
         isAuth ? (
-          <>
+          <div style={{marginLeft: "auto"}}>
             <MenuItem onClick={handleProfileMenuOpen}>
               <IconButton
                 aria-label="account of current user"
@@ -169,13 +172,13 @@ export default withRouter(function PrimarySearchAppBar({history}) {
                 aria-haspopup="true"
                 aria-label="show" 
                 color="inherit">
-                <Badge badgeContent={17} color="secondary">
+                <Badge badgeContent={cartItemsCount.length} color="secondary">
                   <ShoppingCartIcon />
                 </Badge>
               </IconButton>
               <p>Cart</p>
             </MenuItem>
-          </>
+          </div>
         )
         :
         (
@@ -193,9 +196,17 @@ export default withRouter(function PrimarySearchAppBar({history}) {
       
     </Menu>
   );
+  
+  const [searchText, setSearchText] = useState("")
+
+  const searchForm = (event) => {
+    event.preventDefault();
+    dispatch(onSearch(searchText.toLowerCase()))
+    history.push(SEARCH_ROUTE)
+  }
 
   return (
-    <div className={classes.grow}>
+    <header>
       <AppBar position="static">
         <Toolbar>
           <IconButton
@@ -211,11 +222,13 @@ export default withRouter(function PrimarySearchAppBar({history}) {
               PhoneStore
             </Typography>
           </Link>
-          <div className={classes.search}>
+          <form onSubmit={searchForm} className={classes.search}>
             <div className={classes.searchIcon}>
               <SearchIcon />
             </div>
             <InputBase
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
               placeholder="Search…"
               classes={{
                 root: classes.inputRoot,
@@ -223,14 +236,14 @@ export default withRouter(function PrimarySearchAppBar({history}) {
               }}
               inputProps={{ 'aria-label': 'search' }}
             />
-          </div>
+          </form>
           <div className={classes.grow} />
           {
             isAuth ? (
               <>
                 <div className={classes.sectionDesktop}>
                   <IconButton onClick={() => history.push("/cart/"+cart_id)}  aria-label="show" color="inherit">
-                    <Badge badgeContent={17} color="secondary">
+                    <Badge badgeContent={cartItemsCount.length} color="secondary">
                       <ShoppingCartIcon />
                     </Badge>
                   </IconButton>
@@ -291,6 +304,6 @@ export default withRouter(function PrimarySearchAppBar({history}) {
       </AppBar>
       {renderMobileMenu}
       {renderMenu}
-    </div>
+    </header>
   );
 })

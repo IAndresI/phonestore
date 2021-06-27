@@ -12,17 +12,17 @@ export const getOnePhones = async (id) => {
   return data;
 }
 
-export const getAllPhones = async (page=1, limit=9, sort=null, color, manufacturers, price) => {
-  const {data} = await $host.get(`api/phone`, {params: {page, limit, sort, color, manufacturers, price}});
+export const getAllPhones = async (page=1, limit=9, sort=null, color, manufacturers, price,ram,rom,camera, diagonal) => {
+  const {data} = await $host.get(`api/phone`, {params: {page, limit, sort, color, manufacturers, price, ram,rom,camera, diagonal}});
   return data;
 }
 
-export const getAllColor = async () => {
-  const {data} = await $host.get('api/phone/color/');
+export const getFilter = async () => {
+  const {data} = await $host.get('api/phone/filter/');
   return data;
 }
 
-export const getMinMaxPirce = async () => {
-  const {data} = await $host.get('api/phone/min_max_price');
+export const search = async (searchText) => {
+  const {data} = await $host.get('api/phone/search/', {params: {searchText}});
   return data;
 }

@@ -26,6 +26,13 @@ const onPriceChange = (price) => {
   };
 };
 
+const onDiagonalChange = (diagonal) => {
+  return {
+    type: "SET_DIAGONAL",
+    payload: diagonal
+  };
+}
+
 const onManufacturerChange = (manufacturer) => {
   return {
     type: "SET_MANUFACTURER",
@@ -37,6 +44,13 @@ const onColorChange = (color) => {
   return {
     type: "SET_COLORS",
     payload: color
+  };
+};
+
+const onCameraCountChange = (camera) => {
+  return {
+    type: "SET_CAMERA_COUNT",
+    payload: camera
   };
 };
 
@@ -96,6 +110,27 @@ const onLimitSet = (limit) => {
   }
 }
 
+const onRamChange = (ram) => {
+  return {
+    type: "SET_RAM",
+    payload: ram
+  }
+}
+
+const onRomChange = (rom) => {
+  return {
+    type: "SET_ROM",
+    payload: rom
+  }
+}
+
+const onSearch = (text) => {
+  return {
+    type: "SEARCH",
+    payload: text
+  }
+}
+
 export {
   onAddedToCart,
   onRemoveItemFromCart,
@@ -110,5 +145,10 @@ export {
   fetchingCart,
   fetchingColor,
   onPageSet,
-  onLimitSet
+  onLimitSet,
+  onDiagonalChange,
+  onCameraCountChange,
+  onRamChange,
+  onRomChange,
+  onSearch
 };

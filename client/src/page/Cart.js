@@ -10,14 +10,7 @@ const Cart = () => {
   const dispatch = useDispatch()
   const cartItems = useSelector(state => state.cart.cartList)
   const cartId = useSelector(state => state.user.user.cart_id)
-
-  useEffect(() => {
-    console.log(cartItems);
-    getCart(cartId).then(data => {
-      dispatch(fetchingCart(data))
-    })
-  }, [])
-
+  
   return (
     <section>
       {JSON.stringify(cartItems)}

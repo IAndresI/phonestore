@@ -21,7 +21,7 @@ const useStyles = makeStyles({
 });
 
 export default function Phone({phone}) {
-  const {image, name, price, manufacturer, phone_id} = phone
+  const {image, phone_name, price, manufacturer_name, phone_id} = phone
   const classes = useStyles();
   const history = useHistory();
 
@@ -34,14 +34,14 @@ export default function Phone({phone}) {
           height={300}
           className={classes.media}
           image={imagePath}
-          title={name}
+          title={phone_name}
         />
         <CardContent>
           <Typography gutterBottom variant="h5" component="h2">
-            {manufacturer}
+            {manufacturer_name}
           </Typography>
           <Typography variant="body2" color="textSecondary" component="p">
-            {name}
+            {phone_name}
           </Typography>
           <Typography variant="body2" color="textSecondary" component="p">
             {price}

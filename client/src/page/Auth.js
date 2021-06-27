@@ -220,6 +220,7 @@ export default withRouter(function SignIn({location, history}) {
                     <MenuItem value="agen">AGEN</MenuItem>
                   </Select>
                   <TextField
+                    inputProps={{ accept: ".jpg,.jpeg,.png,.webp" }}
                     className={classes.file}
                     variant="outlined"
                     margin="normal"

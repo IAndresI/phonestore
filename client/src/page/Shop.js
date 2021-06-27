@@ -1,30 +1,47 @@
-import { Grid, InputLabel, makeStyles, Select } from '@material-ui/core';
+import { Container, Grid, InputLabel, makeStyles, Select } from '@material-ui/core';
 import React, { useEffect, useState } from 'react';
-import Layout from '../components/Layout';
 import Filter from '../components/Filter';
 import { useDispatch, useSelector } from 'react-redux';
 import Phone from '../components/Phone';
-import { fetchingManufacturer, fetchingPhones, onPageSet } from '../store/actions';
+import { fetchingPhones, onPageSet } from '../store/actions';
 import { getAllPhones } from '../http/phoneAPI';
-import { getAllManufacturer } from '../http/manufacturerAPI';
 import Pagination from '@material-ui/lab/Pagination';
 import Spinner from '../components/Spinner';
 
 const Shop = () => {
+
+  // store
+
+  const dispatch = useDispatch();
+
+  // all phones
+  
   const phone = useSelector(state => state.phone.phoneList);
-  const manufacturer = useSelector(state => state.phone.manufacturer);
+
+  // pagination
+
   const totalCount = useSelector(state => state.phone.totalCount)
   const limit = useSelector(state => state.page.limit)
   const page = useSelector(state => state.page.page)
+  const [paginationCount, setPaginationCount] = useState(1)
+
+  // filter
+
   const pickedColor = useSelector(state => state.filter.color)
   const pickedManufacturer = useSelector(state => state.filter.manufacturer)
   const pickedPrice = useSelector(state => state.filter.price)
+  const pickedRam = useSelector(state => state.filter.ram)
+  const pickedRom = useSelector(state => state.filter.rom)
+  const pickedCamera = useSelector(state => state.filter.camera)
+  const pickedDiagonal = useSelector(state => state.filter.diagonal)
+
+  // sort
 
   const [sort, setSort] = useState("");
-  const [loading, setLoading] = useState(true)
-  const [paginationCount, setPaginationCount] = useState(1)
 
-  const dispatch = useDispatch();
+  const [loading, setLoading] = useState(true)
+
+  // on filter change and componentDidMount
 
   const handleChange = (event) => {
     setSort(event.target.value);
@@ -42,80 +59,90 @@ const Shop = () => {
   useEffect(() => {
     setLoading(true)
     const timer = setTimeout(async () => {
-      await getAllManufacturer().then(data => {
-        dispatch(fetchingManufacturer(data))
-      });
-      await getAllPhones(page, limit, sort, pickedColor, pickedManufacturer, pickedPrice).then(data => {
+      await getAllPhones(page, limit, sort, pickedColor, pickedManufacturer, pickedPrice,pickedRam,pickedRom,pickedCamera,pickedDiagonal).then(data => {
         dispatch(fetchingPhones(data));
       });
       setLoading(false)
     }, 500);
     return () => clearTimeout(timer);
-  }, [page, sort, pickedColor, pickedManufacturer, pickedPrice])
+  }, [page, sort, pickedColor, pickedManufacturer, pickedPrice,pickedRam,pickedRom,pickedCamera,pickedDiagonal, dispatch, limit])
+
+  // styles
 
   const useStyles = makeStyles(() => ({
     sort: {
-      width: 200,
-      marginTop: 10
+      width: 200
     },
     sortLabel: {
       fontSize: 20,
       color: 'black',
-      marginRight: 15
+      marginRight: 15,
     },
     pagination: {
       display: 'flex',
       justifyContent: 'center',
       marginTop: 30,
       width: '100%'
+    },
+    shopInner: {
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'space-between',
+    },
+    shopHeader: {
+      display: 'flex',
+      width: '100%',
+      alignItems: 'center',
+      justifyContent: 'space-between'
     }
   }));
+
   const classes = useStyles();
 
   return (
     <section>
-      <h1>Shop</h1>
-      <Grid style={{flexWrap: "nowrap"}} container spacing={1}>
-        <Grid style={{marginRight: 30}} container md={3}>
-          <Filter manufacturer={manufacturer}/>
-        </Grid>
-        <Grid style={{flexDirection: "column"}} container md={9}>
-          <Grid style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+      <h1 className="title">Shop</h1>
+      <Container>
+        <Grid className={classes.shopInner}>
+          <Grid className={classes.shopHeader}>
             <h2 style={{marginTop: 30}}>Found {loading ? "-" : totalCount} phones</h2>
             <div style={{display: 'flex', alignItems: 'center', marginTop: 20}}>
               <InputLabel className={classes.sortLabel} htmlFor="outlined-age-native-simple">Sort By</InputLabel>
-                  <Select
+                <Select
                 className={classes.sort}
                 native
                 value={sort}
                 onChange={handleChange}
-                label="sort"
-              >
-                <option value="">No sort</option>
-                <option value="ASC">Price: low to high</option>
-                <option value="DESC">Price: high to low</option>
+                label="sort">
+                  <option value="">No sort</option>
+                  <option value="price ASC">Price: low to high</option>
+                  <option value="price DESC">Price: high to low</option>
+                  <option value="phone_name ASC">Name: A-Z</option>
+                  <option value="phone_name DESC">Name: Z-A</option>
               </Select>
             </div>
           </Grid>
-          <Grid container>
+          <div style={{display: 'flex'}}>
+            <Grid style={{marginRight: 30, marginTop: 15}}>
+              <Filter/>
+            </Grid>
             {
               !loading ? 
               (
-                <>
+                <Grid style={{display: 'flex', flexWrap: 'wrap', height: "100%", width:"100%"}}>
                   {
-                    phone.map(e => <Phone key={e.id} phone={{...e, manufacturer: manufacturer.find(el => el.manufacturer_id===e.manufacturer_id)?.name}}/>)
+                    phone.map(e => <Phone key={e.phone_id} phone={e}/>)
                   }
                   <div className={classes.pagination}>
                     <Pagination style={{display: paginationCount === 1 ? 'none' : 'block',}} page={page} onChange={paginationChange} defaultPage={page} count={paginationCount} variant="outlined" color="primary" />
                   </div>
-                </>
+                </Grid>
               )
               : <Spinner/>
             }
-            
-          </Grid>
+          </div>
         </Grid>
-      </Grid>
+      </Container>
     </section>
   );
 };

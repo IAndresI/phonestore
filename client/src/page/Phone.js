@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import { CircularProgress, Grid } from '@material-ui/core';
+import { CircularProgress, Container, Grid } from '@material-ui/core';
 import CardMedia from '@material-ui/core/CardMedia';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
@@ -43,33 +43,35 @@ export default function Phone() {
 
   return (
     <section>
-      <Grid>
-        <CardMedia
-          className={classes.media}
-          image={imagePath}
-          title={phone.name}
-        />
-      </Grid>
-      <Button
-        onClick={() => {
-          dispatch(onAddedToCart(phone.phone_id));
-        }}
-        style={{backgroundColor: isInCart ? "green" : ""}}
-        variant="contained"
-        color="primary"
-        size="large"
-        endIcon={isInCart ? <ShoppingCartIcon>Already In Cart</ShoppingCartIcon> : <AddShoppingCartIcon>Add To Cart</AddShoppingCartIcon>}>{isInCart ? "Already In Cart" : "Add To Cart"}</Button>
-      <h1>{phone.name}</h1>
-      <Typography style={{marginBottom: 30, fontSize: 20, fontWeight: 700}}>Характеристики:</Typography>
-      <Grid>
-        {
-          info.map((e, i) => (
-            <Grid key={e} style={{backgroundColor: i % 2 === 0 ? "lightgray" : "transparent", padding: 10}}>
-              <strong>{e[0]}</strong>:    {Array.isArray(phone[e[1]]) ? phone[e[1]].join("x") : phone[e[1]]}
-            </Grid>
-          ))
-        }
-      </Grid>
+      <h1 className="title mini">{phone.name}</h1>
+      <Container>
+        <Grid>
+          <CardMedia
+            className={classes.media}
+            image={imagePath}
+            title={phone.name}
+          />
+        </Grid>
+        <Button
+          onClick={() => {
+            dispatch(onAddedToCart(phone.phone_id));
+          }}
+          style={{backgroundColor: isInCart ? "green" : "", marginBottom: 30}}
+          variant="contained"
+          color="primary"
+          size="large"
+          endIcon={isInCart ? <ShoppingCartIcon>Already In Cart</ShoppingCartIcon> : <AddShoppingCartIcon>Add To Cart</AddShoppingCartIcon>}>{isInCart ? "Already In Cart" : "Add To Cart"}</Button>
+        <Typography style={{marginBottom: 30, fontSize: 20, fontWeight: 700}}>Характеристики:</Typography>
+        <Grid>
+          {
+            info.map((e, i) => (
+              <Grid key={e} style={{backgroundColor: i % 2 === 0 ? "lightgray" : "transparent", padding: 10}}>
+                <strong>{e[0]}</strong>:    {Array.isArray(phone[e[1]]) ? phone[e[1]].join("x") : phone[e[1]]}
+              </Grid>
+            ))
+          }
+        </Grid>
+      </Container>
     </section>
   );
 }
