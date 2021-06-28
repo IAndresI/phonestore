@@ -113,7 +113,12 @@ export default withRouter(function SignIn({location, history}) {
   if (isAuth) return <Redirect to="/"/> 
 
   return (
-    <section>
+    <section className="section">
+      {
+        isLogin ? <h1 className="title">Login</h1>
+        :
+        <h1 className="title">Registration</h1>
+      }
       <Container component="main" maxWidth="xs">
         <CssBaseline />
         <div className={classes.paper}>

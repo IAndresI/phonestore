@@ -12,10 +12,10 @@ const Footer = () => {
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
-      marginTop: 60,
+      paddingTop: 60,
       background: "#3f51b5",
-      background: "-webkit-linear-gradient(to top, #3f51b5 0.1%,#ffffff 90% ,#ffffff 99%)",
-      background: "linear-gradient(to top, #3f51b5 0.1%, #ffffff 90% ,#ffffff 99%)"
+      background: "-webkit-linear-gradient(to top, #3f51b5 0.1%,#fafafa 90% ,#fafafa 99%)",
+      background: "linear-gradient(to top, #3f51b5 0.1%, #fafafa 90% ,#fafafa 99%)"
     },
   });
   

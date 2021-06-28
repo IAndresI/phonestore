@@ -100,7 +100,7 @@ const Shop = () => {
   const classes = useStyles();
 
   return (
-    <section>
+    <section className="section">
       <h1 className="title">Shop</h1>
       <Container>
         <Grid className={classes.shopInner}>
@@ -129,7 +129,7 @@ const Shop = () => {
             {
               !loading ? 
               (
-                <Grid style={{display: 'flex', flexWrap: 'wrap', height: "100%", width:"100%"}}>
+                <Grid style={{display: 'flex', flexWrap: 'wrap', height: "100%", width:"100%",}}>
                   {
                     phone.map(e => <Phone key={e.phone_id} phone={e}/>)
                   }

@@ -11,9 +11,9 @@ export default function cartReducer(state, action) {
         cartList: action.payload
       }
     case "ADD_CART_ITEM":
-      return updateCart(action.payload, state, 1);
-    case "DELETE_CART_ITEM":
-      return //updateCart(action.payload, state, -1);
+      return updateCart(action.payload, state);
+    // case "DELETE_CART_ITEM":
+    //   return updateCart(action.payload, state, -1);
     case "DELETE_ALL_CART_ITEM":
       const cart = [...state.cart.cartList];
       const phoneIsInCartIndex = cart.findIndex(e => e.phone_id === action.payload);
@@ -34,32 +34,38 @@ export default function cartReducer(state, action) {
 function updateCart(payload, state, action) {
 
   const stateCartList = state.cart.cartList;
-  const phoneInCart = stateCartList.find(e => e.phone_id === payload);
+  const phoneInCart = stateCartList.find(e => e.phone_id === payload.phone_id);
 
   if(phoneInCart) {
-    const oldCartItem = {...phoneInCart, count: phoneInCart.count+action};
+    const oldCartItem = {...phoneInCart, count: payload.count};
     const oldIndex = stateCartList.findIndex(e => e.phone_id===oldCartItem.phone_id)
-    const newCartList = [...stateCartList.splice(0,oldIndex-1),oldCartItem,...stateCartList.splice(oldIndex,stateCartList.length-1)]
+    const newCartList = [...stateCartList.splice(0,oldIndex),oldCartItem,...stateCartList.splice(oldIndex,stateCartList.length-1)]
     if(oldCartItem.count < 1) {
-      const cart = [...stateCartList];
-      cart.slice(oldIndex, 1)
+      const cart = [...newCartList];
+      console.log(cart);
+      cart.splice(oldIndex, 1)
+      console.log(cart);
       return {
         ...state.cart,
-        cartList: cart
+        cartList: cart,
+        totalPrice: cart.reduce((acc, curr) => acc+parseFloat(curr.price.slice(1, curr.price.length).replace(",",""))*curr.count,0)
       }
     }
     else {
       return {
         ...state.cart,
-        cartList: newCartList
+        cartList: newCartList,
+        totalPrice: newCartList.reduce((acc, curr) => acc+parseFloat(curr.price.slice(1, curr.price.length).replace(",",""))*curr.count,0)
       }
     }
   }
   else {
-    const newCartItem = {phone_id: payload, count: 1};
+    const newCartItem = {...payload, count: 1};
+    const newCart = [...state.cart.cartList, newCartItem];
     return {
       ...state.cart,
-      cartList: [...state.cart.cartList, newCartItem]
+      cartList: newCart,
+      totalPrice: newCart.reduce((acc, curr) => acc+parseFloat(curr.price.slice(1, curr.price.length).replace(",",""))*curr.count,0)
     }
   }
 }

@@ -1,7 +1,7 @@
-const onAddedToCart = (id) => {
+const onAddedToCart = (phone) => {
   return {
     type: "ADD_CART_ITEM",
-    payload: id
+    payload: phone
   };
 };
 

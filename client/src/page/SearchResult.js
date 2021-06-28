@@ -47,7 +47,7 @@ const SearchResult = () => {
   }, [searchText])
 
   return (
-    <section>
+    <section className="section">
       <h1 className="title">Search</h1>
       <Container>
         <form>

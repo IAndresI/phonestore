@@ -42,7 +42,7 @@ export default function Phone() {
   if (loading) return <CircularProgress style={{position: "fixed", top: 0, left: 0, right: 0, bottom: 0}}/>
 
   return (
-    <section>
+    <section className="section">
       <h1 className="title mini">{phone.name}</h1>
       <Container>
         <Grid>
@@ -54,7 +54,7 @@ export default function Phone() {
         </Grid>
         <Button
           onClick={() => {
-            dispatch(onAddedToCart(phone.phone_id));
+            dispatch(onAddedToCart({phone_id: phone.phone_id, name: phone.name, price: phone.price, image: phone.image}));
           }}
           style={{backgroundColor: isInCart ? "green" : "", marginBottom: 30}}
           variant="contained"
