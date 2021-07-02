@@ -39,7 +39,7 @@ function updateCart(payload, state, action) {
   if(phoneInCart) {
     const oldCartItem = {...phoneInCart, count: payload.count};
     const oldIndex = stateCartList.findIndex(e => e.phone_id===oldCartItem.phone_id)
-    const newCartList = [...stateCartList.splice(0,oldIndex),oldCartItem,...stateCartList.splice(oldIndex,stateCartList.length-1)]
+    const newCartList = [...stateCartList.splice(0,oldIndex),oldCartItem,...stateCartList.splice(oldIndex+1,stateCartList.length-1)]
     if(oldCartItem.count < 1) {
       const cart = [...newCartList];
       console.log(cart);

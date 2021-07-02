@@ -20,7 +20,7 @@ class PhoneController {
       const offset = page*limit-limit;
       const orderByArr = sort.split(' ')
       const orderBy = `${sort ? `ORDER BY ph.${orderByArr[0]} ${orderByArr[1]}` : ""}`;
-      const whereColor = color ? `AND col_det.color_id IN(${color.join(',')})` : "";
+      const whereColor = color ? `AND ph.color_id IN(${color.join(',')})` : "";
       const whereManufacturer = manufacturers ? `AND ph.manufacturer_name IN(${manufacturers.map(e=>`'${e}'`).join(',')})` : "";
       const wherePrice = price ? `AND ph.price >= ${price[0]}::money AND ph.price <= ${price[1]}::money` : "";
       const whereRam = ram ? `AND ph.ram IN(${ram.join(',')})` : "";
@@ -28,14 +28,14 @@ class PhoneController {
       const whereCamera = camera ? `AND cardinality(ph.camera) IN(${camera.join(',')})` : "";
       const whereDiagonal = diagonal ? `AND ph.diagonal>=${diagonal[0]} AND ph.diagonal<=${diagonal[1]}` : "";
 
-      // console.log(`
-      //   SELECT DISTINCT ph.* 
-      //   FROM get_full_phones ph 
-      //   INNER JOIN color_details col_det ON col_det.phone_id=ph.phone_id 
-      //   WHERE TRUE ${whereColor} ${whereManufacturer} ${wherePrice} ${whereRam} ${whereRom} ${whereCamera} ${whereDiagonal}
-      //   ${orderBy} 
-      //   LIMIT ${limit} OFFSET ${offset};
-      // `);
+      console.log(`
+        SELECT DISTINCT ph.* 
+        FROM get_full_phones ph 
+        INNER JOIN color_details col_det ON col_det.phone_id=ph.phone_id 
+        WHERE TRUE ${whereColor} ${whereManufacturer} ${wherePrice} ${whereRam} ${whereRom} ${whereCamera} ${whereDiagonal}
+        ${orderBy} 
+        LIMIT ${limit} OFFSET ${offset};
+      `);
 
       const qeury = await db.query(`
         SELECT DISTINCT ph.* 
