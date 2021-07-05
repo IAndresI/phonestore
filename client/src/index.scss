@@ -88,3 +88,141 @@ code {
   background: -webkit-linear-gradient(to bottom, #3f51b5 0.1%, #fafafa 90%, #fafafa 99%);
   background: linear-gradient(to bottom, #3f51b5 0.1%, #fafafa 90%, #fafafa 99%);
 }
+
+// Slider
+
+.keen-slider__slide {
+  text-decoration: none;
+  color: inherit;
+
+  &:hover,
+  &:focus {
+    .slider__image {
+      transform: scale(1.2)
+    }
+  }
+
+  &:active {
+    .slider__image {
+      transform: scale(1)
+    }
+  }
+}
+
+.slider {
+  border-radius: 10px;
+
+  &__item {
+    min-height: 400px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    padding: 60px 0 20px;
+  }
+
+  &__image {
+    width: 400px;
+    height: 400px;
+    object-fit: contain;
+    transition: transform .5s;
+    margin-bottom: 20px;
+  }
+
+  &__item-name {
+    font-size: 30px;
+    text-align: center;
+    max-width: 70%;
+    position: relative;
+  }
+}
+
+.number-slide0 {
+  background: rgb(64, 175, 255);
+  background: linear-gradient(128deg,
+      rgba(64, 175, 255, 1) 0%,
+      rgba(63, 97, 255, 1) 100%);
+}
+
+.number-slide1 {
+  background: rgb(255, 75, 64);
+  background: linear-gradient(128deg,
+      rgba(255, 154, 63, 1) 0%,
+      rgba(255, 75, 64, 1) 100%);
+}
+
+.number-slide2 {
+  background: rgb(182, 255, 64);
+  background: linear-gradient(128deg,
+      rgba(182, 255, 64, 1) 0%,
+      rgba(63, 255, 71, 1) 100%);
+  background: linear-gradient(128deg,
+      rgba(189, 255, 83, 1) 0%,
+      rgba(43, 250, 82, 1) 100%);
+}
+
+.number-slide3 {
+  background: rgb(64, 255, 242);
+  background: linear-gradient(128deg,
+      rgba(64, 255, 242, 1) 0%,
+      rgba(63, 188, 255, 1) 100%);
+}
+
+.number-slide4 {
+  background: rgb(255, 64, 156);
+  background: linear-gradient(128deg,
+      rgba(255, 64, 156, 1) 0%,
+      rgba(255, 63, 63, 1) 100%);
+}
+
+.number-slide5 {
+  background: rgb(64, 76, 255);
+  background: linear-gradient(128deg,
+      rgba(64, 76, 255, 1) 0%,
+      rgba(174, 63, 255, 1) 100%);
+}
+
+.dots {
+  display: flex;
+  padding: 10px 0;
+  justify-content: center;
+}
+
+.dot {
+  border: none;
+  width: 10px;
+  height: 10px;
+  background: #c5c5c5;
+  border-radius: 50%;
+  margin: 0 5px;
+  padding: 5px;
+  cursor: pointer;
+}
+
+.dot:focus {
+  outline: none;
+}
+
+.dot.active {
+  background: #000;
+}
+
+.arrow {
+  width: 30px;
+  height: 30px;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  -webkit-transform: translateY(-50%);
+  fill: #fff;
+  cursor: pointer;
+}
+
+.arrow--left {
+  left: 5px;
+}
+
+.arrow--right {
+  left: auto;
+  right: 5px;
+}

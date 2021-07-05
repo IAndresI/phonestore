@@ -17,6 +17,11 @@ export const getAllPhones = async (page=1, limit=9, sort=null, color, manufactur
   return data;
 }
 
+export const getNewestPhones = async () => {
+  const {data} = await $host.get(`api/phone/newest`);
+  return data;
+}
+
 export const getFilter = async () => {
   const {data} = await $host.get('api/phone/filter/');
   return data;

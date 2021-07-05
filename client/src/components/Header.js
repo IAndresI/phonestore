@@ -80,6 +80,7 @@ const useStyles = makeStyles((theme) => ({
   },
   sectionMobile: {
     display: 'flex',
+    marginLeft: 'auto',
     [theme.breakpoints.up('md')]: {
       display: 'none',
     },

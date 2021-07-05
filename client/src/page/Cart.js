@@ -1,7 +1,6 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { getCart } from '../http/cartAPI';
-import { fetchingCart, onAddedToCart } from '../store/actions';
+import { onAddedToCart } from '../store/actions';
 import { Container, makeStyles, TextField } from '@material-ui/core';
 import {Link} from 'react-router-dom';
 

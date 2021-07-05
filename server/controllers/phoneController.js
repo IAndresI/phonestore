@@ -28,14 +28,14 @@ class PhoneController {
       const whereCamera = camera ? `AND cardinality(ph.camera) IN(${camera.join(',')})` : "";
       const whereDiagonal = diagonal ? `AND ph.diagonal>=${diagonal[0]} AND ph.diagonal<=${diagonal[1]}` : "";
 
-      console.log(`
-        SELECT DISTINCT ph.* 
-        FROM get_full_phones ph 
-        INNER JOIN color_details col_det ON col_det.phone_id=ph.phone_id 
-        WHERE TRUE ${whereColor} ${whereManufacturer} ${wherePrice} ${whereRam} ${whereRom} ${whereCamera} ${whereDiagonal}
-        ${orderBy} 
-        LIMIT ${limit} OFFSET ${offset};
-      `);
+      // console.log(`
+      //   SELECT DISTINCT ph.* 
+      //   FROM get_full_phones ph 
+      //   INNER JOIN color_details col_det ON col_det.phone_id=ph.phone_id 
+      //   WHERE TRUE ${whereColor} ${whereManufacturer} ${wherePrice} ${whereRam} ${whereRom} ${whereCamera} ${whereDiagonal}
+      //   ${orderBy} 
+      //   LIMIT ${limit} OFFSET ${offset};
+      // `);
 
       const qeury = await db.query(`
         SELECT DISTINCT ph.* 
@@ -63,6 +63,17 @@ class PhoneController {
     try {
       const {searchText} = req.query;
       const qeury = await db.query(`select * from get_full_phones WHERE lower(phone_name) LIKE '%${searchText}%' OR lower(manufacturer_name) LIKE '%${searchText}%';`);
+      const data = qeury.rows
+      return res.json(data)
+    }
+    catch(err) {
+      return next(ApiError.badRequest(err.message));
+    }
+  }
+
+  async getNewest(req, res,next) {
+    try {
+      const qeury = await db.query(`select * FROM newest_phones;`);
       const data = qeury.rows
       return res.json(data)
     }
