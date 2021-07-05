@@ -30,6 +30,11 @@ export default function Phone() {
 
   const isInCart = cartList.find(e => e.phone_id === phone?.phone_id);
 
+  const removeFromCart = (phone) => dispatch(onAddedToCart({
+    ...phone,
+    count: -1
+  }))
+
   const imagePath=`http://localhost:5000/${phone?.image ? phone?.image : "phone.jpg"}`
   const info = [["Weight", "weight"], ["Diagonal", "diagonal"], ["RAM", "ram"], ["ROM", "memory"], ["Manufacturer", "manufacturer"], ["Camera", "camera"]]
   useEffect(() => {
@@ -52,15 +57,37 @@ export default function Phone() {
             title={phone.name}
           />
         </Grid>
-        <Button
-          onClick={() => {
-            dispatch(onAddedToCart({phone_id: phone.phone_id, name: phone.name, price: phone.price, image: phone.image}));
-          }}
-          style={{backgroundColor: isInCart ? "green" : "", marginBottom: 30}}
-          variant="contained"
-          color="primary"
-          size="large"
-          endIcon={isInCart ? <ShoppingCartIcon>Already In Cart</ShoppingCartIcon> : <AddShoppingCartIcon>Add To Cart</AddShoppingCartIcon>}>{isInCart ? "Already In Cart" : "Add To Cart"}</Button>
+        {
+          isInCart ? 
+          (
+            <Button
+            onClick={() => {
+              removeFromCart({phone_id: phone.phone_id, phone_name: phone.name, price: phone.price, image: phone.image});
+            }}
+            style={{backgroundColor:"green", marginBottom: 30}}
+            variant="contained"
+            color="primary"
+            size="large"
+            endIcon={<ShoppingCartIcon>Already In Cart</ShoppingCartIcon>}>
+              Already In Cart
+            </Button>
+          )
+          :
+          (
+            <Button
+            onClick={() => {
+              dispatch(onAddedToCart({phone_id: phone.phone_id, phone_name: phone.name, price: phone.price, image: phone.image}));
+            }}
+            style={{marginBottom: 30}}
+            variant="contained"
+            color="primary"
+            size="large"
+            endIcon={<AddShoppingCartIcon>Add To Cart</AddShoppingCartIcon>}>
+              Add To Cart
+            </Button>
+          )
+        }
+        
         <Typography style={{marginBottom: 30, fontSize: 20, fontWeight: 700}}>Характеристики:</Typography>
         <Grid>
           {

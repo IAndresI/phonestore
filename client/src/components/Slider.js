@@ -52,7 +52,7 @@ const Slider = ({phones}) => {
             const imagePath = `${process.env.REACT_APP_API_URL}/${item.image ? item.image : "phone.jpg"}`;
             const link = `/phone/${item.phone_id}`;
             return (
-              <Link to={link} className={`keen-slider__slide number-slide${i}`}>
+              <Link key={item.phone_id} to={link} className={`keen-slider__slide number-slide${i}`}>
                 <div className="slider__item">
                   <img className="slider__image" src={imagePath} alt={item.phone_name}/>
                   <h3 className="slider__item-name">{item.phone_name}</h3>

@@ -50,7 +50,7 @@ const SearchResult = () => {
     <section className="section">
       <h1 className="title">Search</h1>
       <Container>
-        <form>
+        <form onSubmit={(e) => e.preventDefault()}>
           <TextField value={searchText} onChange={getSearch} className={classes.input} id="outlined-basic" label="Search..." variant="outlined" />
         </form>
         <div className={classes.searchResult}>
