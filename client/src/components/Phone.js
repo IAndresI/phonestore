@@ -29,7 +29,11 @@ const useStyles = makeStyles({
     }
   },
   name: {
-    fontSize: 20
+    fontSize: 20,
+    display: "-webkit-box",
+    "-webkit-box-orient": "vertical",
+    lineClamp: 2,
+    overflow: "hidden",
   },
   footer: {
     display: "flex",

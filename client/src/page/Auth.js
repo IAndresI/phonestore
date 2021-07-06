@@ -109,9 +109,7 @@ export default withRouter(function SignIn({location, history}) {
     
   }
 
-
   if (isAuth) return <Redirect to="/"/> 
-
   return (
     <section className="section">
       {

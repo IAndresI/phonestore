@@ -7,18 +7,19 @@ import Typography from '@material-ui/core/Typography';
 import InputBase from '@material-ui/core/InputBase';
 import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
-import MenuIcon from '@material-ui/icons/Menu';
 import SearchIcon from '@material-ui/icons/Search';
 import AccountCircle from '@material-ui/icons/AccountCircle';
 import MoreIcon from '@material-ui/icons/MoreVert';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
-import { Button } from '@material-ui/core';
+import { Button} from '@material-ui/core';
 import { withRouter, Link} from 'react-router-dom';
 import { onLogout } from '../store/actions';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 import Badge from '@material-ui/core/Badge';
 import { SEARCH_ROUTE } from '../utils/consts';
 import {onSearch} from '../store/actions'
+import SideBar from './SideBar';
+
 const useStyles = makeStyles((theme) => ({
   grow: {
     flexGrow: 1,
@@ -85,6 +86,15 @@ const useStyles = makeStyles((theme) => ({
       display: 'none',
     },
   },
+  root: {
+    display: 'flex',
+  },
+  appBar: {
+    transition: theme.transitions.create(['margin', 'width'], {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen,
+    }),
+  }
 }));
 
 export default withRouter(function PrimarySearchAppBar({history}) {
@@ -185,7 +195,8 @@ export default withRouter(function PrimarySearchAppBar({history}) {
         (
           <MenuItem onClick={handleProfileMenuOpen}>
             <Button color="inherit"
-              onClick={() => history.push("/login")}>Login</Button>
+              onClick={() => history.push("/login")}>Login
+            </Button>
             <Button 
               onClick={() => history.push("/registration")}
               color="inherit">
@@ -205,19 +216,11 @@ export default withRouter(function PrimarySearchAppBar({history}) {
     dispatch(onSearch(searchText.toLowerCase()))
     history.push(SEARCH_ROUTE)
   }
-
   return (
     <header>
       <AppBar position="static">
         <Toolbar>
-          <IconButton
-            edge="start"
-            className={classes.menuButton}
-            color="inherit"
-            aria-label="open drawer"
-          >
-            <MenuIcon />
-          </IconButton>
+          <SideBar isAuth={isAuth}/>
           <Link className={classes.title} to="/">
             <Typography variant="h6" noWrap>
               PhoneStore
