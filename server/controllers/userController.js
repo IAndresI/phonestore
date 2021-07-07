@@ -79,7 +79,7 @@ class UserController {
         return next(ApiError.badRequest('Enter ID!'))
       }
       const qeury = await db.query('SELECT * FROM client WHERE client_id=$1', [id]);
-      const data = qeury.rows
+      const [data] = qeury.rows
       return res.json(data)
     }
     catch(err) {

@@ -66,6 +66,7 @@ const useStyles = makeStyles(() => ({
   },
   order: {
     width: '30%',
+    height: "100%",
     backgroundColor: "#ffffff",
     borderRadius: '15px',
     padding: 20,

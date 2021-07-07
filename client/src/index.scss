@@ -226,3 +226,13 @@ code {
   left: auto;
   right: 5px;
 }
+
+// Profile
+
+#root .profile {
+  &__title {
+    font-size: 32px;
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
+}
