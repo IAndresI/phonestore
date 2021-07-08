@@ -25,3 +25,8 @@ export const getProfile = async (id) => {
   const {data} = await $authHost.get('api/user/profile/'+id);
   return data;
 }
+
+export const putProfile = async (id, formData) => {
+  const {data} = await $authHost.put('api/user/profile/'+id, formData);
+  return data;
+}

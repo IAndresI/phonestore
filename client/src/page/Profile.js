@@ -1,14 +1,14 @@
-import { Container, makeStyles } from '@material-ui/core';
+import { Container, makeStyles, Snackbar } from '@material-ui/core';
 import React, {useEffect, useState} from 'react';
 import { useSelector } from 'react-redux';
-import { getProfile } from '../http/userAPI';
+import { getProfile, putProfile } from '../http/userAPI';
 import Spinner from '../components/Spinner';
 import PropTypes from 'prop-types';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import Box from '@material-ui/core/Box';
-import Typography from '@material-ui/core/Typography';
-import PersonalData from '../components/profile/pages/PersonalData';
+import PersonalData from '../components/profile/tabs/PersonalData';
+import MuiAlert from '@material-ui/lab/Alert';
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -20,7 +20,8 @@ const useStyles = makeStyles((theme) => ({
     marginRight: 30,
     backgroundColor: '#ffffff',
     borderRadius: 10,
-    padding: 15
+    padding: 15,
+    height: '100%'
   },
   content: {
     width: '70%',
@@ -34,16 +35,16 @@ const useStyles = makeStyles((theme) => ({
     alignItems: 'center',
   },
   userImageContainer: {
-    width: '60%',
-    height: '60%',
+    width: 250,
+    height: 250,
     overflow: 'hidden',
     borderRadius: '50%',
     marginBottom: 10
   },
   userImage: {
-    objectFit: 'contain',
-    width: "100%",
-    height: '100%',
+    width: 250,
+    height: 250,
+    objectFit: "cover",
     display: "block"
   },
   userName: {
@@ -83,6 +84,43 @@ const Profile = () => {
       setLoading(false)
     })
   }, []);
+
+  // Form handlers
+
+  const onPersonalDataSubmit = async ({
+    date_of_birth,
+    email,
+    first_name,
+    gender,
+    image,
+    last_name
+    }, setLoad) => {
+    try {
+      setLoad(true)
+      handleClose();
+      const formData = new FormData();
+
+      formData.append('date_of_birth', `${date_of_birth}`)
+      formData.append('email',`${email}` )
+      formData.append('first_name',`${first_name}` )
+      formData.append('last_name',`${last_name}` )
+      formData.append('gender',`${gender}` )
+      formData.append('client_id',`${client_id}` )
+      if(image) formData.append('image', image)
+      formData.append('image', null)
+      const put = await putProfile(client_id, formData).then(data => {
+        handleClick();
+        getProfile(client_id).then(data => {
+          setProfile(data);
+          setLoad(false)
+        })
+      });
+      return put;
+    }
+    catch(e) {
+      alert(e.response?.data?.message?.detail || e.response?.data?.message || e.message)
+    }
+  }
 
   // Tabs
 
@@ -125,11 +163,30 @@ const Profile = () => {
     setValue(newValue);
   };
 
+  // Alert
+
+  const [open, setOpen] = React.useState(false);
+
+  const handleClick = () => {
+    setOpen(true);
+  };
+
+  const handleClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+
+    setOpen(false);
+  };
+
+  function Alert(props) {
+    return <MuiAlert elevation={6} variant="filled" {...props} />;
+  }
+
   
   if(loading) return <Spinner />
 
-  const imagePath = `${process.env.REACT_APP_API_URL}/${profile.image ? profile.image : "phone.jpg"}`
-
+  const imagePath = `${process.env.REACT_APP_API_URL}/${profile.image ? profile.image : "user.png"}`
   return (
     <section className="profile">
       <h1 className="title">Profile</h1>
@@ -149,20 +206,29 @@ const Profile = () => {
                 classes={{root: classes.tab, indicator: classes.indicator}}
               >
                 <Tab classes={{root: classes.tab}} label="Personal Data" {...a11yProps(0)} />
-                <Tab classes={{root: classes.tab}} label="Orders" {...a11yProps(1)} />
+                <Tab classes={{root: classes.tab}} label="Change Password" {...a11yProps(1)} />
+                <Tab classes={{root: classes.tab}} label="Orders" {...a11yProps(2)} />
               </Tabs>
             </div>
           </div>
         </div>
         <div className={classes.content}>
           <TabPanel value={value} index={0}>
-            <PersonalData profile={profile}/>
+            <PersonalData profile={profile} onSubmit={onPersonalDataSubmit}/>
           </TabPanel>
           <TabPanel value={value} index={1}>
-            Item Two
+            Change Password
+          </TabPanel>
+          <TabPanel value={value} index={2}>
+            Orders
           </TabPanel>
         </div>
       </Container>
+      <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
+        <Alert onClose={handleClose} severity="success">
+          Success!
+        </Alert>
+      </Snackbar>
     </section>
   );
 };

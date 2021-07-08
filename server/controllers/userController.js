@@ -86,6 +86,36 @@ class UserController {
       next(ApiError.badRequest(err.message));
     }
   }
+
+  async putProfile(req, res, next) {
+    try {
+      const {client_id, date_of_birth, email, first_name, last_name, gender, image} = req.body;
+
+      if(!client_id) {
+        return next(ApiError.badRequest('Enter ID!'))
+      }
+
+      let img;
+      let filename = null;
+      if(req.files) {
+        img = req.files.image;
+        filename = uuid.v4()+ ".jpg"
+      }
+      else img=image;
+      
+      const qeury = await db.query(`UPDATE client SET first_name = $1, last_name = $2, email = $3, gender = $4, date_of_birth = $5 ${filename ? `, image = '${filename}'` : ""} WHERE client_id=$6`, [first_name, last_name, email, gender, date_of_birth, client_id], (err) => {
+        if(!err) {
+          if(filename)img.mv(path.resolve(__dirname, '..','static', filename))
+          return res.json(req.body)
+        }
+        next(ApiError.badRequest(err));
+        return res.status(500)
+      })
+    }
+    catch(err) {
+      next(ApiError.badRequest(err.message));
+    }
+  }
 }
 
 module.exports = new UserController();

@@ -230,9 +230,63 @@ code {
 // Profile
 
 #root .profile {
+
+  &__personal-alert {
+    margin-top: 20px;
+  }
+
+  &__personal-form {
+    margin-top: 20px;
+  }
+
   &__title {
     font-size: 32px;
     font-weight: bold;
     margin-bottom: 20px;
+  }
+
+  &__input {
+    width: 250px;
+    margin: 15px 0;
+  }
+
+  &__button {
+    display: block;
+    margin-top: 10px;
+    width: fit-content;
+  }
+
+  &__image-title {
+    font-size: 20px;
+    display: block;
+    margin-top: 15px;
+  }
+
+  &__image-container {
+    width: 150px;
+    height: 150px;
+    overflow: hidden;
+    border-radius: 50%;
+    margin-top: 15px;
+  }
+
+  &__image-preview {
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  &__submit {
+    margin: 0 auto;
+    display: block;
+    width: fit-content;
+    padding: 13px 50px;
+    margin-top: 20px;
+  }
+
+  &__file-upload {
+    position: absolute;
+    width: 0;
   }
 }
