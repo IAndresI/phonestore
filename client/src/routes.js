@@ -4,9 +4,10 @@ import Phone from './page/Phone';
 import Shop from './page/Shop';
 import Auth from './page/Auth';
 import Profile from './page/Profile';
-import {ADMIN_ROUTE, CART_ROUTE, PHONE_ROUTE, SHOP_ROUTE, LOGIN_ROUTE, REGISTRATION_ROUTE, PROFILE_ROUTE, SEARCH_ROUTE, HOME_ROUTE} from './utils/consts'
+import {ADMIN_ROUTE, CART_ROUTE, PHONE_ROUTE, SHOP_ROUTE, LOGIN_ROUTE, REGISTRATION_ROUTE, PROFILE_ROUTE, SEARCH_ROUTE, HOME_ROUTE, CHECKOUT_ROUTE} from './utils/consts'
 import SearchResult from './page/SearchResult';
 import Home from './page/Home';
+import Checkout from './page/Checkout';
 
 
 export const authRoutes = [
@@ -47,5 +48,9 @@ export const publicRoutes = [
   {
     path: HOME_ROUTE,
     Component: Home
+  },
+  {
+    path: CHECKOUT_ROUTE,
+    Component: Checkout
   },
 ];

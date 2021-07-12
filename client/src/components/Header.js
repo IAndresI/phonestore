@@ -13,7 +13,7 @@ import MoreIcon from '@material-ui/icons/MoreVert';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import { Button} from '@material-ui/core';
 import { withRouter, Link} from 'react-router-dom';
-import { onLogout } from '../store/actions';
+import { onLogout, setCart } from '../store/actions';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 import Badge from '@material-ui/core/Badge';
 import { SEARCH_ROUTE } from '../utils/consts';
@@ -145,6 +145,7 @@ export default withRouter(function PrimarySearchAppBar({history}) {
       }}>Profile</MenuItem>
       <MenuItem onClick={() => {
         dispatch(onLogout());
+        dispatch(setCart([]));
         handleMenuClose();
         history.push("/");
       }}>Log Out</MenuItem>
@@ -220,7 +221,7 @@ export default withRouter(function PrimarySearchAppBar({history}) {
     <header>
       <AppBar position="static">
         <Toolbar>
-          <SideBar isAuth={isAuth}/>
+          <SideBar cartItemsCount={cartItemsCount.length} isAuth={isAuth}/>
           <Link className={classes.title} to="/">
             <Typography variant="h6" noWrap>
               PhoneStore
@@ -242,15 +243,16 @@ export default withRouter(function PrimarySearchAppBar({history}) {
             />
           </form>
           <div className={classes.grow} />
+          <IconButton onClick={() => history.push("/cart/"+cart_id)}  aria-label="show" color="inherit">
+            <Badge badgeContent={cartItemsCount.length} color="secondary">
+              <ShoppingCartIcon />
+            </Badge>
+          </IconButton>
           {
             isAuth ? (
               <>
                 <div className={classes.sectionDesktop}>
-                  <IconButton onClick={() => history.push("/cart/"+cart_id)}  aria-label="show" color="inherit">
-                    <Badge badgeContent={cartItemsCount.length} color="secondary">
-                      <ShoppingCartIcon />
-                    </Badge>
-                  </IconButton>
+                  
                   <IconButton
                     edge="end"
                     aria-label="account of current user"

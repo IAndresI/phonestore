@@ -38,13 +38,18 @@ class ManufacturerController {
     }
   }
   async getOne(req, res, next) {
-    const {id} = req.params;
-    if(!id) {
-      return next(ApiError.badRequest('Enter ID!'))
+    try {
+      const {id} = req.params;
+      if(!id) {
+        return next(ApiError.badRequest('Enter ID!'))
+      }
+      const query = await db.query('SELECT * FROM manufacturer WHERE manufacturer_id=$1', [id]);
+      const data = query.rows;
+      return res.json(data)
     }
-    const query = await db.query('SELECT * FROM manufacturer WHERE manufacturer_id=$1', [id]);
-    const data = query.rows;
-    return res.json(data)
+    catch(err) {
+      return next(ApiError.badRequest(err.message));
+    }
   }
 }
 

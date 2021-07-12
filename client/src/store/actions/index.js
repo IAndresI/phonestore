@@ -5,6 +5,13 @@ const onAddedToCart = (phone) => {
   };
 };
 
+const setCart = (cart) => {
+  return {
+    type: "SET_CART",
+    payload: cart
+  };
+};
+
 const onRemoveItemFromCart = (id) => {
   return {
     type: "DELETE_CART_ITEM",
@@ -16,6 +23,13 @@ const onRemoveItemAllFromCart = (id) => {
   return {
     type: "DELETE_ALL_CART_ITEM",
     payload: id
+  };
+};
+
+const onAddCartTotal = (added) => {
+  return {
+    type: "ADD_CART_TOTAL",
+    payload: added
   };
 };
 
@@ -63,6 +77,7 @@ const onLogin = (user) => {
 
 const onLogout = () => {
   localStorage.removeItem("token");
+  localStorage.removeItem("cart");
   return {
     type: "LOGOUT",
   };
@@ -131,6 +146,13 @@ const onSearch = (text) => {
   }
 }
 
+const setPickupPoint = (id) => {
+  return {
+    type: "SET_PICKUP_POINT",
+    payload: id
+  }
+}
+
 export {
   onAddedToCart,
   onRemoveItemFromCart,
@@ -150,5 +172,8 @@ export {
   onCameraCountChange,
   onRamChange,
   onRomChange,
-  onSearch
+  onSearch,
+  setCart,
+  onAddCartTotal,
+  setPickupPoint
 };

@@ -88,7 +88,7 @@ const useStyles = makeStyles({
 });
 
 export default function Phone({phone}) {
-  const {image, phone_name, price, manufacturer_name, phone_id} = phone
+  const {image, phone_name: name, price, manufacturer_name, phone_id} = phone
   const dispatch = useDispatch()
   const classes = useStyles();
 
@@ -100,14 +100,14 @@ export default function Phone({phone}) {
   const imagePath = `${process.env.REACT_APP_API_URL}/${image ? image : "phone.jpg"}`
   const addToCart = () => dispatch(onAddedToCart({
     phone_id,
-    phone_name,
+    name,
     price,
     image
   }))
 
   const removeFromCart = () => dispatch(onAddedToCart({
     phone_id,
-    phone_name,
+    name,
     price,
     image,
     count: -1
@@ -121,13 +121,13 @@ export default function Phone({phone}) {
           height={300}
           className={classes.media}
           image={imagePath}
-          title={phone_name}
+          title={name}
         />
       </Link>
       <CardContent>
         <Link className={classes.name_link} to={`${PHONE_ROUTE}/${phone_id}`}>
           <Typography className={classes.name} gutterBottom variant="h5" component="h2">
-            {phone_name}
+            {name}
           </Typography>
         </Link>
         <Typography variant="body2" color="textSecondary" component="p">

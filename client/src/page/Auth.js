@@ -11,7 +11,6 @@ import PersonAddIcon from '@material-ui/icons/PersonAdd';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
-import Layout from '../components/Layout';
 import { useSelector, useDispatch } from 'react-redux';
 import {Redirect, withRouter} from 'react-router-dom';
 import { LOGIN_ROUTE } from '../utils/consts';
@@ -19,8 +18,10 @@ import {KeyboardDatePicker} from '@material-ui/pickers';
 import { registration, login } from '../http/userAPI';
 import { useForm } from "react-hook-form";
 import Alert from '@material-ui/lab/Alert';
-import {onLogin} from '../store/actions'
+import {onLogin, setCart} from '../store/actions'
 import { InputLabel, MenuItem, Select } from '@material-ui/core';
+import { getCart } from '../http/cartAPI';
+
 
 function Copyright() {
   return (
@@ -83,6 +84,7 @@ export default withRouter(function SignIn({location, history}) {
       if(isLogin) {
         user = await login(data.email, data.password);
         dispatch(onLogin(user))
+        getCart(user.cart_id).then(data => dispatch(setCart(data)));
       }
       else {
         const month = selectedDate.getUTCMonth() + 1;

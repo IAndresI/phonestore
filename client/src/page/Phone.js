@@ -62,7 +62,7 @@ export default function Phone() {
           (
             <Button
             onClick={() => {
-              removeFromCart({phone_id: phone.phone_id, phone_name: phone.name, price: phone.price, image: phone.image});
+              removeFromCart({phone_id: phone.phone_id, name: phone.name, price: phone.price, image: phone.image});
             }}
             style={{backgroundColor:"green", marginBottom: 30}}
             variant="contained"
@@ -76,7 +76,7 @@ export default function Phone() {
           (
             <Button
             onClick={() => {
-              dispatch(onAddedToCart({phone_id: phone.phone_id, phone_name: phone.name, price: phone.price, image: phone.image}));
+              dispatch(onAddedToCart({phone_id: phone.phone_id, name: phone.name, price: phone.price, image: phone.image}));
             }}
             style={{marginBottom: 30}}
             variant="contained"

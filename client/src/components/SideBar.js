@@ -9,7 +9,7 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import MenuIcon from '@material-ui/icons/Menu';
 import IconButton from '@material-ui/core/IconButton';
-import { Typography } from '@material-ui/core';
+import { Badge, Typography } from '@material-ui/core';
 import HomeIcon from '@material-ui/icons/Home';
 import ShoppingBasketIcon from '@material-ui/icons/ShoppingBasket';
 import CompareIcon from '@material-ui/icons/Compare';
@@ -42,7 +42,7 @@ const useStyles = makeStyles({
   }
 });
 
-export default function SideBar({isAuth}) {
+export default function SideBar({isAuth, cartItemsCount}) {
   const classes = useStyles();
   const [state, setState] = React.useState(false);
   const user = useSelector(state => state.user.user)
@@ -100,7 +100,11 @@ export default function SideBar({isAuth}) {
                     (() => {
                       switch(item[0]) {
                         case 'Profile': return <AccountCircleIcon />
-                        case 'Cart': return <ShoppingCartIcon />
+                        case 'Cart': return (
+                          <Badge badgeContent={cartItemsCount} color="secondary">
+                            <ShoppingCartIcon />
+                          </Badge>
+                        )
                         default: return <HomeIcon />
                       }
                     })()

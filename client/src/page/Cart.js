@@ -1,9 +1,15 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { onAddedToCart } from '../store/actions';
-import { Button, Container, makeStyles, TextField } from '@material-ui/core';
+import { onAddCartTotal, onAddedToCart } from '../store/actions';
+import { Button, Container, FormControlLabel, makeStyles, Radio, RadioGroup, TextField } from '@material-ui/core';
 import {Link} from 'react-router-dom';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
+import { CHECKOUT_ROUTE } from '../utils/consts';
+import Map from '../components/cart/Map';
+import {getLocations} from '../http/cartAPI'
+import PickupPointSelect from '../components/cart/PickupPointSelect';
+import Spinner from '../components/Spinner';
+import UserAddress from '../components/cart/UserAddress';
 
 const useStyles = makeStyles(() => ({
   container: {
@@ -65,6 +71,8 @@ const useStyles = makeStyles(() => ({
     marginRight: 50
   },
   order: {
+    position: "sticky",
+    top: 0,
     width: '30%',
     height: "100%",
     backgroundColor: "#ffffff",
@@ -87,8 +95,10 @@ const useStyles = makeStyles(() => ({
   checkout: {
     backgroundColor: "#3f51b5",
     borderRadius: 10,
-    padding: '10px 30px',
+    padding: '15px 30px',
     color: "#ffffff",
+    transition: "all 500ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;",
+    textDecoration: 'none',
     textTransform: "none",
     border: '1px solid #3f51b5',
     "&:hover, &:focus": {
@@ -118,6 +128,40 @@ const useStyles = makeStyles(() => ({
     "&:active": {
       color: "black",
     }
+  },
+  wayToGet: {
+    display: "flex",
+    flexDirection: "row",
+    width: "100%",
+    border: '1px solid rgba(0, 0, 0, 0.23)',
+    borderRadius: 10,
+    justifyContent: "center",
+    marginBottom: 30
+  },
+  wayToGetItem: {
+    width: "50%",
+    display: "flex",
+    alignItems: "flex-start",
+    marginRight: 0,
+    justifyContent: "center",
+    padding: "40px 0",
+  },
+  wayToGetLabel: {
+    display: "flex",
+    flexDirection: "column",
+  },
+  wayToGetName: {
+    fontWeight: 500,
+    fontSize: 20,
+    marginBottom: 5,
+    paddingTop: 6.5
+  },
+  wayToGetRadio: {
+    color: "#3f51b5 !important",
+  },
+  map: {
+    height: 400,
+    width: '100%'
   }
 }));
 
@@ -126,9 +170,38 @@ const Cart = () => {
   const dispatch = useDispatch()
   const cartItems = useSelector(state => state.cart.cartList)
   const cartTotal = useSelector(state => state.cart.totalPrice)
+  const cartPoint = useSelector(state => state.cart.pickupPoint)
   const cartId = useSelector(state => state.user.user.cart_id)
+
+  const [pickupPoints, setPickupPoints] = useState([]);
+  const [loading, setLoading] = useState(true)
   
   const classes = useStyles();
+
+  useEffect(() => {
+    setLoading(true);
+    getLocations().then(data => {
+      setPickupPoints(data)
+      setLoading(false)
+    })
+  }, [])
+
+  const WayToGetLabel = ({name, price}) => {
+    return (
+      <div className={classes.wayToGetLabel}>
+        <span className={classes.wayToGetName}>{name}</span>
+        <span className={classes.wayToGetPrice}>{price}</span>
+      </div>
+    )
+  }
+
+  const [wayToGet, setWayToGet] = useState('point');
+
+  const wayToGetHandleChange = (event) => {
+    setWayToGet(event.target.value);
+    if(event.target.value==="delivery") dispatch(onAddCartTotal(4))
+    else dispatch(onAddCartTotal(-4))
+  };
 
   const countChange = (e, id) => {
     const count = e.target.value;
@@ -140,6 +213,8 @@ const Cart = () => {
     currency: 'USD',
   });
 
+  if(loading) return <Spinner />
+
   return (
     <section className="section">
       <h1 className="title">Cart</h1>
@@ -149,6 +224,7 @@ const Cart = () => {
           (
             <div className={classes.container}>
               <div className={classes.info}>
+                <h2>Items In Cart</h2>
                 {
                   cartItems.map(item => {
                     const imagePath = `${process.env.REACT_APP_API_URL}/${item.image ? item.image : "phone.jpg"}`
@@ -161,10 +237,10 @@ const Cart = () => {
                         </Button>
                         <div className={classes.className}>
                           <Link to={`/phone/${item.phone_id}`} className={classes.imageContainer}>
-                            <img className={classes.image} alt={item.phone_name} height="42" width="42" src={imagePath} />
+                            <img className={classes.image} alt={item.name} height="42" width="42" src={imagePath} />
                           </Link>
                           <div>
-                            <Link className={classes.name} to={`/phone/${item.phone_id}`}><h3>{item.phone_name}</h3></Link>
+                            <Link className={classes.name} to={`/phone/${item.phone_id}`}><h3>{item.name}</h3></Link>
                             <div className={classes.price}>{item.price}</div>
                           </div>
 
@@ -185,13 +261,32 @@ const Cart = () => {
                     )
                   })
                 }
+                <h2>Choose A Way To Get</h2>
+                <RadioGroup className={classes.wayToGet} aria-label="Way To Get" name="wayToGet" value={wayToGet} onChange={wayToGetHandleChange}>
+                  <FormControlLabel className={classes.wayToGetItem} style={{borderRight: '1px solid rgba(0, 0, 0, 0.23)'}} value="point" control={<Radio classes={{checked: classes.wayToGetRadio}} />} label={<WayToGetLabel name="Pickup Point" price="Free"/>}/>
+                  <FormControlLabel className={classes.wayToGetItem} value="delivery" control={<Radio classes={{checked: classes.wayToGetRadio}} />} label={<WayToGetLabel name="Courier Delivery" price="$4.00"/>} />
+                </RadioGroup>
+                {
+                  wayToGet==="point" ? 
+                  (
+                    <>
+                      <PickupPointSelect defaultPoint={cartPoint} pickupPoints={pickupPoints}/>
+                      <Map defaultPoint={cartPoint} selectedPointCoordinates={{lat:cartPoint?.coordinates[0] || 59.869464, lng:cartPoint?.coordinates[1] || 30.34734}} pickupPoints={pickupPoints}/>
+                    </> 
+                  )
+                  :
+                  (
+                    <UserAddress />
+                  )
+                }
+
               </div>
               <div className={classes.order}>
                 <h2>Total Amount</h2>
                 <span className={classes.totalPrice}>{cartTotal ? formatter.format(cartTotal) : 0}</span>
-                <Button className={classes.checkout}>
+                <Link to={CHECKOUT_ROUTE} className={classes.checkout}>
                   Go To Checkout
-                </Button>
+                </Link>
               </div>
             </div>
           )

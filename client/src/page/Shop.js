@@ -117,8 +117,8 @@ const Shop = () => {
                   <option value="">No sort</option>
                   <option value="price ASC">Price: low to high</option>
                   <option value="price DESC">Price: high to low</option>
-                  <option value="phone_name ASC">Name: A-Z</option>
-                  <option value="phone_name DESC">Name: Z-A</option>
+                  <option value="name ASC">Name: A-Z</option>
+                  <option value="name DESC">Name: Z-A</option>
               </Select>
             </div>
           </Grid>

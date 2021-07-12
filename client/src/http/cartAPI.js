@@ -1,5 +1,6 @@
 import {
-  $authHost
+  $authHost,
+  $host
 } from './index'
 
 export const getCart = async (id) => {
@@ -14,5 +15,10 @@ export const changeCart = async (id) => {
 
 export const changeCartItem = async (id, changed) => {
   const {data} = await $authHost.put('api/cart/'+id, {changed});
+  return data;
+}
+
+export const getLocations = async () => {
+  const {data} = await $host.get('api/cart/locations');
   return data;
 }

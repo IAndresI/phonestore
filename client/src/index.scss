@@ -290,3 +290,16 @@ code {
     width: 0;
   }
 }
+
+.map {
+  height: 400px;
+  width: 100%;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.23);
+}
+
+.pickup-point {
+  width: 100%;
+  margin-bottom: 30px;
+}
