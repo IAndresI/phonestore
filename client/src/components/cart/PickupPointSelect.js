@@ -16,7 +16,7 @@ export default function PickupPointSelect({pickupPoints, defaultPoint}) {
   const [inputValue, setInputValue] = useState(``);
 
   return (
-    <div className="pickup-point">
+    <div className="select-point">
       <Autocomplete
         value={defaultPoint?.address}
         inputValue={defaultPoint?.address || inputValue}

@@ -146,10 +146,17 @@ const onSearch = (text) => {
   }
 }
 
-const setPickupPoint = (id) => {
+const setPickupPoint = (point) => {
   return {
     type: "SET_PICKUP_POINT",
-    payload: id
+    payload: point
+  }
+}
+
+const setDeliveryAddress = (address) => {
+  return {
+    type: "SET_DELIVERY_ADDRESS",
+    payload: address
   }
 }
 
@@ -175,5 +182,6 @@ export {
   onSearch,
   setCart,
   onAddCartTotal,
-  setPickupPoint
+  setPickupPoint,
+  setDeliveryAddress
 };

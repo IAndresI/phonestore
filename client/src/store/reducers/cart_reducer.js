@@ -3,7 +3,8 @@ export default function cartReducer(state, action) {
     cartId: null,
     cartList: [],
     totalPrice: 0,
-    pickupPoint: null
+    pickupPoint: null,
+    deliveryAddress: null
   };
   switch (action.type) {
     case "SET_CART":
@@ -34,7 +35,14 @@ export default function cartReducer(state, action) {
     case "SET_PICKUP_POINT":
       return {
         ...state.cart,
+        deliveryAddress: null,
         pickupPoint: action.payload 
+      }
+    case "SET_DELIVERY_ADDRESS":
+      return {
+        ...state.cart,
+        pickupPoint: null,
+        deliveryAddress: action.payload 
       }
     default:
       return state.cart;

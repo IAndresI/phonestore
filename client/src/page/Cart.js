@@ -9,7 +9,7 @@ import Map from '../components/cart/Map';
 import {getLocations} from '../http/cartAPI'
 import PickupPointSelect from '../components/cart/PickupPointSelect';
 import Spinner from '../components/Spinner';
-import UserAddress from '../components/cart/UserAddress';
+import UserAddress from '../components/cart/UserAddressSelect';
 
 const useStyles = makeStyles(() => ({
   container: {
@@ -162,6 +162,22 @@ const useStyles = makeStyles(() => ({
   map: {
     height: 400,
     width: '100%'
+  },
+  deliveryInfo: {
+    display: "flex",
+    justifyContent: "space-between",
+  },
+  deliveryInfoItem: {
+    margin: "0 10px",
+    "&:first-child": {
+      marginLeft: 0
+    },
+    "&:last-child": {
+      marginRight: 0
+    }
+  },
+  delivery: {
+    width: '100%'
   }
 }));
 
@@ -171,6 +187,7 @@ const Cart = () => {
   const cartItems = useSelector(state => state.cart.cartList)
   const cartTotal = useSelector(state => state.cart.totalPrice)
   const cartPoint = useSelector(state => state.cart.pickupPoint)
+  const deliveryAddress = useSelector(state => state.cart.deliveryAddress)
   const cartId = useSelector(state => state.user.user.cart_id)
 
   const [pickupPoints, setPickupPoints] = useState([]);
@@ -276,10 +293,37 @@ const Cart = () => {
                   )
                   :
                   (
-                    <UserAddress />
+                    <div className={classes.delivery}>
+                      <UserAddress defaultAddress={deliveryAddress} />
+                      <div className={classes.deliveryInfo}>
+                        <TextField
+                          className={classes.deliveryInfoItem}
+                          required
+                          id="outlined-required"
+                          label="Room"
+                          placeholder="Enter Room"
+                          variant="outlined"
+                        />
+                        <TextField
+                          className={classes.deliveryInfoItem}
+                          id="outlined-required"
+                          label="Entrance"
+                          placeholder="Enter Entrance"
+                          variant="outlined"
+                        />
+                        <TextField
+                          className={classes.deliveryInfoItem}
+                          id="outlined-required"
+                          label="Floor"
+                          placeholder="Enter Floor"
+                          variant="outlined"
+                        />
+                      </div>
+                    </div>
                   )
                 }
-
+                <h2>Choose A Payment Type</h2>
+                
               </div>
               <div className={classes.order}>
                 <h2>Total Amount</h2>
