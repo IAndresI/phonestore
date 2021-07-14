@@ -18,7 +18,13 @@ const AppRouter = () => {
   useEffect(() => {
     check().then(data => {  
       dispatch(onLogin(data));
-      getCart(data.cart_id).then(data => dispatch(setCart(data)))
+      getCart(data.cart_id).then(data => {
+        dispatch(setCart(data))
+      })
+    })
+    .catch(error => {
+      const cart = isAuth ? localStorage.getItem('userCart') : localStorage.getItem('cart')
+      dispatch(setCart(JSON.parse(cart) || []))
     }).finally(() => setLoading(false))
     
   }, [])

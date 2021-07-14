@@ -1,4 +1,4 @@
-import { Container, TextField } from '@material-ui/core';
+import { Container, Grid, TextField } from '@material-ui/core';
 import React, { useEffect, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import { search } from '../http/phoneAPI';
@@ -6,7 +6,7 @@ import Phone from '../components/Phone';
 import Spinner from '../components/Spinner';
 import {useDispatch, useSelector} from 'react-redux'
 import { onSearch } from '../store/actions';
-
+import Pagination from '@material-ui/lab/Pagination';
 
 const useStyles = makeStyles(() => ({
   input: {
@@ -18,13 +18,33 @@ const useStyles = makeStyles(() => ({
     display: 'flex',
     flexWrap: "wrap",
     justifyContent: 'center'
-  }
+  },
+  pagination: {
+    display: 'flex',
+    justifyContent: 'center',
+    marginTop: 30,
+    width: '100%'
+  },
 }));
   
 const SearchResult = () => {
+
+  // Phones
   
   const [findingPhone, setFindingPhone] = useState([])
   const [loading, setLoading] = useState(true)
+
+  // Pagination
+
+  const limit = 8
+  const [page, setPage] = useState(1)
+  const [paginationCount, setPaginationCount] = useState(1)
+
+  const paginationChange = (event, value) => {
+    setPage(value)
+  }
+
+  // Store
 
   const dispatch = useDispatch()
   const searchText = useSelector(state => state.search.text)
@@ -36,15 +56,25 @@ const SearchResult = () => {
   }
 
   useEffect(() => {
-    setLoading(true)
-    const timer = setTimeout(async () => {
-      search(searchText.toLowerCase()).then((data) => {
-        setFindingPhone(data);
-      })
+    if(!searchText) {
+      setFindingPhone([])
       setLoading(false)
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [searchText])
+      setPage(1)
+    }
+    else {
+      setLoading(true)
+      setPage(1)
+      const timer = setTimeout(async () => {
+        search(searchText.toLowerCase(),limit, page).then(({count, phones}) => {
+          console.log(count,phones);
+          setFindingPhone(phones);
+          setPaginationCount(Math.ceil(count/limit))
+        })
+        setLoading(false)
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [searchText, page])
 
   return (
     <section className="section">
@@ -56,7 +86,25 @@ const SearchResult = () => {
         <div className={classes.searchResult}>
           {
             loading ? <Spinner />
-            : findingPhone.map(e => <Phone key={e.phone_id} phone={e}/>)
+            : 
+            (
+              <Grid style={{display: 'flex', flexWrap: 'wrap', height: "100%", width:"100%",justifyContent: 'center'}}>
+                {
+                  (() => {
+                    if(!searchText) return <h2>Start Searching!</h2>
+                    else if (findingPhone.length <= 0) return <h2>Nothing Found!</h2>
+                    else return(
+                      <>
+                        {findingPhone.map(e => <Phone key={e.phone_id} phone={e}/>)}
+                        <div className={classes.pagination}>
+                          <Pagination style={{display: paginationCount === 1 ? 'none' : 'block',}} page={page} onChange={paginationChange} defaultPage={page} count={paginationCount} variant="outlined" color="primary" />
+                        </div>
+                      </>
+                    )
+                  })()
+                }
+              </Grid>
+            )
           }
         </div>
       </Container>

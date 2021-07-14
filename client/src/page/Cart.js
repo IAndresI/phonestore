@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { onAddCartTotal, onAddedToCart } from '../store/actions';
+import { shallowEqual, useDispatch, useSelector } from 'react-redux';
+import { onAddCartTotal, onChangeCartItem, setPaymentMethod } from '../store/actions';
 import { Button, Container, FormControlLabel, makeStyles, Radio, RadioGroup, TextField } from '@material-ui/core';
 import {Link} from 'react-router-dom';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import { CHECKOUT_ROUTE } from '../utils/consts';
 import Map from '../components/cart/Map';
-import {getLocations} from '../http/cartAPI'
+import {getLocations, getPaymentMethod} from '../http/cartAPI'
 import PickupPointSelect from '../components/cart/PickupPointSelect';
 import Spinner from '../components/Spinner';
 import UserAddress from '../components/cart/UserAddressSelect';
@@ -71,8 +71,9 @@ const useStyles = makeStyles(() => ({
     marginRight: 50
   },
   order: {
+    marginTop: 72,
     position: "sticky",
-    top: 0,
+    top: 30,
     width: '30%',
     height: "100%",
     backgroundColor: "#ffffff",
@@ -156,7 +157,7 @@ const useStyles = makeStyles(() => ({
     marginBottom: 5,
     paddingTop: 6.5
   },
-  wayToGetRadio: {
+  radio: {
     color: "#3f51b5 !important",
   },
   map: {
@@ -178,30 +179,47 @@ const useStyles = makeStyles(() => ({
   },
   delivery: {
     width: '100%'
+  },
+  paymentMethod: {
+    width: '100%'
   }
 }));
 
 const Cart = () => {
 
   const dispatch = useDispatch()
-  const cartItems = useSelector(state => state.cart.cartList)
+  const cartItems = useSelector(state => state.cart.cartList, shallowEqual)
   const cartTotal = useSelector(state => state.cart.totalPrice)
-  const cartPoint = useSelector(state => state.cart.pickupPoint)
-  const deliveryAddress = useSelector(state => state.cart.deliveryAddress)
-  const cartId = useSelector(state => state.user.user.cart_id)
+  const cartPoint = useSelector(state => state.cart.pickupPoint, shallowEqual)
+  const cartPaymentMethod = useSelector(state => state.cart.paymentMethod)
+  const deliveryAddress = useSelector(state => state.cart.deliveryAddress, shallowEqual)
 
   const [pickupPoints, setPickupPoints] = useState([]);
+  const [paymentMethods, setPaymentMethods] = useState([]);
   const [loading, setLoading] = useState(true)
-  
+
+  const [wayToGet, setWayToGet] = useState('point');
+
   const classes = useStyles();
+
+  const getCartData = async () => {
+    getLocations().then(data => {
+      setPickupPoints(data)
+    })
+    getPaymentMethod().then(data => {
+      setPaymentMethods(data)
+      dispatch(setPaymentMethod(data[0].method_id))
+    })
+  }
 
   useEffect(() => {
     setLoading(true);
-    getLocations().then(data => {
-      setPickupPoints(data)
-      setLoading(false)
-    })
+    getCartData().then(() => setLoading(false))
   }, [])
+
+  const paymentMathodHandleChange = (event) => {
+    dispatch(setPaymentMethod(event.target.value))
+  };
 
   const WayToGetLabel = ({name, price}) => {
     return (
@@ -212,8 +230,6 @@ const Cart = () => {
     )
   }
 
-  const [wayToGet, setWayToGet] = useState('point');
-
   const wayToGetHandleChange = (event) => {
     setWayToGet(event.target.value);
     if(event.target.value==="delivery") dispatch(onAddCartTotal(4))
@@ -222,7 +238,7 @@ const Cart = () => {
 
   const countChange = (e, id) => {
     const count = e.target.value;
-    dispatch(onAddedToCart({phone_id: id, count}))
+    dispatch(onChangeCartItem({phone_id: id, count}))
   }
 
   const formatter = new Intl.NumberFormat('en-US', {
@@ -280,8 +296,8 @@ const Cart = () => {
                 }
                 <h2>Choose A Way To Get</h2>
                 <RadioGroup className={classes.wayToGet} aria-label="Way To Get" name="wayToGet" value={wayToGet} onChange={wayToGetHandleChange}>
-                  <FormControlLabel className={classes.wayToGetItem} style={{borderRight: '1px solid rgba(0, 0, 0, 0.23)'}} value="point" control={<Radio classes={{checked: classes.wayToGetRadio}} />} label={<WayToGetLabel name="Pickup Point" price="Free"/>}/>
-                  <FormControlLabel className={classes.wayToGetItem} value="delivery" control={<Radio classes={{checked: classes.wayToGetRadio}} />} label={<WayToGetLabel name="Courier Delivery" price="$4.00"/>} />
+                  <FormControlLabel className={classes.wayToGetItem} style={{borderRight: '1px solid rgba(0, 0, 0, 0.23)'}} value="point" control={<Radio classes={{checked: classes.radio}} />} label={<WayToGetLabel name="Pickup Point" price="Free"/>}/>
+                  <FormControlLabel className={classes.wayToGetItem} value="delivery" control={<Radio classes={{checked: classes.radio}} />} label={<WayToGetLabel name="Courier Delivery" price="$4.00"/>} />
                 </RadioGroup>
                 {
                   wayToGet==="point" ? 
@@ -322,8 +338,12 @@ const Cart = () => {
                     </div>
                   )
                 }
-                <h2>Choose A Payment Type</h2>
-                
+                <h2>Choose A Payment Method</h2>
+                <RadioGroup className={classes.paymentMethod} aria-label="gender" name="gender1" value={+cartPaymentMethod} onChange={paymentMathodHandleChange}>
+                  {
+                    paymentMethods.map(method => <FormControlLabel key={method.method_id} value={method.method_id} control={<Radio classes={{checked: classes.radio}} />} label={method.name} />)
+                  }
+                </RadioGroup>
               </div>
               <div className={classes.order}>
                 <h2>Total Amount</h2>

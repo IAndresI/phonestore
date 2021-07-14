@@ -1,6 +1,6 @@
 export default function searchReducer(state, action) {
   if(state === undefined) return {
-    text: ""
+    text: null
   };
   switch (action.type) {
     case "SEARCH":

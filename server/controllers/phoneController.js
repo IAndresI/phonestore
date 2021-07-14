@@ -61,10 +61,20 @@ class PhoneController {
 
   async search(req, res,next) {
     try {
-      const {searchText} = req.query;
-      const qeury = await db.query(`select * from get_full_phones WHERE lower(phone_name) LIKE '%${searchText}%' OR lower(manufacturer_name) LIKE '%${searchText}%';`);
-      const data = qeury.rows
-      return res.json(data)
+      const {searchText, limit, page} = req.query;
+      const offset = page*limit-limit;
+      const qeury = await db.query(`
+        select * from get_full_phones 
+        WHERE lower(phone_name) LIKE '%${searchText}%' 
+        OR lower(manufacturer_name) LIKE '%${searchText}%' 
+        LIMIT ${limit} OFFSET ${offset};`);
+      const countQeury = await db.query(`
+        SELECT COUNT(*) FROM get_full_phones 
+        WHERE lower(phone_name) LIKE '%${searchText}%' 
+        OR lower(manufacturer_name) LIKE '%${searchText}%'
+        GROUP BY phone_id;
+      `);
+      return res.json({count: countQeury.rows.length,phones: qeury.rows})
     }
     catch(err) {
       return next(ApiError.badRequest(err.message));

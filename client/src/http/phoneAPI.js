@@ -27,7 +27,7 @@ export const getFilter = async () => {
   return data;
 }
 
-export const search = async (searchText) => {
-  const {data} = await $host.get('api/phone/search/', {params: {searchText}});
+export const search = async (searchText, limit=6, page=1) => {
+  const {data} = await $host.get('api/phone/search/', {params: {searchText, limit, page}});
   return data;
 }

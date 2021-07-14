@@ -13,7 +13,6 @@ const Footer = () => {
       justifyContent: 'center',
       alignItems: 'center',
       padding: "60px 0 20px",
-      background: "#3f51b5",
       background: "linear-gradient(to top, #3f51b5 0.1%, #fafafa 90% ,#fafafa 99%)"
     },
   });

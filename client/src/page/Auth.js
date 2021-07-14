@@ -5,7 +5,6 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
 import Link from '@material-ui/core/Link';
 import Grid from '@material-ui/core/Grid';
-import Box from '@material-ui/core/Box';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import PersonAddIcon from '@material-ui/icons/PersonAdd';
 import Typography from '@material-ui/core/Typography';
@@ -16,25 +15,11 @@ import {Redirect, withRouter} from 'react-router-dom';
 import { LOGIN_ROUTE } from '../utils/consts';
 import {KeyboardDatePicker} from '@material-ui/pickers';
 import { registration, login } from '../http/userAPI';
-import { useForm } from "react-hook-form";
+import { useForm, Controller  } from "react-hook-form";
 import Alert from '@material-ui/lab/Alert';
 import {onLogin, setCart} from '../store/actions'
 import { InputLabel, MenuItem, Select } from '@material-ui/core';
 import { getCart } from '../http/cartAPI';
-
-
-function Copyright() {
-  return (
-    <Typography variant="body2" color="textSecondary" align="center">
-      {'Copyright © '}
-      <Link color="inherit" href="https://material-ui.com/">
-        Your Website
-      </Link>{' '}
-      {new Date().getFullYear()}
-      {'.'}
-    </Typography>
-  );
-}
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -61,7 +46,7 @@ const useStyles = makeStyles((theme) => ({
 
 export default withRouter(function SignIn({location, history}) {
   const [selectedDate, setSelectedDate] = useState(new Date('2006-08-18T21:11:54'));
-  const { register, handleSubmit, formState: { errors } } = useForm();
+  const { control, handleSubmit, formState: { errors } } = useForm();
   const dispatch = useDispatch()
   const [image, setImage] = useState(null)
 
@@ -108,7 +93,33 @@ export default withRouter(function SignIn({location, history}) {
     catch(e) {
       alert(e.response.data.message.detail || e.response.data.message)
     }
-    
+  }
+
+  const errorsShow = (error) => {
+
+    const errorType = Object.keys(error).length !== 0 ? Object.entries(error)[0][0] : null;
+    let errorText = null;
+
+    switch (errorType) {
+      case 'email': 
+        errorText = "Email is required!"
+        break;
+      case 'password': 
+        errorText = "Password is required!"
+        break;
+      case 'first_name': 
+        errorText = "First name is required!"
+        break;
+      case 'last_name': 
+        errorText = "Last name is required!"
+        break;
+      case 'gender': 
+        errorText = "Gender is required!"
+        break;
+      default: return null;
+    }
+
+    return <Alert severity="error">{errorText}</Alert>
   }
 
   if (isAuth) return <Redirect to="/"/> 
@@ -134,67 +145,95 @@ export default withRouter(function SignIn({location, history}) {
           </Typography>
           <form className={classes.form} noValidate onSubmit={handleSubmit(click)}>
             {
-              errors.email || errors.password || errors.last_name || errors.first_name || errors.dob || errors.gender
-                ? <Alert severity="error">{(errors.email && "Email required!") || (errors.password && "Password required!") || (errors.last_name && "Last name required!") || (errors.first_name && "Fast name required!") || (errors.dob && "Entre correct date of birthday!") || (errors.gender && "Gender required!") }</Alert> : null
+              errorsShow(errors)
             }
-            <TextField
-              variant="outlined"
-              margin="normal"
-              required
-              fullWidth
-              id="email"
-              label="Email Address"
+            <Controller
               name="email"
-              autoComplete="email"
-              autoFocus
-              {...register("email", { required: true })}
+              control={control}
+              rules={{ required: true }}
+              defaultValue=""
+              render={({ field }) =><TextField
+                variant="outlined"
+                margin="normal"
+                required
+                fullWidth
+                id="email"
+                label="Email Address"
+                name="email"
+                autoComplete="email"
+                autoFocus
+                {...field}
+              />}
             />
-            <TextField
-              variant="outlined"
-              margin="normal"
-              required
-              fullWidth
+            <Controller
               name="password"
-              label="Password"
-              type="password"
-              id="password"
-              autoComplete="current-password"
-              {...register("password", { required: true })}
+              control={control}
+              rules={{ required: true }}
+              defaultValue=""
+              render={({ field }) =><TextField
+                variant="outlined"
+                margin="normal"
+                required
+                fullWidth
+                name="password"
+                label="Password"
+                type="password"
+                id="password"
+                autoComplete="current-password"
+                {...field}
+              />}
             />
             {
               !isLogin ? (
                 <>
-                  <TextField
-                    variant="outlined"
-                    margin="normal"
-                    required
-                    fullWidth
+                  <Controller
                     name="first_name"
-                    label="Frist Name"
-                    type="text"
-                    id="first_name"
-                    {...register("first_name", { required: true })}
+                    rules={{ required: true }}
+                    control={control}
+                    defaultValue=""
+                    render={({ field }) =><TextField
+                      variant="outlined"
+                      margin="normal"
+                      required
+                      fullWidth
+                      name="first_name"
+                      label="Frist Name"
+                      type="text"
+                      id="first_name"
+                      {...field}
+                    />}
                   />
-                  <TextField
-                    variant="outlined"
-                    margin="normal"
-                    required
-                    fullWidth
+                  <Controller
                     name="last_name"
-                    label="Last Name"
-                    type="text"
-                    id="last_name"
-                    {...register("last_name", { required: true })}
+                    rules={{ required: true }}
+                    control={control}
+                    defaultValue=""
+                    render={({ field }) =><TextField
+                      variant="outlined"
+                      margin="normal"
+                      required
+                      fullWidth
+                      name="last_name"
+                      label="Last Name"
+                      type="text"
+                      id="last_name"
+                      {...field}
+                    />}
                   />
-                  <TextField
-                    variant="outlined"
-                    margin="normal"
-                    fullWidth
+                  <Controller
                     name="tel"
-                    label="Phone"
-                    type="tel"
-                    id="tel"
-                    {...register("phone")}
+                    control={control}
+                    defaultValue=""
+                    render={({ field }) =><TextField
+                      variant="outlined"
+                      margin="normal"
+                      fullWidth
+                      name="tel"
+                      label="Phone"
+                      type="tel"
+                      id="tel"
+                      {...field}
+                    />}
                   />
                   <KeyboardDatePicker
                     margin="normal"
@@ -209,21 +248,26 @@ export default withRouter(function SignIn({location, history}) {
                     }}
                   />
                   <InputLabel id="demo-simple-select-label">Gender</InputLabel>
-                  <Select
-                    style={{width: "100%"}}
-                    labelId="demo-simple-select-label"
-                    id="demo-simple-select"
-                    {...register("gender", { required: true })}
-                  >
-                    <MenuItem value="m">M</MenuItem>
-                    <MenuItem value="f">F</MenuItem>
-                    <MenuItem value="bi">BI</MenuItem>
-                    <MenuItem value="trans">TRANS</MenuItem>
-                    <MenuItem value="adg">ADG</MenuItem>
-                    <MenuItem value="neut">NEUT</MenuItem>
-                    <MenuItem value="fem">FEM</MenuItem>
-                    <MenuItem value="agen">AGEN</MenuItem>
-                  </Select>
+                  <Controller
+                    name="gender"
+                    control={control}
+                    rules={{ required: true }}
+                    render={({ field }) => <Select
+                      style={{width: "100%"}}
+                      labelId="demo-simple-select-label"
+                      id="demo-simple-select"
+                      {...field}
+                    >
+                      <MenuItem value="m">M</MenuItem>
+                      <MenuItem value="f">F</MenuItem>
+                      <MenuItem value="bi">BI</MenuItem>
+                      <MenuItem value="trans">TRANS</MenuItem>
+                      <MenuItem value="adg">ADG</MenuItem>
+                      <MenuItem value="neut">NEUT</MenuItem>
+                      <MenuItem value="fem">FEM</MenuItem>
+                      <MenuItem value="agen">AGEN</MenuItem>
+                    </Select>}
+                  />
                   <TextField
                     inputProps={{ accept: ".jpg,.jpeg,.png,.webp" }}
                     className={classes.file}
@@ -279,9 +323,6 @@ export default withRouter(function SignIn({location, history}) {
             </Grid>
           </form>
         </div>
-        <Box mt={8}>
-          <Copyright />
-        </Box>
       </Container>
     </section>
   );

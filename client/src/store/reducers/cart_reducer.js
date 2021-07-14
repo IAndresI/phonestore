@@ -4,7 +4,8 @@ export default function cartReducer(state, action) {
     cartList: [],
     totalPrice: 0,
     pickupPoint: null,
-    deliveryAddress: null
+    deliveryAddress: null,
+    paymentMethod: null
   };
   switch (action.type) {
     case "SET_CART":
@@ -13,7 +14,7 @@ export default function cartReducer(state, action) {
         cartList: action.payload,
         totalPrice: getTotalPrice(action.payload) 
       }
-    case "ADD_CART_ITEM":
+    case "CHANGE_CART_ITEM":
       return updateCart(action.payload, state);
     case "DELETE_ALL_CART_ITEM":
       const cart = [...state.cart.cartList];
@@ -44,6 +45,11 @@ export default function cartReducer(state, action) {
         pickupPoint: null,
         deliveryAddress: action.payload 
       }
+    case "SET_PAYMENT_METHOD":
+      return {
+        ...state.cart,
+        paymentMethod: action.payload 
+      }
     default:
       return state.cart;
   }
@@ -53,38 +59,42 @@ function getTotalPrice(cart) {
   return cart.reduce((acc, curr) => acc+parseFloat(curr.price.slice(1, curr.price.length).replace(",",""))*curr.count,0)
 }
 
+function setLocalStorageCart(state, newCart) {
+  state.user.isAuth ? localStorage.setItem("userCart", JSON.stringify(newCart)) : localStorage.setItem("cart", JSON.stringify(newCart))
+}
+
 function updateCart(payload, state) {
 
   const stateCartList = state.cart.cartList;
   const phoneInCart = stateCartList.find(e => e.phone_id === payload.phone_id);
+  let newCart;
 
   if(phoneInCart) {
     const oldCartItem = {...phoneInCart, count: payload.count || phoneInCart.count};
     const oldIndex = stateCartList.findIndex(e => e.phone_id===oldCartItem.phone_id)
-    const newCartList = [...stateCartList.slice(0,oldIndex),oldCartItem,...stateCartList.slice(oldIndex+1,stateCartList.length+1)]
+    newCart = [...stateCartList.slice(0,oldIndex),oldCartItem,...stateCartList.slice(oldIndex+1,stateCartList.length+1)]
     if(oldCartItem.count < 1) {
-      const cart = [...newCartList];
-      cart.splice(oldIndex, 1);
-      localStorage.setItem("cart", JSON.stringify(cart))
+      newCart.splice(oldIndex, 1);
+      setLocalStorageCart(state, newCart)
       return {
         ...state.cart,
-        cartList: cart,
-        totalPrice: getTotalPrice(cart) 
+        cartList: newCart,
+        totalPrice: getTotalPrice(newCart) 
       }
     }
     else {
-      localStorage.setItem("cart", JSON.stringify(newCartList))
+      setLocalStorageCart(state, newCart)
       return {
         ...state.cart,
-        cartList: newCartList,
-        totalPrice: getTotalPrice(newCartList) 
+        cartList: newCart,
+        totalPrice: getTotalPrice(newCart) 
       }
     }
   }
   else {
     const newCartItem = {...payload, count: 1};
-    const newCart = [...state.cart.cartList, newCartItem];
-    localStorage.setItem("cart", JSON.stringify(newCart))
+    newCart = [...stateCartList, newCartItem];
+    setLocalStorageCart(state, newCart)
     return {
       ...state.cart,
       cartList: newCart,

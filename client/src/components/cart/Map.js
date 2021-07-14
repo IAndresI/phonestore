@@ -1,5 +1,5 @@
 import React from 'react';
-import {GoogleMap, withScriptjs, withGoogleMap} from 'react-google-maps';
+import {GoogleMap, withGoogleMap} from 'react-google-maps';
 import Marker from 'react-google-maps/lib/components/Marker';
 import { useDispatch } from 'react-redux';
 import { setPickupPoint } from '../../store/actions';

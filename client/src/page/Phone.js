@@ -8,7 +8,7 @@ import AddShoppingCartIcon from '@material-ui/icons/AddShoppingCart';
 import { useParams } from 'react-router-dom';
 import { getOnePhones } from '../http/phoneAPI';
 import { useDispatch, useSelector } from 'react-redux';
-import { onAddedToCart } from '../store/actions';
+import { onChangeCartItem } from '../store/actions';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 
 const useStyles = makeStyles({
@@ -30,7 +30,7 @@ export default function Phone() {
 
   const isInCart = cartList.find(e => e.phone_id === phone?.phone_id);
 
-  const removeFromCart = (phone) => dispatch(onAddedToCart({
+  const removeFromCart = (phone) => dispatch(onChangeCartItem({
     ...phone,
     count: -1
   }))
@@ -76,7 +76,7 @@ export default function Phone() {
           (
             <Button
             onClick={() => {
-              dispatch(onAddedToCart({phone_id: phone.phone_id, name: phone.name, price: phone.price, image: phone.image}));
+              dispatch(onChangeCartItem({phone_id: phone.phone_id, name: phone.name, price: phone.price, image: phone.image}));
             }}
             style={{marginBottom: 30}}
             variant="contained"

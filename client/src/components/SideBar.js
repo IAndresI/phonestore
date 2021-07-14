@@ -20,7 +20,9 @@ import PersonAddIcon from '@material-ui/icons/PersonAdd';
 import LockOpenIcon from '@material-ui/icons/LockOpen';
 import { Link } from 'react-router-dom';
 import {CART_ROUTE, SHOP_ROUTE, LOGIN_ROUTE, REGISTRATION_ROUTE, PROFILE_ROUTE, SEARCH_ROUTE, HOME_ROUTE} from '../utils/consts'
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { onLogout } from '../store/actions';
+import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 
 const useStyles = makeStyles({
   list: {
@@ -46,6 +48,7 @@ export default function SideBar({isAuth, cartItemsCount}) {
   const classes = useStyles();
   const [state, setState] = React.useState(false);
   const user = useSelector(state => state.user.user)
+  const dispatch = useDispatch()
 
   const toggleDrawer = (open) => (event) => {
     if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
@@ -92,28 +95,41 @@ export default function SideBar({isAuth, cartItemsCount}) {
         {
           isAuth ?
           (
-            [['Profile', `${PROFILE_ROUTE}/${user.id}`], ['Cart', `${CART_ROUTE}/${user.cart_id}`]].map((item, index) => (
-              <Link to={item[1]} key={item[0]} className={classes.link}>
-                <ListItem button>
-                  <ListItemIcon>
-                  {
-                    (() => {
-                      switch(item[0]) {
-                        case 'Profile': return <AccountCircleIcon />
-                        case 'Cart': return (
-                          <Badge badgeContent={cartItemsCount} color="secondary">
-                            <ShoppingCartIcon />
-                          </Badge>
-                        )
-                        default: return <HomeIcon />
+            <>
+              {
+                [['Profile', `${PROFILE_ROUTE}/${user.id}`], ['Cart', `${CART_ROUTE}/${user.cart_id}`]].map((item, index) => (
+                  <Link to={item[1]} key={item[0]} className={classes.link}>
+                    <ListItem button>
+                      <ListItemIcon>
+                      {
+                        (() => {
+                          switch(item[0]) {
+                            case 'Profile': return <AccountCircleIcon />
+                            case 'Cart': return (
+                              <Badge badgeContent={cartItemsCount} color="secondary">
+                                <ShoppingCartIcon />
+                              </Badge>
+                            )
+                            default: return <HomeIcon />
+                          }
+                        })()
                       }
-                    })()
-                  }
+                      </ListItemIcon>
+                      <ListItemText primary={item[0]} />
+                    </ListItem>
+                  </Link>
+                ))
+              }
+              <Link to="/" className={classes.link}>
+                <ListItem onClick={() => dispatch(onLogout())} button>
+                  <ListItemIcon>
+                    <ExitToAppIcon />
                   </ListItemIcon>
-                  <ListItemText primary={item[0]} />
+                  <ListItemText primary="Logout" />
                 </ListItem>
               </Link>
-            ))
+            </>
+            
           )
           :
           (

@@ -8,7 +8,7 @@ import {Link } from 'react-router-dom'
 import { PHONE_ROUTE } from '../utils/consts';
 import { Button } from '@material-ui/core';
 import { useDispatch, useSelector } from 'react-redux';
-import { onAddedToCart } from '../store/actions';
+import { onChangeCartItem } from '../store/actions';
 
 const useStyles = makeStyles({
   root: {
@@ -98,14 +98,14 @@ export default function Phone({phone}) {
   const inCart=phonesInCart.find(e => e.phone_id===phone_id)
 
   const imagePath = `${process.env.REACT_APP_API_URL}/${image ? image : "phone.jpg"}`
-  const addToCart = () => dispatch(onAddedToCart({
+  const addToCart = () => dispatch(onChangeCartItem({
     phone_id,
     name,
     price,
     image
   }))
 
-  const removeFromCart = () => dispatch(onAddedToCart({
+  const removeFromCart = () => dispatch(onChangeCartItem({
     phone_id,
     name,
     price,

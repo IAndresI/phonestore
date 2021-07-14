@@ -1,6 +1,6 @@
-const onAddedToCart = (phone) => {
+const onChangeCartItem = (phone) => {
   return {
-    type: "ADD_CART_ITEM",
+    type: "CHANGE_CART_ITEM",
     payload: phone
   };
 };
@@ -77,7 +77,6 @@ const onLogin = (user) => {
 
 const onLogout = () => {
   localStorage.removeItem("token");
-  localStorage.removeItem("cart");
   return {
     type: "LOGOUT",
   };
@@ -160,8 +159,15 @@ const setDeliveryAddress = (address) => {
   }
 }
 
+const setPaymentMethod = (method) => {
+  return {
+    type: "SET_PAYMENT_METHOD",
+    payload: method
+  }
+}
+
 export {
-  onAddedToCart,
+  onChangeCartItem,
   onRemoveItemFromCart,
   onRemoveItemAllFromCart,
   onManufacturerChange,
@@ -183,5 +189,6 @@ export {
   setCart,
   onAddCartTotal,
   setPickupPoint,
-  setDeliveryAddress
+  setDeliveryAddress,
+  setPaymentMethod
 };

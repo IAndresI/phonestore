@@ -3,6 +3,7 @@ import { fade, makeStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
+import Icon from '@material-ui/core/Icon';
 import Typography from '@material-ui/core/Typography';
 import InputBase from '@material-ui/core/InputBase';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -19,6 +20,7 @@ import Badge from '@material-ui/core/Badge';
 import { SEARCH_ROUTE } from '../utils/consts';
 import {onSearch} from '../store/actions'
 import SideBar from './SideBar';
+import PersonAddIcon from '@material-ui/icons/PersonAdd';
 
 const useStyles = makeStyles((theme) => ({
   grow: {
@@ -94,6 +96,11 @@ const useStyles = makeStyles((theme) => ({
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
     }),
+  },
+  icon: {
+    overflow: 'visible',
+    width: '40px',
+    display: 'flex',
   }
 }));
 
@@ -105,8 +112,8 @@ export default withRouter(function PrimarySearchAppBar({history}) {
   const cartItemsCount = useSelector((state) => state.cart.cartList, shallowEqual)
 
   const classes = useStyles();
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
 
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
@@ -145,7 +152,7 @@ export default withRouter(function PrimarySearchAppBar({history}) {
       }}>Profile</MenuItem>
       <MenuItem onClick={() => {
         dispatch(onLogout());
-        dispatch(setCart([]));
+        dispatch(setCart(JSON.parse(localStorage.getItem('cart') || [])))
         handleMenuClose();
         history.push("/");
       }}>Log Out</MenuItem>
@@ -168,18 +175,20 @@ export default withRouter(function PrimarySearchAppBar({history}) {
         isAuth ? (
           <div style={{marginLeft: "auto"}}>
             <MenuItem onClick={handleProfileMenuOpen}>
-              <IconButton
+              <Icon
+                className={classes.icon}
                 aria-label="account of current user"
                 aria-controls="primary-search-account-menu"
                 aria-haspopup="true"
                 color="inherit"
               >
                 <AccountCircle />
-              </IconButton>
+              </Icon>
               <p>Profile</p>
             </MenuItem>
-            <MenuItem onClick={() => history.push("/cart/"+cart_id)}>
-              <IconButton 
+            <MenuItem onClick={() => isAuth ? history.push("/cart/"+cart_id) : history.push("/cart")}>
+              <Icon
+                className={classes.icon}
                 aria-controls="primary-search-account-menu"
                 aria-haspopup="true"
                 aria-label="show" 
@@ -187,23 +196,50 @@ export default withRouter(function PrimarySearchAppBar({history}) {
                 <Badge badgeContent={cartItemsCount.length} color="secondary">
                   <ShoppingCartIcon />
                 </Badge>
-              </IconButton>
+              </Icon>
               <p>Cart</p>
             </MenuItem>
           </div>
         )
         :
         (
-          <MenuItem onClick={handleProfileMenuOpen}>
-            <Button color="inherit"
-              onClick={() => history.push("/login")}>Login
-            </Button>
-            <Button 
-              onClick={() => history.push("/registration")}
-              color="inherit">
-              Register
-            </Button>
-          </MenuItem>
+          <div>
+            <MenuItem onClick={() => history.push("/login")}>
+              <Icon
+                className={classes.icon}
+                aria-controls="primary-search-account-menu"
+                aria-haspopup="true"
+                aria-label="show" 
+                color="inherit">
+                <AccountCircle />
+              </Icon>
+              <p>Login</p>
+            </MenuItem>
+            <MenuItem onClick={() => history.push("/registration")}>
+              <Icon 
+                className={classes.icon}
+                aria-controls="primary-search-account-menu"
+                aria-haspopup="true"
+                aria-label="show" 
+                color="inherit">
+                <PersonAddIcon />
+              </Icon>
+              <p>Register</p>
+            </MenuItem>
+            <MenuItem onClick={() => isAuth ? history.push("/cart/"+cart_id) : history.push("/cart")}>
+              <Icon
+                className={classes.icon}
+                aria-controls="primary-search-account-menu"
+                aria-haspopup="true"
+                aria-label="show" 
+                color="inherit">
+                <Badge badgeContent={cartItemsCount.length} color="secondary">
+                  <ShoppingCartIcon />
+                </Badge>
+              </Icon>
+              <p>Cart</p>
+            </MenuItem>
+          </div>
         )
       }
       
@@ -243,16 +279,15 @@ export default withRouter(function PrimarySearchAppBar({history}) {
             />
           </form>
           <div className={classes.grow} />
-          <IconButton onClick={() => history.push("/cart/"+cart_id)}  aria-label="show" color="inherit">
-            <Badge badgeContent={cartItemsCount.length} color="secondary">
-              <ShoppingCartIcon />
-            </Badge>
-          </IconButton>
           {
             isAuth ? (
               <>
                 <div className={classes.sectionDesktop}>
-                  
+                  <IconButton onClick={() => history.push("/cart/"+cart_id)}  aria-label="show" color="inherit">
+                    <Badge badgeContent={cartItemsCount.length} color="secondary">
+                      <ShoppingCartIcon />
+                    </Badge>
+                  </IconButton>
                   <IconButton
                     edge="end"
                     aria-label="account of current user"
@@ -283,6 +318,11 @@ export default withRouter(function PrimarySearchAppBar({history}) {
             (
               <>
                 <div className={classes.sectionDesktop}>
+                  <IconButton onClick={() => history.push("/cart")}  aria-label="show" color="inherit">
+                    <Badge badgeContent={cartItemsCount.length} color="secondary">
+                      <ShoppingCartIcon />
+                    </Badge>
+                  </IconButton>
                   <Button color="inherit"
                     onClick={() => history.push("/login")}>Login</Button>
                   <Button 

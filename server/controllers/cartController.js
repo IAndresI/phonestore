@@ -41,6 +41,17 @@ class CartController {
     }
   }
 
+  async getPaymentMethod(req, res, next) {
+    try {
+      const query = await db.query('SELECT * FROM payment_method');
+      const data = query.rows;
+      return res.json(data)
+    }
+    catch(err) {
+      return next(ApiError.badRequest(err.message));
+    }
+  }
+
   async getLocations(req, res, next) {
     try {
       const query = await db.query('SELECT * FROM pickup_point');

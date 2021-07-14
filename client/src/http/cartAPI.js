@@ -22,3 +22,8 @@ export const getLocations = async () => {
   const {data} = await $host.get('api/cart/locations');
   return data;
 }
+
+export const getPaymentMethod = async () => {
+  const {data} = await $host.get('api/cart/payment_method');
+  return data;
+}

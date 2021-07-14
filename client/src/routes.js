@@ -26,6 +26,10 @@ export const authRoutes = [
 ];
 export const publicRoutes = [
   {
+    path: CART_ROUTE,
+    Component: Cart
+  },
+  {
     path: PHONE_ROUTE+"/:id",
     Component: Phone
   },
