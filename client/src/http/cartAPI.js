@@ -27,3 +27,8 @@ export const getPaymentMethod = async () => {
   const {data} = await $host.get('api/cart/payment_method');
   return data;
 }
+
+export const addPayPal = async () => {
+  const {data} = await $host.get('api/paypal/config');
+  return data;
+}

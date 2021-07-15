@@ -6,10 +6,11 @@ import {Link} from 'react-router-dom';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import { CHECKOUT_ROUTE } from '../utils/consts';
 import Map from '../components/cart/Map';
-import {getLocations, getPaymentMethod} from '../http/cartAPI'
+import {addPayPal, getLocations, getPaymentMethod} from '../http/cartAPI'
 import PickupPointSelect from '../components/cart/PickupPointSelect';
 import Spinner from '../components/Spinner';
 import UserAddress from '../components/cart/UserAddressSelect';
+import { PayPalButton } from "react-paypal-button-v2";
 
 const useStyles = makeStyles(() => ({
   container: {
@@ -95,7 +96,11 @@ const useStyles = makeStyles(() => ({
   },
   checkout: {
     backgroundColor: "#3f51b5",
+    width: '100%',
     borderRadius: 10,
+    textAlign: 'center',
+    fontSize: 18,
+    fontWeight: 500,
     padding: '15px 30px',
     color: "#ffffff",
     transition: "all 500ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;",
@@ -103,6 +108,7 @@ const useStyles = makeStyles(() => ({
     textTransform: "none",
     border: '1px solid #3f51b5',
     "&:hover, &:focus": {
+      outline: "transparent",
       color: "#3f51b5",
       backgroundColor: "#ffffff",
     },
@@ -181,6 +187,10 @@ const useStyles = makeStyles(() => ({
     width: '100%'
   },
   paymentMethod: {
+    width: '100%',
+    marginBottom: 30
+  },
+  paypal: {
     width: '100%'
   }
 }));
@@ -197,6 +207,7 @@ const Cart = () => {
   const [pickupPoints, setPickupPoints] = useState([]);
   const [paymentMethods, setPaymentMethods] = useState([]);
   const [loading, setLoading] = useState(true)
+  const [paypalSDK, setPaypalSDK] = useState(false)
 
   const [wayToGet, setWayToGet] = useState('point');
 
@@ -210,6 +221,16 @@ const Cart = () => {
       setPaymentMethods(data)
       dispatch(setPaymentMethod(data[0].method_id))
     })
+    addPayPal().then(clientId => {
+      const script = document.createElement('script');
+      script.type='text/javascript';
+      script.async = true;
+      script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}`;
+      script.onload = () => {
+        setPaypalSDK(true)
+      };
+      document.body.appendChild(script)
+    })
   }
 
   useEffect(() => {
@@ -217,6 +238,21 @@ const Cart = () => {
     getCartData().then(() => setLoading(false))
   }, [])
 
+  // PayPal Payment
+
+  const successPaymentHandler = (details, data) => {
+    alert("Transaction completed by " + details.payer.name.given_name);
+    alert(data.orderID);
+    console.log(details);
+    console.log(data);
+  }
+
+  const failurePaymentHandler = (error) => {
+    alert(error);
+  }
+
+  // End PayPal Payment
+  
   const paymentMathodHandleChange = (event) => {
     dispatch(setPaymentMethod(event.target.value))
   };
@@ -344,6 +380,25 @@ const Cart = () => {
                     paymentMethods.map(method => <FormControlLabel key={method.method_id} value={method.method_id} control={<Radio classes={{checked: classes.radio}} />} label={method.name} />)
                   }
                 </RadioGroup>
+                {
+                  cartPaymentMethod+"" === "2" ? 
+                    paypalSDK ?
+                    (
+                      <div className={classes.paypal}>
+                        <PayPalButton
+                          amount={cartTotal}
+                          onSuccess={successPaymentHandler}
+                          onError={failurePaymentHandler}
+                        />
+                      </div>
+                    ) 
+                    : <Spinner />
+                  : (
+                    <Button className={classes.checkout}>
+                      Create Order
+                    </Button>
+                  )
+                }
               </div>
               <div className={classes.order}>
                 <h2>Total Amount</h2>
