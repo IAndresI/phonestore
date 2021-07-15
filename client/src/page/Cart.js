@@ -231,6 +231,11 @@ const Cart = () => {
       };
       document.body.appendChild(script)
     })
+    const script = document.createElement('script');
+    script.type='text/javascript';
+    script.async = false;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.REACT_APP_API_KEY}&libraries=geometry,drawing,places`;
+    document.body.appendChild(script)
   }
 
   useEffect(() => {
