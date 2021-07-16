@@ -4,7 +4,7 @@ import Marker from 'react-google-maps/lib/components/Marker';
 import { useDispatch } from 'react-redux';
 import { setPickupPoint } from '../../store/actions';
 
-const Map = ({pickupPoints,selectedPointCoordinates}) => {
+const Map = ({pickupPoints,selectedPointCoordinates, setValue}) => {
 
   const dispatch = useDispatch()
 
@@ -16,7 +16,10 @@ const Map = ({pickupPoints,selectedPointCoordinates}) => {
             <Marker 
               key={point.pickup_point_id} 
               position={{lat: point.coordinates[0], lng: point.coordinates[1]}}
-              onClick={() => dispatch(setPickupPoint(point))}/>
+              onClick={() => {
+                setValue("point",point.address)
+                dispatch(setPickupPoint(point))
+              }}/>
           ))
         }
       </GoogleMap>

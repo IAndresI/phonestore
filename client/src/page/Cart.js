@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import { onAddCartTotal, onChangeCartItem, setPaymentMethod } from '../store/actions';
-import { Button, Container, FormControlLabel, makeStyles, Radio, RadioGroup, TextField } from '@material-ui/core';
+import { Button, Container, Fade, FormControlLabel, makeStyles, Radio, RadioGroup, TextField, Snackbar } from '@material-ui/core';
 import {Link} from 'react-router-dom';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import { CHECKOUT_ROUTE } from '../utils/consts';
@@ -9,8 +9,10 @@ import Map from '../components/cart/Map';
 import {addPayPal, getLocations, getPaymentMethod} from '../http/cartAPI'
 import PickupPointSelect from '../components/cart/PickupPointSelect';
 import Spinner from '../components/Spinner';
-import UserAddress from '../components/cart/UserAddressSelect';
+import UserAddressSelect from '../components/cart/UserAddressSelect';
 import { PayPalButton } from "react-paypal-button-v2";
+import { Controller, useForm } from 'react-hook-form';
+import MuiAlert from '@material-ui/lab/Alert';
 
 const useStyles = makeStyles(() => ({
   container: {
@@ -170,27 +172,24 @@ const useStyles = makeStyles(() => ({
     height: 400,
     width: '100%'
   },
-  deliveryInfo: {
-    display: "flex",
-    justifyContent: "space-between",
-  },
-  deliveryInfoItem: {
-    margin: "0 10px",
-    "&:first-child": {
-      marginLeft: 0
-    },
-    "&:last-child": {
-      marginRight: 0
-    }
-  },
-  delivery: {
-    width: '100%'
-  },
   paymentMethod: {
     width: '100%',
     marginBottom: 30
   },
-  paypal: {
+  paypalButton: {
+    width: '100%'
+  },
+  userData: {
+    display: 'flex',
+    justifyContent: 'center',
+    flexDirection: 'column',
+    width: '100%'
+  },
+  userDataInput: {
+    width: '100%',
+    marginBottom: 30
+  },
+  form: {
     width: '100%'
   }
 }));
@@ -198,20 +197,87 @@ const useStyles = makeStyles(() => ({
 const Cart = () => {
 
   const dispatch = useDispatch()
+
+  // Cart Info
   const cartItems = useSelector(state => state.cart.cartList, shallowEqual)
   const cartTotal = useSelector(state => state.cart.totalPrice)
   const cartPoint = useSelector(state => state.cart.pickupPoint, shallowEqual)
   const cartPaymentMethod = useSelector(state => state.cart.paymentMethod)
   const deliveryAddress = useSelector(state => state.cart.deliveryAddress, shallowEqual)
 
+  // User Info
+
+  const isAuth = useSelector(state => state.user.isAuth)
+
+  // Inputs
+
   const [pickupPoints, setPickupPoints] = useState([]);
   const [paymentMethods, setPaymentMethods] = useState([]);
-  const [loading, setLoading] = useState(true)
-  const [paypalSDK, setPaypalSDK] = useState(false)
-
   const [wayToGet, setWayToGet] = useState('point');
 
+  // Loading Scripts And Queries
+
+  const [loading, setLoading] = useState(true)
+  const [paypalSDK, setPaypalSDK] = useState(!!document.querySelector('#paypal-button'))
+  const [googleSDK, setGoogleSDK] = useState(!!document.querySelector('#googlemaps'))
+
+  // Snack Bar
+
+  const [snackBar, setSnackBar] = useState({
+    open: false,
+    Transition: Fade,
+  });
+
+  const getErrorText = (errors) => {
+    const errorType = Object.keys(errors).length !== 0 ? Object.entries(errors)[0][0] : null;
+
+    switch (errorType) {
+      case "fio":
+        return "Enter your last and first names!"
+      case "email":
+        return "Enter email!"
+      case "delivery-avenue":
+        return "Enter correct delivery address!"
+      case "room":
+        return "Enter your room number!"
+      case "point":
+        return "Enter pick-up point address!"
+      default: return "";
+    }
+  }
+
+  const snackBarHandleClick = (Transition) => () => {
+    setSnackBar({
+      open: true,
+      Transition,
+    });
+  };
+
+  const snackBarHandleClose = () => {
+    setSnackBar({
+      ...snackBar,
+      open: false,
+    });
+  };
+
+  function Alert(props) {
+    return <MuiAlert elevation={6} variant="filled" {...props} />;
+  }
+
+  // Form Controll
+
+  const { control, handleSubmit, setValue, formState: { errors } } = useForm();
+
+  const createOrder = (data, e) => {
+    e.preventDefault();
+    console.log(data);
+  }
+
+  // Material UI Styles
+
   const classes = useStyles();
+
+  // Upload Data From Server
 
   const getCartData = async () => {
     getLocations().then(data => {
@@ -222,21 +288,23 @@ const Cart = () => {
       dispatch(setPaymentMethod(data[0].method_id))
     })
     addPayPal().then(clientId => {
-      const script = document.createElement('script');
-      script.type='text/javascript';
-      script.async = true;
-      script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}`;
-      script.onload = () => {
-        setPaypalSDK(true)
-      };
-      document.body.appendChild(script)
+      if(! document.querySelector('#paypal-button')) {
+        const script = document.createElement('script');
+        script.type='text/javascript';
+        script.id='paypal-button';
+        script.async = true;
+        script.src = `https://www.paypal.com/sdk/js?&client-id=${clientId}`;
+        script.setAttribute("data-namespace", "paypal_sdk")
+        script.onload = () => {
+          setPaypalSDK(true)
+        };
+        document.head.insertAdjacentElement("afterbegin", script);
+      }
     })
-    const script = document.createElement('script');
-    script.type='text/javascript';
-    script.async = false;
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.REACT_APP_API_KEY}&libraries=geometry,drawing,places`;
-    document.body.appendChild(script)
+    addGoogleAPIs();
   }
+
+  // ComponentDidMount
 
   useEffect(() => {
     setLoading(true);
@@ -257,10 +325,30 @@ const Cart = () => {
   }
 
   // End PayPal Payment
+
+  // Google maps and autocomplete 
+
+  const addGoogleAPIs = () => {
+    if(!document.querySelector('#googlemaps')) {
+      const script = document.createElement('script');
+      script.id='googlemaps';
+      script.type='text/javascript';
+      script.async = false;
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.REACT_APP_API_KEY}&libraries=geometry,drawing,places`;
+      script.onload = () => {
+        setGoogleSDK(true)
+      };
+      document.head.insertAdjacentElement("afterbegin", script);
+    }
+  }
+
+  // End Google maps and autocomplete 
   
   const paymentMathodHandleChange = (event) => {
     dispatch(setPaymentMethod(event.target.value))
   };
+
+  // Way To Get RadioGroup
 
   const WayToGetLabel = ({name, price}) => {
     return (
@@ -277,17 +365,25 @@ const Cart = () => {
     else dispatch(onAddCartTotal(-4))
   };
 
+  // Change Phone In Cart Count
+
   const countChange = (e, id) => {
     const count = e.target.value;
     dispatch(onChangeCartItem({phone_id: id, count}))
   }
+
+  // Format Price Data From DB
 
   const formatter = new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
   });
 
+  // Loading Indicator
+
   if(loading) return <Spinner />
+
+  console.log(control);
 
   return (
     <section className="section">
@@ -335,75 +431,116 @@ const Cart = () => {
                     )
                   })
                 }
-                <h2>Choose A Way To Get</h2>
-                <RadioGroup className={classes.wayToGet} aria-label="Way To Get" name="wayToGet" value={wayToGet} onChange={wayToGetHandleChange}>
-                  <FormControlLabel className={classes.wayToGetItem} style={{borderRight: '1px solid rgba(0, 0, 0, 0.23)'}} value="point" control={<Radio classes={{checked: classes.radio}} />} label={<WayToGetLabel name="Pickup Point" price="Free"/>}/>
-                  <FormControlLabel className={classes.wayToGetItem} value="delivery" control={<Radio classes={{checked: classes.radio}} />} label={<WayToGetLabel name="Courier Delivery" price="$4.00"/>} />
-                </RadioGroup>
-                {
-                  wayToGet==="point" ? 
-                  (
-                    <>
-                      <PickupPointSelect defaultPoint={cartPoint} pickupPoints={pickupPoints}/>
-                      <Map defaultPoint={cartPoint} selectedPointCoordinates={{lat:cartPoint?.coordinates[0] || 59.869464, lng:cartPoint?.coordinates[1] || 30.34734}} pickupPoints={pickupPoints}/>
-                    </> 
-                  )
-                  :
-                  (
-                    <div className={classes.delivery}>
-                      <UserAddress defaultAddress={deliveryAddress} />
-                      <div className={classes.deliveryInfo}>
-                        <TextField
-                          className={classes.deliveryInfoItem}
-                          required
-                          id="outlined-required"
-                          label="Room"
-                          placeholder="Enter Room"
-                          variant="outlined"
-                        />
-                        <TextField
-                          className={classes.deliveryInfoItem}
-                          id="outlined-required"
-                          label="Entrance"
-                          placeholder="Enter Entrance"
-                          variant="outlined"
-                        />
-                        <TextField
-                          className={classes.deliveryInfoItem}
-                          id="outlined-required"
-                          label="Floor"
-                          placeholder="Enter Floor"
-                          variant="outlined"
-                        />
-                      </div>
-                    </div>
-                  )
-                }
-                <h2>Choose A Payment Method</h2>
-                <RadioGroup className={classes.paymentMethod} aria-label="gender" name="gender1" value={+cartPaymentMethod} onChange={paymentMathodHandleChange}>
+                <form className={classes.form} onSubmit={handleSubmit(createOrder)}>
                   {
-                    paymentMethods.map(method => <FormControlLabel key={method.method_id} value={method.method_id} control={<Radio classes={{checked: classes.radio}} />} label={method.name} />)
-                  }
-                </RadioGroup>
-                {
-                  cartPaymentMethod+"" === "2" ? 
-                    paypalSDK ?
+                    !isAuth ? 
                     (
-                      <div className={classes.paypal}>
-                        <PayPalButton
-                          amount={cartTotal}
-                          onSuccess={successPaymentHandler}
-                          onError={failurePaymentHandler}
-                        />
-                      </div>
-                    ) 
-                    : <Spinner />
-                  : (
-                    <Button className={classes.checkout}>
-                      Create Order
-                    </Button>
-                  )
-                }
+                      <>
+                        <h2>Enter Your Details</h2>
+                        <div className={classes.userData}>
+                          <Controller
+                            name="fio"
+                            control={control}
+                            rules={{ required: true }}
+                            render={({ field }) => <TextField
+                              className={classes.userDataInput}
+                              type="text"
+                              id="outlined-required"
+                              label="Last Name And First Name"
+                              placeholder="Enter Your Name"
+                              variant="outlined"
+                              {...field }
+                            />}
+                          />
+                          <Controller
+                            name="email"
+                            control={control}
+                            rules={{ required: true }}
+                            render={({ field }) => <TextField
+                              className={classes.userDataInput}
+                              id="outlined-required"
+                              type="email"
+                              label="Email"
+                              placeholder="Enter Email"
+                              variant="outlined"
+                              {...field }
+                            />}
+                          />
+                          <Controller
+                            name="phone"
+                            control={control}
+                            render={({ field }) => <TextField
+                              className={classes.userDataInput}
+                              id="outlined-required"
+                              label="Phone"
+                              type="tel"
+                              placeholder="Enter Phone"
+                              variant="outlined"
+                              {...field }
+                            />}
+                          />
+                        </div>
+                      </>
+
+                    )
+                    :
+                    null
+                  }
+                  <h2>Choose A Way To Get</h2>
+                  <RadioGroup className={classes.wayToGet} aria-label="Way To Get" name="wayToGet" onChange={wayToGetHandleChange} value={wayToGet}>
+                    <FormControlLabel className={classes.wayToGetItem} style={{borderRight: '1px solid rgba(0, 0, 0, 0.23)'}} value="point" control={<Radio classes={{checked: classes.radio}} />} label={<WayToGetLabel name="Pickup Point" price="Free"/>}/>
+                    <FormControlLabel className={classes.wayToGetItem} value="delivery" control={<Radio classes={{checked: classes.radio}} />} label={<WayToGetLabel name="Courier Delivery" price="$4.00"/>} />
+                  </RadioGroup>
+                  {
+                    wayToGet==="point" ? 
+                      googleSDK ?
+                      (
+                        <>
+                          <Controller
+                            name="point"
+                            control={control}
+                            rules={{ required: true }}
+                            render={({ field }) => <PickupPointSelect setValue={setValue} defaultPoint={cartPoint} pickupPoints={pickupPoints} field={field}/>}
+                          />
+                          <Map setValue={setValue} defaultPoint={cartPoint} selectedPointCoordinates={{lat:cartPoint?.coordinates[0] || 59.869464, lng:cartPoint?.coordinates[1] || 30.34734}} pickupPoints={pickupPoints}/>
+                        </> 
+                      ) : <Spinner />
+                    :
+                    (
+                      <Controller
+                        name="delivery-avenue"
+                        control={control}
+                        rules={{ required: true }}
+                        render={({ field }) => <UserAddressSelect setValue={setValue} control={control} defaultAddress={deliveryAddress} />}
+                      />
+                    )
+                  }
+                  <h2>Choose A Payment Method</h2>
+                  <RadioGroup className={classes.paymentMethod} aria-label="gender" name="gender1" value={+cartPaymentMethod} onChange={paymentMathodHandleChange}>
+                    {
+                      paymentMethods.map(method => <FormControlLabel key={method.method_id} value={method.method_id} control={<Radio classes={{checked: classes.radio}} />} label={method.name} />)
+                    }
+                  </RadioGroup>
+                  {
+                    cartPaymentMethod+"" === "2" ? 
+                      paypalSDK ?
+                      (
+                        <div className={classes.paypalButton}>
+                          <PayPalButton
+                            amount={cartTotal}
+                            onSuccess={successPaymentHandler}
+                            onError={failurePaymentHandler}
+                          />
+                        </div>
+                      ) 
+                      : <Spinner />
+                    : (
+                      <Button type="submit" onClick={snackBarHandleClick(Fade)} className={classes.checkout}>
+                        Create Order
+                      </Button>
+                    )
+                  }
+                </form>
               </div>
               <div className={classes.order}>
                 <h2>Total Amount</h2>
@@ -418,6 +555,23 @@ const Cart = () => {
           <h2 style={{textAlign: 'center', fontSize: 30}}>Your cart is empty!</h2>
         }
       </Container>
+      {
+        Object.keys(errors).length !== 0 ? 
+        (
+          <Snackbar
+            open={snackBar.open}
+            onClose={snackBarHandleClose}
+            TransitionComponent={snackBar.Transition}
+            key={snackBar.Transition.name}>
+              <Alert severity="error">
+                {getErrorText(errors)}
+              </Alert>
+          </Snackbar>
+        )
+        :
+        null
+      }
+      
     </section>
   );
 };

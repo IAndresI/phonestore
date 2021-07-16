@@ -4,7 +4,7 @@ import Autocomplete from '@material-ui/lab/Autocomplete';
 import { setPickupPoint } from '../../store/actions';
 import { useDispatch } from 'react-redux';
 
-export default function PickupPointSelect({pickupPoints, defaultPoint}) {
+export default function PickupPointSelect({setValue, pickupPoints, defaultPoint, field}) {
 
   const dispatch = useDispatch()
 
@@ -24,10 +24,11 @@ export default function PickupPointSelect({pickupPoints, defaultPoint}) {
           setInputValue(newInputValue);
           const findingPoint = pickupPoints.find(el => el.address===newInputValue);
           findingPoint ? dispatch(setPickupPoint(findingPoint)) : dispatch(setPickupPoint(null))
+          setValue('point', newInputValue)
         }}
         id="controllable-states"
         options={pickupPointsAddress}
-        renderInput={(params) => <TextField {...params} label="Select Pick-up Point" variant="outlined" />}
+        renderInput={(params) => <TextField {...params} label="Select Pick-up Point" variant="outlined" {...field}/>}
       />
     </div>
   );
