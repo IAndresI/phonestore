@@ -13,6 +13,7 @@ import UserAddressSelect from '../components/cart/UserAddressSelect';
 import { PayPalButton } from "react-paypal-button-v2";
 import { Controller, useForm } from 'react-hook-form';
 import MuiAlert from '@material-ui/lab/Alert';
+import PayPalModal from '../components/cart/PayPalModal';
 
 const useStyles = makeStyles(() => ({
   container: {
@@ -177,7 +178,7 @@ const useStyles = makeStyles(() => ({
     marginBottom: 30
   },
   paypalButton: {
-    width: '100%'
+    width: '100%',
   },
   userData: {
     display: 'flex',
@@ -201,9 +202,7 @@ const Cart = () => {
   // Cart Info
   const cartItems = useSelector(state => state.cart.cartList, shallowEqual)
   const cartTotal = useSelector(state => state.cart.totalPrice)
-  const cartPoint = useSelector(state => state.cart.pickupPoint, shallowEqual)
   const cartPaymentMethod = useSelector(state => state.cart.paymentMethod)
-  const deliveryAddress = useSelector(state => state.cart.deliveryAddress, shallowEqual)
 
   // User Info
 
@@ -232,8 +231,10 @@ const Cart = () => {
     const errorType = Object.keys(errors).length !== 0 ? Object.entries(errors)[0][0] : null;
 
     switch (errorType) {
-      case "fio":
-        return "Enter your last and first names!"
+      case "first_name":
+        return "Enter your first name!"
+      case "last_name":
+        return "Enter your last name!"
       case "email":
         return "Enter email!"
       case "delivery-avenue":
@@ -271,6 +272,9 @@ const Cart = () => {
   const createOrder = (data, e) => {
     e.preventDefault();
     console.log(data);
+    if (cartPaymentMethod+"" === "2") {
+      setOpenPayPalMpdal(true);
+    }
   }
 
   // Material UI Styles
@@ -310,6 +314,14 @@ const Cart = () => {
     setLoading(true);
     getCartData().then(() => setLoading(false))
   }, [])
+
+  //PayPal Modal
+
+  const [openPayPalMpdal, setOpenPayPalMpdal] = useState(false);
+
+  const handlePayPalModalClose = () => {
+    setOpenPayPalMpdal(false);
+  };
 
   // PayPal Payment
 
@@ -379,11 +391,11 @@ const Cart = () => {
     currency: 'USD',
   });
 
+  console.log(control);
+
   // Loading Indicator
 
   if(loading) return <Spinner />
-
-  console.log(control);
 
   return (
     <section className="section">
@@ -439,15 +451,29 @@ const Cart = () => {
                         <h2>Enter Your Details</h2>
                         <div className={classes.userData}>
                           <Controller
-                            name="fio"
+                            name="first_name"
                             control={control}
                             rules={{ required: true }}
                             render={({ field }) => <TextField
                               className={classes.userDataInput}
                               type="text"
                               id="outlined-required"
-                              label="Last Name And First Name"
-                              placeholder="Enter Your Name"
+                              label="First Name"
+                              placeholder="Enter Your First Name"
+                              variant="outlined"
+                              {...field }
+                            />}
+                          />
+                          <Controller
+                            name="last_name"
+                            control={control}
+                            rules={{ required: true }}
+                            render={({ field }) => <TextField
+                              className={classes.userDataInput}
+                              type="text"
+                              id="outlined-required"
+                              label="Last Name"
+                              placeholder="Enter Your Last Name"
                               variant="outlined"
                               {...field }
                             />}
@@ -500,9 +526,9 @@ const Cart = () => {
                             name="point"
                             control={control}
                             rules={{ required: true }}
-                            render={({ field }) => <PickupPointSelect setValue={setValue} defaultPoint={cartPoint} pickupPoints={pickupPoints} field={field}/>}
+                            render={({ field }) => <PickupPointSelect setValue={setValue} pickupPoints={pickupPoints} {...field}/>}
                           />
-                          <Map setValue={setValue} defaultPoint={cartPoint} selectedPointCoordinates={{lat:cartPoint?.coordinates[0] || 59.869464, lng:cartPoint?.coordinates[1] || 30.34734}} pickupPoints={pickupPoints}/>
+                          <Map setValue={setValue} selectedPointCoordinates={{lat:59.869464, lng: 30.34734}} pickupPoints={pickupPoints}/>
                         </> 
                       ) : <Spinner />
                     :
@@ -511,7 +537,7 @@ const Cart = () => {
                         name="delivery-avenue"
                         control={control}
                         rules={{ required: true }}
-                        render={({ field }) => <UserAddressSelect setValue={setValue} control={control} defaultAddress={deliveryAddress} />}
+                        render={({ field }) => <UserAddressSelect setValue={setValue} control={control} {...field}/>}
                       />
                     )
                   }
@@ -525,13 +551,9 @@ const Cart = () => {
                     cartPaymentMethod+"" === "2" ? 
                       paypalSDK ?
                       (
-                        <div className={classes.paypalButton}>
-                          <PayPalButton
-                            amount={cartTotal}
-                            onSuccess={successPaymentHandler}
-                            onError={failurePaymentHandler}
-                          />
-                        </div>
+                        <Button type="submit" onClick={snackBarHandleClick(Fade)} className={classes.checkout}>
+                          Go To Checkout
+                        </Button>
                       ) 
                       : <Spinner />
                     : (
@@ -545,9 +567,6 @@ const Cart = () => {
               <div className={classes.order}>
                 <h2>Total Amount</h2>
                 <span className={classes.totalPrice}>{cartTotal ? formatter.format(cartTotal) : 0}</span>
-                <Link to={CHECKOUT_ROUTE} className={classes.checkout}>
-                  Go To Checkout
-                </Link>
               </div>
             </div>
           )
@@ -571,7 +590,16 @@ const Cart = () => {
         :
         null
       }
-      
+      <PayPalModal open={openPayPalMpdal} handleClose={handlePayPalModalClose}>
+        <div className={classes.paypalButton}>
+          <PayPalButton
+            shippingPreference="NO_SHIPPING"
+            amount={cartTotal}
+            onSuccess={successPaymentHandler}
+            onError={failurePaymentHandler}
+          />
+        </div>
+      </PayPalModal>
     </section>
   );
 };

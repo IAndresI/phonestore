@@ -14,6 +14,7 @@ function generateJwt(id, email, cart_id) {
 }
 
 class UserController {
+
   async create(req, res, next) {
     try {
       const {password, date_of_birth, email, phone, first_name, last_name, gender} = req.body;
@@ -35,6 +36,23 @@ class UserController {
           next(ApiError.badRequest(err));
           return res.status(500)
         })
+    }
+    catch(err) {
+      next(ApiError.badRequest(err.message));
+    }
+  }
+  
+  async createEmpty(req, res, next) {
+    try {
+      const { email, firstName, lastName, phone=null } = req.body;
+
+      const randomPassword = Math.random().toString(36).slice(2);
+      const hashedPassword = await bcrypt.hash(randomPassword, 5)
+
+      const qeury = await db.query(`SELECT create_empty_client AS "client_id" FROM create_empty_client($1, $2, $3, $4, $5);`, [hashedPassword, email, firstName, lastName, phone])
+
+      const [data] = qeury.rows
+      return res.json(data)
     }
     catch(err) {
       next(ApiError.badRequest(err.message));

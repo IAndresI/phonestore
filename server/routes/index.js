@@ -6,7 +6,9 @@ const manufacturerRouter = require('./manufacturerRouter');
 const cartRouter = require('./cartRouter');
 const orderRouter = require('./orderRouter');
 const paypalRouter = require('./paypalRouter');
+const emailRouter = require('./emailRouter');
 
+router.use('/email', emailRouter)
 router.use('/paypal', paypalRouter)
 router.use('/phone', phoneRouter)
 router.use('/manufacturer', manufacturerRouter)
