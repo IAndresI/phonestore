@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { shallowEqual, useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { onAddCartTotal, onChangeCartItem, setPaymentMethod } from '../store/actions';
 import { Button, Container, Fade, FormControlLabel, makeStyles, Radio, RadioGroup, TextField, Snackbar } from '@material-ui/core';
 import {Link} from 'react-router-dom';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
-import { CHECKOUT_ROUTE } from '../utils/consts';
 import Map from '../components/cart/Map';
 import {addPayPal, getLocations, getPaymentMethod} from '../http/cartAPI'
 import PickupPointSelect from '../components/cart/PickupPointSelect';
@@ -14,6 +13,7 @@ import { PayPalButton } from "react-paypal-button-v2";
 import { Controller, useForm } from 'react-hook-form';
 import MuiAlert from '@material-ui/lab/Alert';
 import PayPalModal from '../components/cart/PayPalModal';
+import {createUnregistredUserOrder, createRegistredUserOrder} from '../http/orderAPI'
 
 const useStyles = makeStyles(() => ({
   container: {
@@ -200,19 +200,22 @@ const Cart = () => {
   const dispatch = useDispatch()
 
   // Cart Info
-  const cartItems = useSelector(state => state.cart.cartList, shallowEqual)
+
+  const cartItems = useSelector(state => state.cart.cartList)
   const cartTotal = useSelector(state => state.cart.totalPrice)
   const cartPaymentMethod = useSelector(state => state.cart.paymentMethod)
+  const cartPickupPoint = useSelector(state => state.cart.pickupPoint)
 
   // User Info
 
   const isAuth = useSelector(state => state.user.isAuth)
+  const user = useSelector(state => state.user.user)
 
   // Inputs
 
   const [pickupPoints, setPickupPoints] = useState([]);
   const [paymentMethods, setPaymentMethods] = useState([]);
-  const [wayToGet, setWayToGet] = useState('point');
+  const [wayToGet, setWayToGet] = useState('pickupPoint');
 
   // Loading Scripts And Queries
 
@@ -220,7 +223,7 @@ const Cart = () => {
   const [paypalSDK, setPaypalSDK] = useState(!!document.querySelector('#paypal-button'))
   const [googleSDK, setGoogleSDK] = useState(!!document.querySelector('#googlemaps'))
 
-  // Snack Bar
+  // Snack Bar control
 
   const [snackBar, setSnackBar] = useState({
     open: false,
@@ -237,11 +240,11 @@ const Cart = () => {
         return "Enter your last name!"
       case "email":
         return "Enter email!"
-      case "delivery-avenue":
+      case "deliveryAvenue":
         return "Enter correct delivery address!"
       case "room":
         return "Enter your room number!"
-      case "point":
+      case "pickupPoint":
         return "Enter pick-up point address!"
       default: return "";
     }
@@ -267,14 +270,81 @@ const Cart = () => {
 
   // Form Controll
 
-  const { control, handleSubmit, setValue, formState: { errors } } = useForm();
+  const { control, getValues, handleSubmit, setValue, formState: { errors } } = useForm();
 
-  const createOrder = (data, e) => {
+  const getFullData = async (formData, unregistred) => {
+    if(unregistred) {
+      const data = {
+        dateOrderPaid: null, 
+        ...formData,
+        total: cartTotal,
+        items: cartItems,
+          
+      }
+      console.log(data);
+      // return await createUnregistredUserOrder({
+      //   dateOrderPaid: null, 
+      //   total: 15000, 
+      //   paymentMethod: 1, 
+      //   pickupPoint: 2, 
+      //   deliveryAddress: null,
+      //   items: [[1,2],[2,3]]
+      // },
+      // {
+      //   email: "Irina@mail.ru", 
+      //   firstName: 'Irina', 
+      //   lastName: 'Vanchenko', 
+      //   phone: 89111233456
+      // })
+    }
+    else {
+      let clientAddress
+      if(formData.deliveryAvenue) {
+        const fragmentedAddress = formData.deliveryAvenue.split(',')
+        const countryAndCity = fragmentedAddress.splice(fragmentedAddress.length - 2)
+        clientAddress = `${fragmentedAddress.join(',')}, room ${formData.room},${countryAndCity.join(',')}`;
+      }
+      
+      const data = {
+        clientId: user.id,
+        pickupPoint: pickupPoints.find(el => el.address===formData.pickupPoint).pickup_point_id || null,
+        deliveryAddress: clientAddress || null,
+        total: cartTotal,
+        items: cartItems.map(e => [e.phone_id, e.count]),
+        dateOrderPaid: null,
+        paymentMethod: cartPaymentMethod,
+      }
+      console.log(data);
+    }
+  }
+
+  const createOrder = async (data, e) => {
     e.preventDefault();
-    console.log(data);
-    if (cartPaymentMethod+"" === "2") {
+    
+    if (cartPaymentMethod === 2) {
       setOpenPayPalMpdal(true);
     }
+    else {
+      if(isAuth) {
+        getFullData(data, false)
+      }
+      else getFullData(data, true)
+      // await createUnregistredUserOrder({
+      //   dateOrderPaid: null, 
+      //   total: 15000, 
+      //   paymentMethod: 1, 
+      //   pickupPoint: 2, 
+      //   deliveryAddress: null,
+      //   items: [[1,2],[2,3]]
+      // },
+      // {
+      //   email: "Irina@mail.ru", 
+      //   firstName: 'Irina', 
+      //   lastName: 'Vanchenko', 
+      //   phone: 89111233456
+      // })
+    }
+
   }
 
   // Material UI Styles
@@ -315,7 +385,7 @@ const Cart = () => {
     getCartData().then(() => setLoading(false))
   }, [])
 
-  //PayPal Modal
+  //PayPal modal control
 
   const [openPayPalMpdal, setOpenPayPalMpdal] = useState(false);
 
@@ -323,7 +393,7 @@ const Cart = () => {
     setOpenPayPalMpdal(false);
   };
 
-  // PayPal Payment
+  // PayPal payment
 
   const successPaymentHandler = (details, data) => {
     alert("Transaction completed by " + details.payer.name.given_name);
@@ -335,8 +405,6 @@ const Cart = () => {
   const failurePaymentHandler = (error) => {
     alert(error);
   }
-
-  // End PayPal Payment
 
   // Google maps and autocomplete 
 
@@ -354,10 +422,10 @@ const Cart = () => {
     }
   }
 
-  // End Google maps and autocomplete 
+  // Dispatch payment method
   
   const paymentMathodHandleChange = (event) => {
-    dispatch(setPaymentMethod(event.target.value))
+    dispatch(setPaymentMethod(+event.target.value))
   };
 
   // Way To Get RadioGroup
@@ -390,8 +458,6 @@ const Cart = () => {
     style: 'currency',
     currency: 'USD',
   });
-
-  console.log(control);
 
   // Loading Indicator
 
@@ -514,27 +580,33 @@ const Cart = () => {
                   }
                   <h2>Choose A Way To Get</h2>
                   <RadioGroup className={classes.wayToGet} aria-label="Way To Get" name="wayToGet" onChange={wayToGetHandleChange} value={wayToGet}>
-                    <FormControlLabel className={classes.wayToGetItem} style={{borderRight: '1px solid rgba(0, 0, 0, 0.23)'}} value="point" control={<Radio classes={{checked: classes.radio}} />} label={<WayToGetLabel name="Pickup Point" price="Free"/>}/>
+                    <FormControlLabel className={classes.wayToGetItem} style={{borderRight: '1px solid rgba(0, 0, 0, 0.23)'}} value="pickupPoint" control={<Radio classes={{checked: classes.radio}} />} label={<WayToGetLabel name="Pickup Point" price="Free"/>}/>
                     <FormControlLabel className={classes.wayToGetItem} value="delivery" control={<Radio classes={{checked: classes.radio}} />} label={<WayToGetLabel name="Courier Delivery" price="$4.00"/>} />
                   </RadioGroup>
                   {
-                    wayToGet==="point" ? 
+                    wayToGet==="pickupPoint" ? 
                       googleSDK ?
                       (
                         <>
                           <Controller
-                            name="point"
+                            name="pickupPoint"
                             control={control}
                             rules={{ required: true }}
                             render={({ field }) => <PickupPointSelect setValue={setValue} pickupPoints={pickupPoints} {...field}/>}
                           />
-                          <Map setValue={setValue} selectedPointCoordinates={{lat:59.869464, lng: 30.34734}} pickupPoints={pickupPoints}/>
+                          <Map 
+                            setValue={setValue} 
+                            selectedPointCoordinates={{
+                              lat: pickupPoints.find(el=> el.address===cartPickupPoint?.address)?.coordinates[0] || 59.869464, 
+                              lng: pickupPoints.find(el=> el.address===cartPickupPoint?.address)?.coordinates[1] || 30.34734
+                            }} 
+                            pickupPoints={pickupPoints}/>
                         </> 
                       ) : <Spinner />
                     :
                     (
                       <Controller
-                        name="delivery-avenue"
+                        name="deliveryAvenue"
                         control={control}
                         rules={{ required: true }}
                         render={({ field }) => <UserAddressSelect setValue={setValue} control={control} {...field}/>}
@@ -542,13 +614,19 @@ const Cart = () => {
                     )
                   }
                   <h2>Choose A Payment Method</h2>
-                  <RadioGroup className={classes.paymentMethod} aria-label="gender" name="gender1" value={+cartPaymentMethod} onChange={paymentMathodHandleChange}>
+                  <RadioGroup 
+                    className={classes.paymentMethod}
+                    aria-label="payment method"
+                    name="paymentMethod"
+                    value={cartPaymentMethod}
+                    onChange={paymentMathodHandleChange}>
                     {
                       paymentMethods.map(method => <FormControlLabel key={method.method_id} value={method.method_id} control={<Radio classes={{checked: classes.radio}} />} label={method.name} />)
                     }
                   </RadioGroup>
+                  
                   {
-                    cartPaymentMethod+"" === "2" ? 
+                    cartPaymentMethod === 2 ? 
                       paypalSDK ?
                       (
                         <Button type="submit" onClick={snackBarHandleClick(Fade)} className={classes.checkout}>
@@ -592,12 +670,18 @@ const Cart = () => {
       }
       <PayPalModal open={openPayPalMpdal} handleClose={handlePayPalModalClose}>
         <div className={classes.paypalButton}>
-          <PayPalButton
-            shippingPreference="NO_SHIPPING"
-            amount={cartTotal}
-            onSuccess={successPaymentHandler}
-            onError={failurePaymentHandler}
-          />
+          {
+            paypalSDK ?
+            <PayPalButton
+              shippingPreference="NO_SHIPPING"
+              amount={cartTotal}
+              onSuccess={successPaymentHandler}
+              onError={failurePaymentHandler}
+            />
+            :
+            <Spinner />
+          }
+          
         </div>
       </PayPalModal>
     </section>

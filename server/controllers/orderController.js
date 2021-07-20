@@ -1,32 +1,24 @@
 const db = require('../db');
-const uuid = require('uuid');
-const path = require('path');
 const ApiError = require('../error/ApiError');
 
 class OrderController {
   async create(req, res, next) { 
-    // try {
-    //   const {name, director, phone, inn, address, link} = req.body;
-    //   let img;
-    //   let filename = null;
-    //   if(req.files) {
-    //     img = req.files.img;
-    //     filename = uuid.v4()+ ".jpg"
-    //   }
-      
-    //   const qeury = await db.query(`INSERT INTO 
-    //     public.order (name, director, phone, inn, address, link, image)
-    //     VALUES ($1, $2, $3, $4, $5, $6, $7);`, [name, director, phone, inn, address, link, filename], (err, res) => {
-    //       if(!err) {
-    //         if(filename)img.mv(path.resolve(__dirname, '..','static', filename))
-    //         return res.json(req.body)
-    //       }
-    //       return next(ApiError.badRequest(err));
-    //     });
-    // }
-    // catch(err) {
-    //   next(ApiError.badRequest(err.message));
-    // }
+    try {
+
+      const {clientId, dateOrderPaid, total, paymentMethod, pickupPoint, deliveryAddress, items } = req.body;
+
+      await db.query(
+        `call create_order(
+          ($1, $2, $3::money, $4, $5, $6),
+          ARRAY[$7::int[]]
+        );`,
+        [clientId, dateOrderPaid, total, paymentMethod,pickupPoint, deliveryAddress, items],
+        (err, response) => !err ? res.json(req.body) : next(ApiError.badRequest(err))
+      );
+    }
+    catch(err) {
+      next(ApiError.badRequest(err.message));
+    }
   }
 
   async getAll(req, res, next) {

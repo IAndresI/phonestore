@@ -24,7 +24,7 @@ export default function PickupPointSelect({setValue, pickupPoints, defaultPoint,
           setInputValue(newInputValue);
           const findingPoint = pickupPoints.find(el => el.address===newInputValue);
           findingPoint ? dispatch(setPickupPoint(findingPoint)) : dispatch(setPickupPoint(null))
-          setValue('point', newInputValue)
+          setValue('pickupPoint', newInputValue)
         }}
         inputProps={{form: {autocomplete: 'off'}}}
         id="controllable-states"

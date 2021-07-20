@@ -82,7 +82,7 @@ export default function LocationSearchInput({defaultAddress, setValue, control})
               onInputChange={(event, newInputValue) => {
                 setAddress(newInputValue);
                 dispatch(setDeliveryAddress(suggestions.some(el => el.description === newInputValue) ? newInputValue : null))
-                setValue("delivery-avenue",newInputValue)
+                setValue("deliveryAvenue",newInputValue)
               }}
               id="controllable-states"
               options={suggestions.map(suggestion => suggestion.description).filter(el => el.toLocaleLowerCase().match('санкт') || el.toLocaleLowerCase().match('ленин'))}
