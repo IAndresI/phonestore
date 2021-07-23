@@ -13,7 +13,10 @@ class OrderController {
           ARRAY[$7::int[]]
         );`,
         [clientId, dateOrderPaid, total, paymentMethod,pickupPoint, deliveryAddress, items],
-        (err, response) => !err ? res.json(req.body) : next(ApiError.badRequest(err))
+        (err, response) => {
+          if(err) next(ApiError.badRequest(err))
+          else return res.json(response.rows[0].returning_order_id)
+        }
       );
     }
     catch(err) {

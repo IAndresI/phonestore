@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { onAddCartTotal, onChangeCartItem, setPaymentMethod } from '../store/actions';
 import { Button, Container, Fade, FormControlLabel, makeStyles, Radio, RadioGroup, TextField, Snackbar } from '@material-ui/core';
-import {Link} from 'react-router-dom';
+import {Link, Redirect, useHistory} from 'react-router-dom';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import Map from '../components/cart/Map';
 import {addPayPal, getLocations, getPaymentMethod} from '../http/cartAPI'
@@ -14,6 +14,7 @@ import { Controller, useForm } from 'react-hook-form';
 import MuiAlert from '@material-ui/lab/Alert';
 import PayPalModal from '../components/cart/PayPalModal';
 import {createUnregistredUserOrder, createRegistredUserOrder} from '../http/orderAPI'
+import { ORDER_STATUS } from '../utils/consts';
 
 const useStyles = makeStyles(() => ({
   container: {
@@ -199,6 +200,14 @@ const Cart = () => {
 
   const dispatch = useDispatch()
 
+  // API Erros
+
+  const [apiErrors, setApiErrors] = useState({})
+
+  // Redirect
+
+  const history = useHistory()
+
   // Cart Info
 
   const cartItems = useSelector(state => state.cart.cartList)
@@ -234,9 +243,9 @@ const Cart = () => {
     const errorType = Object.keys(errors).length !== 0 ? Object.entries(errors)[0][0] : null;
 
     switch (errorType) {
-      case "first_name":
+      case "firstName":
         return "Enter your first name!"
-      case "last_name":
+      case "lastName":
         return "Enter your last name!"
       case "email":
         return "Enter email!"
@@ -246,8 +255,12 @@ const Cart = () => {
         return "Enter your room number!"
       case "pickupPoint":
         return "Enter pick-up point address!"
+      case "emailDuplicate":
+        return errors[errorType]
       default: return "";
     }
+
+    
   }
 
   const snackBarHandleClick = (Transition) => () => {
@@ -270,51 +283,73 @@ const Cart = () => {
 
   // Form Controll
 
-  const { control, getValues, handleSubmit, setValue, formState: { errors } } = useForm();
+  const { control, handleSubmit, setValue, formState: { errors } } = useForm();
 
   const getFullData = async (formData, unregistred) => {
-    if(unregistred) {
-      const data = {
-        dateOrderPaid: null, 
-        ...formData,
-        total: cartTotal,
-        items: cartItems,
-          
-      }
-      console.log(data);
-      // return await createUnregistredUserOrder({
-      //   dateOrderPaid: null, 
-      //   total: 15000, 
-      //   paymentMethod: 1, 
-      //   pickupPoint: 2, 
-      //   deliveryAddress: null,
-      //   items: [[1,2],[2,3]]
-      // },
-      // {
-      //   email: "Irina@mail.ru", 
-      //   firstName: 'Irina', 
-      //   lastName: 'Vanchenko', 
-      //   phone: 89111233456
-      // })
+
+    let clientAddress
+    if(formData.deliveryAvenue && wayToGet==='delivery') {
+      const fragmentedAddress = formData.deliveryAvenue.split(',')
+      const countryAndCity = fragmentedAddress.splice(fragmentedAddress.length - 2)
+      clientAddress = `${fragmentedAddress.join(',')}, room ${formData.room},${countryAndCity.join(',')}`;
     }
-    else {
-      let clientAddress
-      if(formData.deliveryAvenue) {
-        const fragmentedAddress = formData.deliveryAvenue.split(',')
-        const countryAndCity = fragmentedAddress.splice(fragmentedAddress.length - 2)
-        clientAddress = `${fragmentedAddress.join(',')}, room ${formData.room},${countryAndCity.join(',')}`;
+
+    if(unregistred) {
+      const orderDeatils = {
+        pickupPoint: pickupPoints.find(el => el.address===formData.pickupPoint)?.pickup_point_id || null,
+        deliveryAddress: clientAddress || null,
+        dateOrderPaid: null, 
+        total: cartTotal,
+        items: cartItems.map(e => [e.phone_id, e.count]),
+        paymentMethod: cartPaymentMethod
+      }
+      const clientDeatils = {
+        email: formData.email,
+        phone: formData.phone || null,
+        firstName: formData.firstName,
+        lastName: formData.lastName
+      }
+
+      try {
+        const orderDetails = await createUnregistredUserOrder(orderDeatils, clientDeatils)
+
+        history.push({
+          pathname: ORDER_STATUS,
+          state: { detail: {order: orderDetails.order.data} }
+        })
+      }
+      catch(err) {
+        if(err?.response?.status === 409) {
+          setApiErrors({emailDuplicate: "This Email already exists"})
+        }
       }
       
-      const data = {
+    }
+    else {
+      const orderDeatils = {
         clientId: user.id,
-        pickupPoint: pickupPoints.find(el => el.address===formData.pickupPoint).pickup_point_id || null,
+        pickupPoint: pickupPoints.find(el => el.address===formData.pickupPoint)?.pickup_point_id || null,
         deliveryAddress: clientAddress || null,
         total: cartTotal,
         items: cartItems.map(e => [e.phone_id, e.count]),
         dateOrderPaid: null,
         paymentMethod: cartPaymentMethod,
       }
-      console.log(data);
+
+      try {
+        const orderId = await createRegistredUserOrder(orderDeatils)
+
+        history.push({
+          pathname: ORDER_STATUS,
+          state: { detail: orderId }
+        })
+      }
+      catch(err) {
+        if(err?.response?.status === 409) {
+          setApiErrors({emailDuplicate: "This Email already exists"})
+        }
+      }
+      
     }
   }
 
@@ -439,10 +474,17 @@ const Cart = () => {
     )
   }
 
+  console.log(control);
   const wayToGetHandleChange = (event) => {
     setWayToGet(event.target.value);
-    if(event.target.value==="delivery") dispatch(onAddCartTotal(4))
-    else dispatch(onAddCartTotal(-4))
+    if(event.target.value==="delivery") {
+      dispatch(onAddCartTotal(4));
+      setValue('pickupPoint', null)
+    }
+    else {
+      dispatch(onAddCartTotal(-4))
+      setValue('deliveryAvenue', null)
+    }
   };
 
   // Change Phone In Cart Count
@@ -517,7 +559,7 @@ const Cart = () => {
                         <h2>Enter Your Details</h2>
                         <div className={classes.userData}>
                           <Controller
-                            name="first_name"
+                            name="firstName"
                             control={control}
                             rules={{ required: true }}
                             render={({ field }) => <TextField
@@ -531,7 +573,7 @@ const Cart = () => {
                             />}
                           />
                           <Controller
-                            name="last_name"
+                            name="lastName"
                             control={control}
                             rules={{ required: true }}
                             render={({ field }) => <TextField
@@ -652,22 +694,6 @@ const Cart = () => {
           <h2 style={{textAlign: 'center', fontSize: 30}}>Your cart is empty!</h2>
         }
       </Container>
-      {
-        Object.keys(errors).length !== 0 ? 
-        (
-          <Snackbar
-            open={snackBar.open}
-            onClose={snackBarHandleClose}
-            TransitionComponent={snackBar.Transition}
-            key={snackBar.Transition.name}>
-              <Alert severity="error">
-                {getErrorText(errors)}
-              </Alert>
-          </Snackbar>
-        )
-        :
-        null
-      }
       <PayPalModal open={openPayPalMpdal} handleClose={handlePayPalModalClose}>
         <div className={classes.paypalButton}>
           {
@@ -684,6 +710,22 @@ const Cart = () => {
           
         </div>
       </PayPalModal>
+      {
+        Object.keys(errors).length !== 0 || Object.keys(apiErrors).length !== 0 ? 
+        (
+          <Snackbar
+            open={snackBar.open}
+            onClose={snackBarHandleClose}
+            TransitionComponent={snackBar.Transition}
+            key={snackBar.Transition.name}>
+              <Alert severity="error">
+                {getErrorText({...errors, ...apiErrors})}
+              </Alert>
+          </Snackbar>
+        )
+        :
+        null
+      }
     </section>
   );
 };

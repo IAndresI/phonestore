@@ -49,10 +49,20 @@ class UserController {
       const randomPassword = Math.random().toString(36).slice(2);
       const hashedPassword = await bcrypt.hash(randomPassword, 5)
 
-      const qeury = await db.query(`SELECT create_empty_client AS "client_id" FROM create_empty_client($1, $2, $3, $4, $5);`, [hashedPassword, email, firstName, lastName, phone])
-
-      const [data] = qeury.rows
-      return res.json(data)
+      const qeury = await db.query(
+        `SELECT create_empty_client AS "client_id" FROM create_empty_client($1, $2, $3, $4, $5);`, 
+        [hashedPassword, email, firstName, lastName, phone],
+        (err, response) => {
+          if(err) {
+            if(err.code==="23505") next(ApiError.duplicateEmail("This email already exists! Please, login before creating order!"));
+            else next(ApiError.badRequest(err.message));
+          }
+          else {
+            const [data] = response.rows
+            return res.json(data)
+          }
+        }
+      )
     }
     catch(err) {
       next(ApiError.badRequest(err.message));
