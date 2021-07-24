@@ -202,7 +202,7 @@ const Cart = () => {
 
   // API Erros
 
-  const [apiErrors, setApiErrors] = useState({})
+  const [errorText, setErrorText] = useState("")
 
   // Redirect
 
@@ -239,9 +239,10 @@ const Cart = () => {
     Transition: Fade,
   });
 
-  const getErrorText = (errors) => {
-    const errorType = Object.keys(errors).length !== 0 ? Object.entries(errors)[0][0] : null;
+  const getErrorText = (err) => {
+    const errorType = Object.keys(err).length !== 0 ? Object.entries(err)[0][0] : null;
 
+    console.log(err);
     switch (errorType) {
       case "firstName":
         return "Enter your first name!"
@@ -285,9 +286,10 @@ const Cart = () => {
 
   const { control, handleSubmit, setValue, formState: { errors } } = useForm();
 
-  const getFullData = async (formData, unregistred) => {
+  const getFullData = (formData, unregistred) => {
 
-    let clientAddress
+    let clientAddress;
+
     if(formData.deliveryAvenue && wayToGet==='delivery') {
       const fragmentedAddress = formData.deliveryAvenue.split(',')
       const countryAndCity = fragmentedAddress.splice(fragmentedAddress.length - 2)
@@ -310,20 +312,7 @@ const Cart = () => {
         lastName: formData.lastName
       }
 
-      try {
-        const orderDetails = await createUnregistredUserOrder(orderDeatils, clientDeatils)
-
-        history.push({
-          pathname: ORDER_STATUS,
-          state: { detail: {order: orderDetails.order.data} }
-        })
-      }
-      catch(err) {
-        if(err?.response?.status === 409) {
-          setApiErrors({emailDuplicate: "This Email already exists"})
-        }
-      }
-      
+      return {orderDeatils, clientDeatils};
     }
     else {
       const orderDeatils = {
@@ -336,20 +325,7 @@ const Cart = () => {
         paymentMethod: cartPaymentMethod,
       }
 
-      try {
-        const orderId = await createRegistredUserOrder(orderDeatils)
-
-        history.push({
-          pathname: ORDER_STATUS,
-          state: { detail: orderId }
-        })
-      }
-      catch(err) {
-        if(err?.response?.status === 409) {
-          setApiErrors({emailDuplicate: "This Email already exists"})
-        }
-      }
-      
+      return orderDeatils;
     }
   }
 
@@ -361,25 +337,43 @@ const Cart = () => {
     }
     else {
       if(isAuth) {
-        getFullData(data, false)
-      }
-      else getFullData(data, true)
-      // await createUnregistredUserOrder({
-      //   dateOrderPaid: null, 
-      //   total: 15000, 
-      //   paymentMethod: 1, 
-      //   pickupPoint: 2, 
-      //   deliveryAddress: null,
-      //   items: [[1,2],[2,3]]
-      // },
-      // {
-      //   email: "Irina@mail.ru", 
-      //   firstName: 'Irina', 
-      //   lastName: 'Vanchenko', 
-      //   phone: 89111233456
-      // })
-    }
+        try {
 
+          const orderDetails = getFullData(data, false)
+
+          const orderId = await createRegistredUserOrder(orderDetails)
+
+          history.push({
+            pathname: ORDER_STATUS,
+            state: { detail: orderId }
+          })
+        }
+        catch(err) {
+          if(err?.response?.status === 409) {
+            errors.emailDuplicate = "This Email already exists"
+            setErrorText(getErrorText({...errors}))
+          }
+        }
+      }
+      else {
+        try {
+
+          const orderDetails = getFullData(data, true)
+          const details = await createUnregistredUserOrder(orderDetails.orderDeatils, orderDetails.clientDeatils)
+          
+          history.push({
+            pathname: ORDER_STATUS,
+            state: { detail: {order: details.order.data} }
+          })
+        }
+        catch(err) {
+          if(err?.response?.status === 409) {
+            errors.emailDuplicate = "This Email already exists"
+            setErrorText(getErrorText({...errors}))
+          }
+        }
+      }
+    }
   }
 
   // Material UI Styles
@@ -394,7 +388,7 @@ const Cart = () => {
     })
     getPaymentMethod().then(data => {
       setPaymentMethods(data)
-      dispatch(setPaymentMethod(data[0].method_id))
+      dispatch(setPaymentMethod(data[1].method_id))
     })
     addPayPal().then(clientId => {
       if(! document.querySelector('#paypal-button')) {
@@ -419,6 +413,12 @@ const Cart = () => {
     setLoading(true);
     getCartData().then(() => setLoading(false))
   }, [])
+
+  useEffect(() => {
+    if(Object.keys(errors).length > 0) {
+      setErrorText(getErrorText({...errors}))
+    }
+  });
 
   //PayPal modal control
 
@@ -474,7 +474,6 @@ const Cart = () => {
     )
   }
 
-  console.log(control);
   const wayToGetHandleChange = (event) => {
     setWayToGet(event.target.value);
     if(event.target.value==="delivery") {
@@ -670,11 +669,18 @@ const Cart = () => {
                   {
                     cartPaymentMethod === 2 ? 
                       paypalSDK ?
-                      (
-                        <Button type="submit" onClick={snackBarHandleClick(Fade)} className={classes.checkout}>
-                          Go To Checkout
-                        </Button>
-                      ) 
+                        Object.keys(errors).length > 0 ?
+                        (
+                          <Button type="submit" onClick={snackBarHandleClick(Fade)}  className={classes.checkout}>
+                            Go To Checkout
+                          </Button>
+                        )
+                        :
+                        (
+                          <Button type="submit" className={classes.checkout}>
+                            Go To Checkout
+                          </Button>
+                        )
                       : <Spinner />
                     : (
                       <Button type="submit" onClick={snackBarHandleClick(Fade)} className={classes.checkout}>
@@ -710,22 +716,15 @@ const Cart = () => {
           
         </div>
       </PayPalModal>
-      {
-        Object.keys(errors).length !== 0 || Object.keys(apiErrors).length !== 0 ? 
-        (
-          <Snackbar
-            open={snackBar.open}
-            onClose={snackBarHandleClose}
-            TransitionComponent={snackBar.Transition}
-            key={snackBar.Transition.name}>
-              <Alert severity="error">
-                {getErrorText({...errors, ...apiErrors})}
-              </Alert>
-          </Snackbar>
-        )
-        :
-        null
-      }
+      <Snackbar
+        open={snackBar.open}
+        onClose={snackBarHandleClose}
+        TransitionComponent={snackBar.Transition}
+        key={snackBar.Transition.name}>
+          <Alert severity="error">
+            {errorText}
+          </Alert>
+      </Snackbar>
     </section>
   );
 };
