@@ -1,5 +1,5 @@
 import Admin from './page/Admin';
-import Cart from './page/Cart';
+import Cart from './page/cart';
 import Phone from './page/Phone';
 import Shop from './page/Shop';
 import Auth from './page/Auth';

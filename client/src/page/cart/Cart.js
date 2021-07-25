@@ -1,226 +1,53 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { onAddCartTotal, onChangeCartItem, setPaymentMethod } from '../store/actions';
-import { Button, Container, Fade, FormControlLabel, makeStyles, Radio, RadioGroup, TextField, Snackbar } from '@material-ui/core';
-import {Link, Redirect, useHistory} from 'react-router-dom';
+import { onAddCartTotal, onChangeCartItem, setPaymentMethod } from '../../store/actions';
+import { Button, Container, Fade, FormControlLabel, Radio, RadioGroup, TextField } from '@material-ui/core';
+import {Link, useHistory} from 'react-router-dom';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
-import Map from '../components/cart/Map';
-import {addPayPal, getLocations, getPaymentMethod} from '../http/cartAPI'
-import PickupPointSelect from '../components/cart/PickupPointSelect';
-import Spinner from '../components/Spinner';
-import UserAddressSelect from '../components/cart/UserAddressSelect';
+import Map from '../../components/cart/Map';
+import {addPayPal, getLocations, getPaymentMethod} from '../../http/cartAPI'
+import PickupPointSelect from '../../components/cart/PickupPointSelect';
+import Spinner from '../../components/Spinner';
+import UserAddressSelect from '../../components/cart/UserAddressSelect';
 import { PayPalButton } from "react-paypal-button-v2";
 import { Controller, useForm } from 'react-hook-form';
-import MuiAlert from '@material-ui/lab/Alert';
-import PayPalModal from '../components/cart/PayPalModal';
-import {createUnregistredUserOrder, createRegistredUserOrder} from '../http/orderAPI'
-import { ORDER_STATUS } from '../utils/consts';
-
-const useStyles = makeStyles(() => ({
-  container: {
-    display: 'flex',
-    justifyContent: 'center'
-  },
-  imageContainer: {
-    height: 120,
-    width: 120,
-    textDecoration: 'none',
-    color: 'inherit',
-    display: 'flex',
-    overflow: 'hidden',
-    marginRight: 20
-  },
-  name: {
-    textDecoration: 'none',
-    color: 'black',
-    transition: 'all 0.5s',
-    '&:hover,&:focus': {
-      color: "#3f51b5"
-    },
-    '&:active': {
-      color: "inherit"
-    }
-  },
-  image: {
-    width: '100%',
-    height: '100%',
-    objectFit: 'contain',
-    transform: "scale(0.9)",
-    transition: "all 500ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;",
-    '&:hover': {
-      transform: "scale(1)"
-    },
-  },
-  item: {
-    position: 'relative',
-    display: 'flex',
-    alignItems: 'center',
-    width: '100%',
-    justifyContent: 'space-between',
-    borderRadius: '15px',
-    marginBottom: 15,
-    padding: "10px 20px",
-    boxShadow: "0px 2px 1px -1px rgba(0,0,0,0.2), 0px 1px 1px 0px rgba(0,0,0,0.14), 0px 1px 3px 0px rgba(0,0,0,0.12)",
-    backgroundColor: "#ffffff",
-    transition: "all 500ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;",
-    '&:hover': {
-      background: "#fafafa",
-      transform: "translateY(-2px)"
-    },
-  },
-  info: {
-    display: 'flex',
-    width: '70%',
-    alignItems: 'center',
-    flexDirection: 'column',
-    marginRight: 50
-  },
-  order: {
-    marginTop: 72,
-    position: "sticky",
-    top: 30,
-    width: '30%',
-    height: "100%",
-    backgroundColor: "#ffffff",
-    borderRadius: '15px',
-    padding: 20,
-    boxShadow: "0px 2px 1px -1px rgba(0,0,0,0.2), 0px 1px 1px 0px rgba(0,0,0,0.14), 0px 1px 3px 0px rgba(0,0,0,0.12)",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: 'center',
-    justifyContent: 'space-between'
-  },
-  count: {
-    width: '70px',
-  },
-  className: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between'
-  },
-  checkout: {
-    backgroundColor: "#3f51b5",
-    width: '100%',
-    borderRadius: 10,
-    textAlign: 'center',
-    fontSize: 18,
-    fontWeight: 500,
-    padding: '15px 30px',
-    color: "#ffffff",
-    transition: "all 500ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;",
-    textDecoration: 'none',
-    textTransform: "none",
-    border: '1px solid #3f51b5',
-    "&:hover, &:focus": {
-      outline: "transparent",
-      color: "#3f51b5",
-      backgroundColor: "#ffffff",
-    },
-    "&:active": {
-      color: "#ffffff",
-      backgroundColor: "#3f51b5",
-    }
-  },
-  totalPrice: {
-    fontSize: 25,
-    color: "#000000",
-    fontWeight: 700,
-    marginBottom: 25
-  },
-  removeButton: {
-    position: "absolute",
-    right: 0,
-    top: 0,
-    borderRadius: "0 10px 0 0",
-    transition: "all 500ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;",
-    "&:hover, &:focus": {
-      color: "red",
-    },
-    "&:active": {
-      color: "black",
-    }
-  },
-  wayToGet: {
-    display: "flex",
-    flexDirection: "row",
-    width: "100%",
-    border: '1px solid rgba(0, 0, 0, 0.23)',
-    borderRadius: 10,
-    justifyContent: "center",
-    marginBottom: 30
-  },
-  wayToGetItem: {
-    width: "50%",
-    display: "flex",
-    alignItems: "flex-start",
-    marginRight: 0,
-    justifyContent: "center",
-    padding: "40px 0",
-  },
-  wayToGetLabel: {
-    display: "flex",
-    flexDirection: "column",
-  },
-  wayToGetName: {
-    fontWeight: 500,
-    fontSize: 20,
-    marginBottom: 5,
-    paddingTop: 6.5
-  },
-  radio: {
-    color: "#3f51b5 !important",
-  },
-  map: {
-    height: 400,
-    width: '100%'
-  },
-  paymentMethod: {
-    width: '100%',
-    marginBottom: 30
-  },
-  paypalButton: {
-    width: '100%',
-  },
-  userData: {
-    display: 'flex',
-    justifyContent: 'center',
-    flexDirection: 'column',
-    width: '100%'
-  },
-  userDataInput: {
-    width: '100%',
-    marginBottom: 30
-  },
-  form: {
-    width: '100%'
-  }
-}));
+import PayPalModal from '../../components/cart/PayPalModal';
+import {createUnregistredUserOrder, createRegistredUserOrder} from '../../http/orderAPI'
+import { ORDER_STATUS } from '../../utils/consts';
+import useStyles from './style'
+import SnackBar from '../../components/cart/SnackBar';
 
 const Cart = () => {
 
+  // Dispatch
+
   const dispatch = useDispatch()
 
-  // API Erros
+  // Material UI Styles
 
-  const [errorText, setErrorText] = useState("")
+  const classes = useStyles();
+
+  // API Errors
+
+  const [apiErrors, setApiErrors] = useState({})
 
   // Redirect
 
   const history = useHistory()
 
-  // Cart Info
+  // Cart Stored Info
 
   const cartItems = useSelector(state => state.cart.cartList)
   const cartTotal = useSelector(state => state.cart.totalPrice)
   const cartPaymentMethod = useSelector(state => state.cart.paymentMethod)
   const cartPickupPoint = useSelector(state => state.cart.pickupPoint)
 
-  // User Info
+  // User Stored Info
 
   const isAuth = useSelector(state => state.user.isAuth)
   const user = useSelector(state => state.user.user)
 
-  // Inputs
+  // Inputs State
 
   const [pickupPoints, setPickupPoints] = useState([]);
   const [paymentMethods, setPaymentMethods] = useState([]);
@@ -231,56 +58,6 @@ const Cart = () => {
   const [loading, setLoading] = useState(true)
   const [paypalSDK, setPaypalSDK] = useState(!!document.querySelector('#paypal-button'))
   const [googleSDK, setGoogleSDK] = useState(!!document.querySelector('#googlemaps'))
-
-  // Snack Bar control
-
-  const [snackBar, setSnackBar] = useState({
-    open: false,
-    Transition: Fade,
-  });
-
-  const getErrorText = (err) => {
-    const errorType = Object.keys(err).length !== 0 ? Object.entries(err)[0][0] : null;
-
-    console.log(err);
-    switch (errorType) {
-      case "firstName":
-        return "Enter your first name!"
-      case "lastName":
-        return "Enter your last name!"
-      case "email":
-        return "Enter email!"
-      case "deliveryAvenue":
-        return "Enter correct delivery address!"
-      case "room":
-        return "Enter your room number!"
-      case "pickupPoint":
-        return "Enter pick-up point address!"
-      case "emailDuplicate":
-        return errors[errorType]
-      default: return "";
-    }
-
-    
-  }
-
-  const snackBarHandleClick = (Transition) => () => {
-    setSnackBar({
-      open: true,
-      Transition,
-    });
-  };
-
-  const snackBarHandleClose = () => {
-    setSnackBar({
-      ...snackBar,
-      open: false,
-    });
-  };
-
-  function Alert(props) {
-    return <MuiAlert elevation={6} variant="filled" {...props} />;
-  }
 
   // Form Controll
 
@@ -342,7 +119,7 @@ const Cart = () => {
           const orderDetails = getFullData(data, false)
 
           const orderId = await createRegistredUserOrder(orderDetails)
-
+          setApiErrors({})
           history.push({
             pathname: ORDER_STATUS,
             state: { detail: orderId }
@@ -350,8 +127,7 @@ const Cart = () => {
         }
         catch(err) {
           if(err?.response?.status === 409) {
-            errors.emailDuplicate = "This Email already exists"
-            setErrorText(getErrorText({...errors}))
+            setApiErrors((oldErrors) => ({...oldErrors, emailDuplicate: "This Email already exists"}))
           }
         }
       }
@@ -360,7 +136,7 @@ const Cart = () => {
 
           const orderDetails = getFullData(data, true)
           const details = await createUnregistredUserOrder(orderDetails.orderDeatils, orderDetails.clientDeatils)
-          
+          setApiErrors({})
           history.push({
             pathname: ORDER_STATUS,
             state: { detail: {order: details.order.data} }
@@ -368,17 +144,12 @@ const Cart = () => {
         }
         catch(err) {
           if(err?.response?.status === 409) {
-            errors.emailDuplicate = "This Email already exists"
-            setErrorText(getErrorText({...errors}))
+            setApiErrors((oldErrors) => ({...oldErrors, emailDuplicate: "This Email already exists"}))
           }
         }
       }
     }
   }
-
-  // Material UI Styles
-
-  const classes = useStyles();
 
   // Upload Data From Server
 
@@ -391,7 +162,7 @@ const Cart = () => {
       dispatch(setPaymentMethod(data[1].method_id))
     })
     addPayPal().then(clientId => {
-      if(! document.querySelector('#paypal-button')) {
+      if(!document.querySelector('#paypal-button')) {
         const script = document.createElement('script');
         script.type='text/javascript';
         script.id='paypal-button';
@@ -410,15 +181,11 @@ const Cart = () => {
   // ComponentDidMount
 
   useEffect(() => {
+
     setLoading(true);
     getCartData().then(() => setLoading(false))
-  }, [])
 
-  useEffect(() => {
-    if(Object.keys(errors).length > 0) {
-      setErrorText(getErrorText({...errors}))
-    }
-  });
+  }, [])
 
   //PayPal modal control
 
@@ -504,6 +271,9 @@ const Cart = () => {
 
   if(loading) return <Spinner />
 
+  // Returning Component
+
+  console.log(errors);
   return (
     <section className="section">
       <h1 className="title">Cart</h1>
@@ -671,7 +441,7 @@ const Cart = () => {
                       paypalSDK ?
                         Object.keys(errors).length > 0 ?
                         (
-                          <Button type="submit" onClick={snackBarHandleClick(Fade)}  className={classes.checkout}>
+                          <Button type="submit" className={classes.checkout}>
                             Go To Checkout
                           </Button>
                         )
@@ -683,7 +453,7 @@ const Cart = () => {
                         )
                       : <Spinner />
                     : (
-                      <Button type="submit" onClick={snackBarHandleClick(Fade)} className={classes.checkout}>
+                      <Button type="submit" className={classes.checkout}>
                         Create Order
                       </Button>
                     )
@@ -716,15 +486,7 @@ const Cart = () => {
           
         </div>
       </PayPalModal>
-      <Snackbar
-        open={snackBar.open}
-        onClose={snackBarHandleClose}
-        TransitionComponent={snackBar.Transition}
-        key={snackBar.Transition.name}>
-          <Alert severity="error">
-            {errorText}
-          </Alert>
-      </Snackbar>
+      <SnackBar errors={{...apiErrors, ...errors}}/>
     </section>
   );
 };

@@ -26,7 +26,6 @@ export default function PickupPointSelect({setValue, pickupPoints, defaultPoint,
           findingPoint ? dispatch(setPickupPoint(findingPoint)) : dispatch(setPickupPoint(null))
           setValue('pickupPoint', newInputValue)
         }}
-        inputProps={{form: {autocomplete: 'off'}}}
         id="controllable-states"
         options={pickupPointsAddress}
         renderInput={(params) => <TextField {...params} label="Select Pick-up Point" variant="outlined" {...field} />}
