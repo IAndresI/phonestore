@@ -35,3 +35,8 @@ export const putProfile = async (id, formData) => {
   const {data} = await $authHost.put('api/user/profile/'+id, formData);
   return data;
 }
+
+export const isAlreadyRegistred = async (email) => {
+  const {data} = await $host.get('api/user/is_already_registred', {params: {email}});
+  return data;
+}

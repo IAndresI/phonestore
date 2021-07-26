@@ -37,6 +37,8 @@ const SnackBar = ({errors}) => {
         return "Enter pick-up point address!"
       case "emailDuplicate":
         return "This email already registred! Please, register before make order!"
+      case "payError":
+        return "An error occurred while paying!"
       default: return "";
     }
   }
@@ -54,7 +56,7 @@ const SnackBar = ({errors}) => {
 
   return (
     <Snackbar
-      open={snackBar.open}
+      open={snackBar.open && Object.keys(errors).length > 0}
       TransitionComponent={snackBar.Transition}
       onClose={snackBarOnClose}
       key={snackBar.Transition.name}>

@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { onAddCartTotal, onChangeCartItem, setPaymentMethod } from '../../store/actions';
-import { Button, Container, Fade, FormControlLabel, Radio, RadioGroup, TextField } from '@material-ui/core';
-import {Link, useHistory} from 'react-router-dom';
-import HighlightOffIcon from '@material-ui/icons/HighlightOff';
+import { onAddCartTotal, setPaymentMethod } from '../../store/actions';
+import { Button, Container, FormControlLabel, Radio, RadioGroup, TextField } from '@material-ui/core';
+import {useHistory} from 'react-router-dom';
 import Map from '../../components/cart/Map';
 import {addPayPal, getLocations, getPaymentMethod} from '../../http/cartAPI'
 import PickupPointSelect from '../../components/cart/PickupPointSelect';
@@ -16,6 +15,8 @@ import {createUnregistredUserOrder, createRegistredUserOrder} from '../../http/o
 import { ORDER_STATUS } from '../../utils/consts';
 import useStyles from './style'
 import SnackBar from '../../components/cart/SnackBar';
+import ItemsList from '../../components/cart/ItemsList';
+import { isAlreadyRegistred } from '../../http/userAPI';
 
 const Cart = () => {
 
@@ -52,6 +53,7 @@ const Cart = () => {
   const [pickupPoints, setPickupPoints] = useState([]);
   const [paymentMethods, setPaymentMethods] = useState([]);
   const [wayToGet, setWayToGet] = useState('pickupPoint');
+  const [tempUserData, setTempUserData] = useState({})
 
   // Loading Scripts And Queries
 
@@ -108,9 +110,20 @@ const Cart = () => {
 
   const createOrder = async (data, e) => {
     e.preventDefault();
-    
+    setApiErrors({})
     if (cartPaymentMethod === 2) {
-      setOpenPayPalMpdal(true);
+      if(isAuth) {
+        setTempUserData(getFullData(data, false))
+        setOpenPayPalMpdal(true);
+      }
+      else {
+        const alreadyRegistred = await isAlreadyRegistred(data.email)
+        if(!alreadyRegistred) {
+          setTempUserData(getFullData(data, true))
+          setOpenPayPalMpdal(true);
+        }
+        else setApiErrors((oldErrors) => ({...oldErrors, emailDuplicate: "This Email already exists"}))
+      }
     }
     else {
       if(isAuth) {
@@ -136,7 +149,6 @@ const Cart = () => {
 
           const orderDetails = getFullData(data, true)
           const details = await createUnregistredUserOrder(orderDetails.orderDeatils, orderDetails.clientDeatils)
-          setApiErrors({})
           history.push({
             pathname: ORDER_STATUS,
             state: { detail: {order: details.order.data} }
@@ -197,15 +209,42 @@ const Cart = () => {
 
   // PayPal payment
 
-  const successPaymentHandler = (details, data) => {
+  const successPaymentHandler = async (details, data) => {
     alert("Transaction completed by " + details.payer.name.given_name);
-    alert(data.orderID);
-    console.log(details);
-    console.log(data);
+    if(isAuth) {
+      try {
+
+        const orderId = await createRegistredUserOrder(tempUserData)
+        setApiErrors({})
+        history.push({
+          pathname: ORDER_STATUS,
+          state: { detail: orderId }
+        })
+      }
+      catch(err) {
+        if(err?.response?.status === 409) {
+          setApiErrors((oldErrors) => ({...oldErrors, emailDuplicate: "This Email already exists"}))
+        }
+      }
+    }
+    else {
+      try {
+        const details = await createUnregistredUserOrder(tempUserData.orderDeatils, tempUserData.clientDeatils)
+        history.push({
+          pathname: ORDER_STATUS,
+          state: { detail: {order: details.order.data} }
+        })
+      }
+      catch(err) {
+        if(err?.response?.status === 409) {
+          setApiErrors((oldErrors) => ({...oldErrors, emailDuplicate: "This Email already exists"}))
+        }
+      }
+    }
   }
 
   const failurePaymentHandler = (error) => {
-    alert(error);
+    setApiErrors((oldErrors) => ({...oldErrors, payError: "You didn't pay"}))
   }
 
   // Google maps and autocomplete 
@@ -253,13 +292,6 @@ const Cart = () => {
     }
   };
 
-  // Change Phone In Cart Count
-
-  const countChange = (e, id) => {
-    const count = e.target.value;
-    dispatch(onChangeCartItem({phone_id: id, count}))
-  }
-
   // Format Price Data From DB
 
   const formatter = new Intl.NumberFormat('en-US', {
@@ -273,7 +305,6 @@ const Cart = () => {
 
   // Returning Component
 
-  console.log(errors);
   return (
     <section className="section">
       <h1 className="title">Cart</h1>
@@ -284,42 +315,7 @@ const Cart = () => {
             <div className={classes.container}>
               <div className={classes.info}>
                 <h2>Items In Cart</h2>
-                {
-                  cartItems.map(item => {
-                    const imagePath = `${process.env.REACT_APP_API_URL}/${item.image ? item.image : "phone.jpg"}`
-                    return (
-                      <div key={item.phone_id} className={classes.item} >
-                        <Button 
-                          onClick={() => countChange({target:{value: -1}}, item.phone_id)}
-                          className={classes.removeButton}>
-                          <HighlightOffIcon />
-                        </Button>
-                        <div className={classes.className}>
-                          <Link to={`/phone/${item.phone_id}`} className={classes.imageContainer}>
-                            <img className={classes.image} alt={item.name} height="42" width="42" src={imagePath} />
-                          </Link>
-                          <div>
-                            <Link className={classes.name} to={`/phone/${item.phone_id}`}><h3>{item.name}</h3></Link>
-                            <div className={classes.price}>{item.price}</div>
-                          </div>
-
-                        </div>
-                        <div>
-                          <TextField
-                            className={classes.count}
-                            onChange={(e) => countChange(e, item.phone_id)}
-                            id="outlined-from-input"
-                            type="number"
-                            name="min"
-                            defaultValue={item.count}
-                            inputProps={{ max: 100, step: 1}}
-                            variant="outlined"
-                          />
-                        </div>
-                      </div>
-                    )
-                  })
-                }
+                <ItemsList classes={classes} cartItems={cartItems} />
                 <form className={classes.form} onSubmit={handleSubmit(createOrder)}>
                   {
                     !isAuth ? 
@@ -459,6 +455,7 @@ const Cart = () => {
                     )
                   }
                 </form>
+              
               </div>
               <div className={classes.order}>
                 <h2>Total Amount</h2>
@@ -470,7 +467,7 @@ const Cart = () => {
           <h2 style={{textAlign: 'center', fontSize: 30}}>Your cart is empty!</h2>
         }
       </Container>
-      <PayPalModal open={openPayPalMpdal} handleClose={handlePayPalModalClose}>
+      <PayPalModal loading={!paypalSDK} open={openPayPalMpdal && Object.keys(errors).length === 0} handleClose={handlePayPalModalClose}>
         <div className={classes.paypalButton}>
           {
             paypalSDK ?
