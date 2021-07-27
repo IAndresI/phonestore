@@ -21,7 +21,7 @@ import LockOpenIcon from '@material-ui/icons/LockOpen';
 import { Link } from 'react-router-dom';
 import {CART_ROUTE, SHOP_ROUTE, LOGIN_ROUTE, REGISTRATION_ROUTE, PROFILE_ROUTE, SEARCH_ROUTE, HOME_ROUTE} from '../utils/consts'
 import { useDispatch, useSelector } from 'react-redux';
-import { onLogout } from '../store/actions';
+import { onLogout, setCart } from '../store/actions';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 
 const useStyles = makeStyles({
@@ -48,6 +48,7 @@ export default function SideBar({isAuth, cartItemsCount}) {
   const classes = useStyles();
   const [state, setState] = React.useState(false);
   const user = useSelector(state => state.user.user)
+  const compare = useSelector(state => state.compare.items)
   const dispatch = useDispatch()
 
   const toggleDrawer = (open) => (event) => {
@@ -69,7 +70,7 @@ export default function SideBar({isAuth, cartItemsCount}) {
         PhoneStore
       </Typography>
       <List>
-        {[['Home', HOME_ROUTE], ['Shop', SHOP_ROUTE], ['Compare', "/compare"], ['Search', SEARCH_ROUTE]].map((item, index) => (
+        {[['Home', HOME_ROUTE], ['Shop', SHOP_ROUTE], ['Compare', "/compare"], ['Search', SEARCH_ROUTE], ['Cart', isAuth ? `${CART_ROUTE}/${user.cart_id}` : CART_ROUTE]].map((item, index) => (
           <Link to={item[1]} key={item[0]} className={classes.link}>
             <ListItem button>
               <ListItemIcon>
@@ -78,7 +79,16 @@ export default function SideBar({isAuth, cartItemsCount}) {
                     switch(item[0]) {
                       case 'Home': return <HomeIcon />
                       case 'Shop': return <ShoppingBasketIcon />
-                      case 'Compare': return <CompareIcon />
+                      case 'Compare': return (
+                        <Badge badgeContent={compare.length} color="secondary">
+                          <CompareIcon />
+                        </Badge>
+                      )
+                      case 'Cart': return (
+                        <Badge badgeContent={cartItemsCount} color="secondary">
+                          <ShoppingCartIcon />
+                        </Badge>
+                      )
                       case 'Search': return <SearchIcon />
                       default: return <HomeIcon />
                     }
@@ -97,7 +107,7 @@ export default function SideBar({isAuth, cartItemsCount}) {
           (
             <>
               {
-                [['Profile', `${PROFILE_ROUTE}/${user.id}`], ['Cart', `${CART_ROUTE}/${user.cart_id}`]].map((item, index) => (
+                [['Profile', `${PROFILE_ROUTE}/${user.id}`]].map((item, index) => (
                   <Link to={item[1]} key={item[0]} className={classes.link}>
                     <ListItem button>
                       <ListItemIcon>
@@ -105,11 +115,6 @@ export default function SideBar({isAuth, cartItemsCount}) {
                         (() => {
                           switch(item[0]) {
                             case 'Profile': return <AccountCircleIcon />
-                            case 'Cart': return (
-                              <Badge badgeContent={cartItemsCount} color="secondary">
-                                <ShoppingCartIcon />
-                              </Badge>
-                            )
                             default: return <HomeIcon />
                           }
                         })()
@@ -121,7 +126,10 @@ export default function SideBar({isAuth, cartItemsCount}) {
                 ))
               }
               <Link to="/" className={classes.link}>
-                <ListItem onClick={() => dispatch(onLogout())} button>
+                <ListItem onClick={() => {
+                  dispatch(onLogout())
+                  dispatch(setCart(JSON.parse(localStorage.getItem('cart') || [])))
+                }} button>
                   <ListItemIcon>
                     <ExitToAppIcon />
                   </ListItemIcon>

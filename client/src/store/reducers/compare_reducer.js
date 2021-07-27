@@ -1,15 +1,25 @@
 export default function compareReducer(state, action) {
   if(state === undefined) return {
-    items: [1,2,3],
+    items: localStorage.getItem('compare')?.split(',') || [],
   };
+
   switch (action.type) {
     case "ADD_COMPARE_ITEM":
+      const newAddedItems = [...state.compare.items, action.payload]
+      localStorage.setItem("compare", newAddedItems)
       return {
-        items: [...state.compare.items, action.payload]
+        items: newAddedItems
       };
     case "REMOVE_COMPARE_ITEM":
+      const newRemovedItems = state.compare.items.filter(el => +el !== action.payload);
+      if(newRemovedItems.length > 0) {
+        localStorage.setItem("compare", newRemovedItems)
+      }
+      else {
+        localStorage.removeItem("compare")
+      }
       return {
-        items: state.compare.items.filter(el => el.phone_id !== action.payload)
+        items: newRemovedItems
       };
     default:
       return state.compare;

@@ -8,8 +8,9 @@ import AddShoppingCartIcon from '@material-ui/icons/AddShoppingCart';
 import { useParams } from 'react-router-dom';
 import { getOnePhones } from '../http/phoneAPI';
 import { useDispatch, useSelector } from 'react-redux';
-import { onChangeCartItem } from '../store/actions';
+import { addCompareItem, removeCompareItem, onChangeCartItem } from '../store/actions';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
+import CompareIcon from '@material-ui/icons/Compare';
 
 const useStyles = makeStyles({
   media: {
@@ -27,8 +28,10 @@ export default function Phone() {
 
   const dispatch = useDispatch();
   const cartList = useSelector(state => state.cart.cartList);
+  const compareList = useSelector(state => state.compare.items);
 
   const isInCart = cartList.find(e => e.phone_id === phone?.phone_id);
+  const isInCompare = compareList.find(e => +e === phone?.phone_id);
 
   const removeFromCart = (phone) => dispatch(onChangeCartItem({
     ...phone,
@@ -64,12 +67,12 @@ export default function Phone() {
             onClick={() => {
               removeFromCart({phone_id: phone.phone_id, name: phone.name, price: phone.price, image: phone.image});
             }}
-            style={{backgroundColor:"green", marginBottom: 30}}
+            style={{backgroundColor:"tomato", marginBottom: 30, marginRight: 30}}
             variant="contained"
             color="primary"
             size="large"
-            endIcon={<ShoppingCartIcon>Already In Cart</ShoppingCartIcon>}>
-              Already In Cart
+            endIcon={<ShoppingCartIcon/>}>
+              Remove From Cart
             </Button>
           )
           :
@@ -78,12 +81,43 @@ export default function Phone() {
             onClick={() => {
               dispatch(onChangeCartItem({phone_id: phone.phone_id, name: phone.name, price: phone.price, image: phone.image}));
             }}
-            style={{marginBottom: 30}}
+            style={{marginBottom: 30, marginRight: 30}}
             variant="contained"
             color="primary"
             size="large"
             endIcon={<AddShoppingCartIcon>Add To Cart</AddShoppingCartIcon>}>
               Add To Cart
+            </Button>
+          )
+        }
+
+        {
+          isInCompare ?
+          (
+            <Button
+              onClick={() => {
+                dispatch(removeCompareItem(phone.phone_id));
+              }}
+              style={{backgroundColor: "tomato", marginBottom: 30}}
+              variant="contained"
+              color="primary"
+              size="large"
+              endIcon={<CompareIcon/>}>
+                Remove From Compare
+            </Button>
+          )
+          :
+          (
+            <Button
+              onClick={() => {
+                dispatch(addCompareItem(phone.phone_id));
+              }}
+              style={{marginBottom: 30}}
+              variant="contained"
+              color="primary"
+              size="large"
+              endIcon={<CompareIcon/>}>
+                Add To Compare
             </Button>
           )
         }
