@@ -2,6 +2,12 @@ import {
   $host
 } from './index'
 
+
+export const getSeveralPhones = async (id) => {
+  const {data} = await $host.get('api/phone/get_several', {params: {id: id}});
+  return data;
+}
+
 export const createPhone = async (formData) => {
   const {data} = await $host.post('api/phone/', formData);
   return data;

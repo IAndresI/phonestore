@@ -64,6 +64,7 @@ const SearchResult = () => {
     else {
       setLoading(true)
       setPage(1)
+      setFindingPhone([1]);
       const timer = setTimeout(async () => {
         search(searchText.toLowerCase(),limit, page).then(({count, phones}) => {
           console.log(count,phones);

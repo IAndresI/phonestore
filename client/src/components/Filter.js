@@ -103,8 +103,6 @@ const Filter = () => {
 
   const handleChange = (event, newValue) => {
     setPrice(newValue);
-    dispatch(onPriceChange(newValue))
-    dispatch(onPageSet(1))
   };
 
   const handleToggle = (value, state, changeState, action, type) => () => {
@@ -164,7 +162,17 @@ const Filter = () => {
       setColorList(color);
       dispatch(fetchingColor(color))
     });
-  }, []);
+  }, [dispatch]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      dispatch(onPriceChange(price))
+      dispatch(onPageSet(1))
+    }, 500);
+    return () => {
+      clearTimeout(timer)
+    }
+  }, [price, dispatch])
 
   return (
     <div className={classes.root}>

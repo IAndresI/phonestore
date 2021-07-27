@@ -4,11 +4,12 @@ import Phone from './page/Phone';
 import Shop from './page/Shop';
 import Auth from './page/Auth';
 import Profile from './page/Profile';
-import {ADMIN_ROUTE, CART_ROUTE, PHONE_ROUTE, SHOP_ROUTE, LOGIN_ROUTE, REGISTRATION_ROUTE, PROFILE_ROUTE, SEARCH_ROUTE, HOME_ROUTE, CHECKOUT_ROUTE, ORDER_STATUS} from './utils/consts'
+import { COMPARE_ROUTE, ADMIN_ROUTE, CART_ROUTE, PHONE_ROUTE, SHOP_ROUTE, LOGIN_ROUTE, REGISTRATION_ROUTE, PROFILE_ROUTE, SEARCH_ROUTE, HOME_ROUTE, CHECKOUT_ROUTE, ORDER_STATUS} from './utils/consts'
 import SearchResult from './page/SearchResult';
 import Home from './page/Home';
 import Checkout from './page/Checkout';
 import OrderStatus from './page/OrderStatus';
+import Compare from './page/Compare';
 
 export const authRoutes = [
   {
@@ -25,6 +26,10 @@ export const authRoutes = [
   },
 ];
 export const publicRoutes = [
+  {
+    path: COMPARE_ROUTE,
+    Component: Compare
+  },
   {
     path: CART_ROUTE,
     Component: Cart

@@ -166,7 +166,23 @@ const setPaymentMethod = (method) => {
   }
 }
 
+const addCompareItem = (id) => {
+  return {
+    type: "ADD_COMPARE_ITEM",
+    payload: id
+  }
+}
+
+const removeCompareItem = (id) => {
+  return {
+    type: "REMOVE_COMPARE_ITEM",
+    payload: id
+  }
+}
+
 export {
+  removeCompareItem,
+  addCompareItem,
   onChangeCartItem,
   onRemoveItemFromCart,
   onRemoveItemAllFromCart,
