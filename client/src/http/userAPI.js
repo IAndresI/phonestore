@@ -40,3 +40,13 @@ export const isAlreadyRegistred = async (email) => {
   const {data} = await $host.get('api/user/is_already_registred', {params: {email}});
   return data;
 }
+
+export const checkPassword = async (clientId, password) => {
+  const {data} = await $host.get('api/user/password_check', {params: {clientId, password}});
+  return data;
+}
+
+export const changePassword = async (clientId, password) => {
+  const {data} = await $authHost.put('api/user/password_change', {clientId, password});
+  return data;
+}

@@ -1,7 +1,7 @@
 import { Container, makeStyles, Snackbar } from '@material-ui/core';
 import React, {useEffect, useState} from 'react';
 import { useSelector } from 'react-redux';
-import { getProfile, putProfile } from '../http/userAPI';
+import { changePassword, checkPassword, getProfile, putProfile } from '../http/userAPI';
 import Spinner from '../components/Spinner';
 import PropTypes from 'prop-types';
 import Tabs from '@material-ui/core/Tabs';
@@ -9,6 +9,7 @@ import Tab from '@material-ui/core/Tab';
 import Box from '@material-ui/core/Box';
 import PersonalData from '../components/profile/tabs/PersonalData';
 import MuiAlert from '@material-ui/lab/Alert';
+import ChangePassword from '../components/profile/tabs/ChangePassword';
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -73,13 +74,13 @@ const Profile = () => {
 
   const [profile, setProfile] = useState(null)
   const [loading, setLoading] = useState(true)
-  const client_id = useSelector(state => state.user.user.id);
+  const clientId = useSelector(state => state.user.user.id);
   
   const classes = useStyles();
 
   useEffect(() => {
     setLoading(true)
-    getProfile(client_id).then(data => {
+    getProfile(clientId).then(data => {
       setProfile(data);
       setLoading(false)
     })
@@ -105,17 +106,47 @@ const Profile = () => {
       formData.append('first_name',`${first_name}` )
       formData.append('last_name',`${last_name}` )
       formData.append('gender',`${gender}` )
-      formData.append('client_id',`${client_id}` )
+      formData.append('clientId',`${clientId}` )
       if(image) formData.append('image', image)
       formData.append('image', null)
-      const put = await putProfile(client_id, formData).then(data => {
+      const put = await putProfile(clientId, formData).then(data => {
         handleClick();
-        getProfile(client_id).then(data => {
+        getProfile(clientId).then(data => {
           setProfile(data);
           setLoad(false)
         })
       });
       return put;
+    }
+    catch(e) {
+      alert(e.response?.data?.message?.detail || e.response?.data?.message || e.message)
+    }
+  }
+
+  // Change Passowrd Handler
+
+  const passwordChange = async (data, setLoading, setApiErrors) => {
+    try {
+      setApiErrors({})
+      setLoading(true)
+      handleClose();
+      if(data.new_password !== data.confirm_password) {
+        setApiErrors({new_not_match: true})
+        setLoading(false)
+        return;
+      }
+      else {
+        const check = await checkPassword(clientId, data.current_password)
+        if(check) {
+          const put = await changePassword(clientId, data.new_password).then(data => handleClick());
+
+          return put;
+        }
+        else {
+          setApiErrors({current_not_match: true})
+        }
+      }
+      setLoading(false)
     }
     catch(e) {
       alert(e.response?.data?.message?.detail || e.response?.data?.message || e.message)
@@ -217,7 +248,7 @@ const Profile = () => {
             <PersonalData profile={profile} onSubmit={onPersonalDataSubmit}/>
           </TabPanel>
           <TabPanel value={value} index={1}>
-            Change Password
+            <ChangePassword onSubmit={passwordChange}/>
           </TabPanel>
           <TabPanel value={value} index={2}>
             Orders
