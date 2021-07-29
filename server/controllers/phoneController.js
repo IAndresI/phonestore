@@ -4,6 +4,14 @@ const path = require('path');
 const ApiError = require('../error/ApiError');
 
 class PhoneController {
+
+  async getSeveral(req, res, next) {
+    const {id} = req.query;
+    const qeury = await db.query(`SELECT * FROM get_several_phones(ARRAY[$1::int[]]);`, [id]);
+    const data = qeury.rows
+    return res.json(data)
+  }
+
   async getOne(req, res, next) {
     const {id} = req.params;
     if(!id) {

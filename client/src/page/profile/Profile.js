@@ -1,76 +1,19 @@
 import { Container, makeStyles, Snackbar } from '@material-ui/core';
 import React, {useEffect, useState} from 'react';
 import { useSelector } from 'react-redux';
-import { changePassword, checkPassword, getProfile, putProfile } from '../http/userAPI';
-import Spinner from '../components/Spinner';
+import { changePassword, checkPassword, getProfile, putProfile } from '../../http/userAPI';
+import Spinner from '../../components/Spinner';
 import PropTypes from 'prop-types';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import Box from '@material-ui/core/Box';
-import PersonalData from '../components/profile/tabs/PersonalData';
+import PersonalData from '../../components/profile/tabs/PersonalData';
 import MuiAlert from '@material-ui/lab/Alert';
-import ChangePassword from '../components/profile/tabs/ChangePassword';
+import ChangePassword from '../../components/profile/tabs/ChangePassword';
+import useStyles from './style';
+import Orders from '../../components/profile/tabs/Orders';
 
-const useStyles = makeStyles((theme) => ({
-  container: {
-    display: 'flex',
-    justifyContent: 'center',
-  },
-  aside: {
-    width: '30%',
-    marginRight: 30,
-    backgroundColor: '#ffffff',
-    borderRadius: 10,
-    padding: 15,
-    height: '100%'
-  },
-  content: {
-    width: '70%',
-    backgroundColor: '#ffffff',
-    borderRadius: 10,
-    padding: 15
-  },
-  userInfo: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-  },
-  userImageContainer: {
-    width: 250,
-    height: 250,
-    overflow: 'hidden',
-    borderRadius: '50%',
-    marginBottom: 10
-  },
-  userImage: {
-    width: 250,
-    height: 250,
-    objectFit: "cover",
-    display: "block"
-  },
-  userName: {
-    fontSize: 20,
-    fontWeight: 500,
-    marginBottom: 30
-  },
-  root: {
-    display: 'flex',
-    width: '100%'
-  },
-  tab: {
-    width: '100%',
-    maxWidth: '100%',
-    textTransform: 'none',
-    fontSize: 18
-  },
-  indicator: {
-    right: 'auto',
-    left: 0,
-    backgroundColor: '#3f51b5'
-  },
-}));
-
-const Profile = () => {
+const Profile = ({setPageLoading}) => {
 
   const [profile, setProfile] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -84,6 +27,8 @@ const Profile = () => {
       setProfile(data);
       setLoading(false)
     })
+
+    return () => setPageLoading(true)
   }, []);
 
   // Form handlers
@@ -251,7 +196,7 @@ const Profile = () => {
             <ChangePassword onSubmit={passwordChange}/>
           </TabPanel>
           <TabPanel value={value} index={2}>
-            Orders
+            <Orders clientId={clientId}/>
           </TabPanel>
         </div>
       </Container>

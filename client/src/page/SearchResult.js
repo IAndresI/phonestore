@@ -27,7 +27,7 @@ const useStyles = makeStyles(() => ({
   },
 }));
   
-const SearchResult = () => {
+const SearchResult = ({setPageLoading}) => {
 
   // Phones
   
@@ -54,6 +54,10 @@ const SearchResult = () => {
   const getSearch = (e) => {
     dispatch(onSearch(e.target.value))
   }
+
+  useEffect(() => {
+    return () => setPageLoading(true)
+  }, [])
 
   useEffect(() => {
     if(!searchText) {

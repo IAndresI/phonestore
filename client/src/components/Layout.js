@@ -1,16 +1,24 @@
-import React from 'react';
+import React, {useState} from 'react';
 import Footer from './Footer';
 import Header from './Header'
 
 const Layout = (props) => {
   return (
-    <>
-      <Header className="header" />
-      <main className="main-content">
-        {props.children}
-      </main>
-      <Footer className="footer"/>
-    </>
+    <div className={props.loading ? "root loading" : "root onload"}>
+      {
+        props.loading ? null :
+        (
+          <>
+            <Header className="header" />
+            <main className={props.classLoading}>
+              {props.children}
+            </main>
+            <Footer className="footer"/>
+          </>
+        )
+      }
+      
+    </div>
   );
 };
 

@@ -24,6 +24,26 @@ class OrderController {
     }
   }
 
+  async getUserOrders(req, res, next) {
+    try {
+
+      const {page, limit} = req.query;
+      const offset = page*limit;
+
+      const {id} = req.params;
+      if(!id) {
+        return next(ApiError.badRequest('Enter ID!'))
+      } 
+    
+      const dataQuery = await db.query('SELECT * FROM get_all_user_orders WHERE client_id=$1 LIMIT $2 OFFSET $3;', [id, limit, offset]);
+      const countQuery = await db.query('SELECT COUNT(*) FROM get_all_user_orders WHERE client_id=$1;', [id]);
+      return res.json({count: countQuery.rows[0].count,orders: dataQuery.rows})
+    }
+    catch(err) {
+      return next(ApiError.badRequest(err.message));
+    }
+  }
+
   async getAll(req, res, next) {
     try {
       const query = await db.query('SELECT * FROM order');

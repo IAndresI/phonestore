@@ -19,7 +19,7 @@ const useStyles = makeStyles({
   },
 });
 
-export default function Phone() {
+export default function Phone({setPageLoading}) {
   //const phone = {id: 1, weight: 20, diagonal: 5, ram: 30, memory: 256, price: 1000, manufacturer_id: 1, name: "Iphone 12 Pro", color: "White", image: "7e8da54c-f815-42ba-b1f3-328c2fa24333.jpg"};
   const classes = useStyles();
   const [phone, setPhone] = useState(null);
@@ -45,6 +45,8 @@ export default function Phone() {
       setPhone(data)
       setLoading(false)
     })
+
+    return () => setPageLoading(true)
   }, [])
 
   if (loading) return <CircularProgress style={{position: "fixed", top: 0, left: 0, right: 0, bottom: 0}}/>

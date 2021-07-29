@@ -18,7 +18,7 @@ import SnackBar from '../../components/cart/SnackBar';
 import ItemsList from '../../components/cart/ItemsList';
 import { isAlreadyRegistred } from '../../http/userAPI';
 
-const Cart = () => {
+const Cart = ({setPageLoading}) => {
 
   // Dispatch
 
@@ -79,7 +79,7 @@ const Cart = () => {
       const orderDeatils = {
         pickupPoint: pickupPoints.find(el => el.address===formData.pickupPoint)?.pickup_point_id || null,
         deliveryAddress: clientAddress || null,
-        dateOrderPaid: null, 
+        dateOrderPaid: cartPaymentMethod === 2 ? new Date() : null, 
         total: cartTotal,
         items: cartItems.map(e => [e.phone_id, e.count]),
         paymentMethod: cartPaymentMethod
@@ -100,7 +100,7 @@ const Cart = () => {
         deliveryAddress: clientAddress || null,
         total: cartTotal,
         items: cartItems.map(e => [e.phone_id, e.count]),
-        dateOrderPaid: null,
+        dateOrderPaid: cartPaymentMethod === 2 ? new Date() : null,
         paymentMethod: cartPaymentMethod,
       }
 
@@ -197,6 +197,7 @@ const Cart = () => {
     setLoading(true);
     getCartData().then(() => setLoading(false))
 
+    return () => setPageLoading(true)
   }, [])
 
   //PayPal modal control
@@ -210,10 +211,8 @@ const Cart = () => {
   // PayPal payment
 
   const successPaymentHandler = async (details, data) => {
-    alert("Transaction completed by " + details.payer.name.given_name);
     if(isAuth) {
       try {
-
         const orderId = await createRegistredUserOrder(tempUserData)
         setApiErrors({})
         history.push({

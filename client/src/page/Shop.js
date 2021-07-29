@@ -8,7 +8,7 @@ import { getAllPhones } from '../http/phoneAPI';
 import Pagination from '@material-ui/lab/Pagination';
 import Spinner from '../components/Spinner';
 
-const Shop = () => {
+const Shop = ({setPageLoading}) => {
 
   // store
 
@@ -50,6 +50,10 @@ const Shop = () => {
   const paginationChange = (event, value) => {
     dispatch(onPageSet(value))
   }
+
+  useEffect(() => {
+    setPageLoading(true)
+  }, [])
 
   useEffect(() => {
     const pageCount = Math.ceil(totalCount/limit);

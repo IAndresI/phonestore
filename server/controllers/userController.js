@@ -131,14 +131,70 @@ class UserController {
       }
       else img=image;
       
-      const qeury = await db.query(`UPDATE client SET first_name = $1, last_name = $2, email = $3, gender = $4, date_of_birth = $5 ${filename ? `, image = '${filename}'` : ""} WHERE client_id=$6`, [first_name, last_name, email, gender, date_of_birth, client_id], (err) => {
-        if(!err) {
-          if(filename)img.mv(path.resolve(__dirname, '..','static', filename))
-          return res.json(req.body)
+      const qeury = await db.query(`
+        UPDATE client 
+        SET first_name = $1, last_name = $2, email = $3, gender = $4, date_of_birth = $5 ${filename ? `, image = '${filename}'` : ""} 
+        WHERE client_id=$6`, 
+        [first_name, last_name, email, gender, date_of_birth, client_id], 
+        (err) => {
+          if(!err) {
+            if(filename)img.mv(path.resolve(__dirname, '..','static', filename))
+            return res.json(req.body)
+          }
+          next(ApiError.badRequest(err));
+          return res.status(500)
+        })
+    }
+    catch(err) {
+      next(ApiError.badRequest(err.message));
+    }
+  }
+
+  async isAlreadyRegistred(req, res, next) {
+    try {
+      const {email} = req.query;
+      if(!email) {
+        return next(ApiError.badRequest('Enter email!'))
+      }
+      const qeury = await db.query(`SELECT client_id FROM client WHERE email=$1;`, [email]);
+      const [data] = qeury.rows
+      return res.json(!!data)
+    }
+    catch(err) {
+      next(ApiError.badRequest(err.message));
+    }
+  }
+
+  async checkPassword(req, res, next) {
+    try {
+      const {password, clientId} = req.query;
+      await db.query(
+        `SELECT password FROM client WHERE client_id=$1;`, 
+        [clientId],
+        (err, response) => {
+          if(err) return next(ApiError.badRequest(err.message));
+          else {
+            if (response.rows.length > 0) return res.json(bcrypt.compareSync(password, response.rows[0]?.password || undefined))
+            else res.json(false)
+          }
         }
-        next(ApiError.badRequest(err));
-        return res.status(500)
-      })
+      );
+    }
+    catch(err) {
+      next(ApiError.badRequest(err.message));
+    }
+  }
+
+  async changePassword(req, res, next) {
+    try {
+      const {password, clientId} = req.body;
+      if(!password || !clientId) {
+        next(ApiError.badRequest('Email or Password not entered!'));
+      }
+      const hashedPassword = await bcrypt.hash(password, 5)
+      const qeury = await db.query(`UPDATE client SET password=$1 WHERE client_id=$2;`, [hashedPassword, clientId]);
+      const [data] = qeury.rows
+      return res.json(data)
     }
     catch(err) {
       next(ApiError.badRequest(err.message));

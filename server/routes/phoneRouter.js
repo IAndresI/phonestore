@@ -2,6 +2,7 @@ const Router = require('express');
 const router = new Router();
 const phoneController = require('../controllers/phoneController');
 
+router.get('/get_several',phoneController.getSeveral);
 router.get('/newest',phoneController.getNewest);
 router.get('/filter', phoneController.getAllFilter);
 router.get('/search', phoneController.search);

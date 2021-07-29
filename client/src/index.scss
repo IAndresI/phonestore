@@ -12,10 +12,22 @@ body {
   box-sizing: border-box;
 }
 
-#root {
+.root {
+  transition: opacity .5s;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+}
+
+.root.loading,
+.main-content.pageLoading {
+  opacity: 0;
+}
+
+.root.onload,
+.main-content.pageLoad {
+  opacity: 1;
+  transition: opacity .5s;
 }
 
 #root .makeStyles-grow-1 {

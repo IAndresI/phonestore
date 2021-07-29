@@ -96,7 +96,7 @@ const useStyles = makeStyles({
   }
 });
 
-const Compare = () => {
+const Compare = ({setPageLoading}) => {
 
   const dispatch = useDispatch()
 
@@ -115,6 +115,7 @@ const Compare = () => {
         setLoading(false)
       })
       .finally(err => setLoading(false))
+    return () => setPageLoading(true)
   }, [storedId])
 
   if(loading) return <Spinner />

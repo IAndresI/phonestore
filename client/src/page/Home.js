@@ -27,7 +27,7 @@ const useStyles = makeStyles(() => ({
   }
 }));
 
-const Home = () => {
+const Home = ({setPageLoading}) => {
 
   const [newestPhones, setNewestPhones] = useState([])
   const [loading, setLoading] = useState(true)
@@ -39,6 +39,7 @@ const Home = () => {
       setNewestPhones(data)
       setLoading(false)
     })
+    return () => setPageLoading(true)
   }, [])
 
   return (
