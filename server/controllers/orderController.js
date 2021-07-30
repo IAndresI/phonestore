@@ -61,9 +61,20 @@ class OrderController {
       if(!id) {
         return next(ApiError.badRequest('Enter ID!'))
       }
-      const query = await db.query('SELECT * FROM order WHERE order_id=$1', [id]);
-      const data = query.rows;
-      return res.json(data)
+      const orderInfo = await db.query('SELECT * FROM order_info WHERE order_id=$1;', [id]);
+      const orderDetailsInfo = await db.query(`
+        SELECT ph.phone_id,
+        ph.name,
+        ph.price,
+        ph.image,
+        ord_det.count
+    
+        FROM order_details ord_det
+        JOIN phone ph ON ph.phone_id = ord_det.phone_id 
+        WHERE ord_det.order_id=$1;`,
+        [id]
+      );
+      return res.json({orderInfo: orderInfo.rows[0], orderDetailsInfo: orderDetailsInfo.rows})
     }
     catch(err) {
       return next(ApiError.badRequest(err.message));

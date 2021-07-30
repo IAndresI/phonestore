@@ -1,14 +1,14 @@
 import React, {useEffect, useState} from 'react';
 import { getUserOrders } from '../../../http/orderAPI';
 import Spinner from '../../Spinner';
-import OrderTable from '../components/OrderTable';
+import OrdersTable from '../components/OrdersTable';
 import Title from '../components/Title';
 
 const Orders = ({clientId}) => {
 
   const [orders, setOrders] = useState([])
   const [page, setPage] = useState(0)
-  const [rowsPerPage, setRowsPerPage] = useState(3);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
 
   const [loading, setLoading] = useState(true)
 
@@ -33,7 +33,7 @@ const Orders = ({clientId}) => {
         (
           <>
             <h2>Order Count: {orders.count}</h2>
-            <OrderTable 
+            <OrdersTable 
               count={+orders.count} 
               orders={orders.orders} 
               rowsPerPage={rowsPerPage} 

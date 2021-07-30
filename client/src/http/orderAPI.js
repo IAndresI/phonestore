@@ -18,3 +18,8 @@ export const getUserOrders = async (clientId, page, limit) => {
   const {data} = await $host.get('api/order/client/' + clientId, {params: {page, limit}});
   return data;
 }
+
+export const getUserOrder = async (clientId) => {
+  const {data} = await $host.get('api/order/' + clientId);
+  return data;
+}

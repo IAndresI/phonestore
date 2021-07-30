@@ -20,10 +20,8 @@ const AppRouter = () => {
   useEffect(() => {
     if(pageLoading) {
       setClassLoading("main-content pageLoading")
-      console.log(11111);
       setTimeout(() => {
         setClassLoading("main-content pageLoad")
-        console.log(2222);
         setPageLoading(false)
       }, 500);
     }
