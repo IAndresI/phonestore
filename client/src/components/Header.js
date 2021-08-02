@@ -101,6 +101,9 @@ const useStyles = makeStyles((theme) => ({
     overflow: 'visible',
     width: '40px',
     display: 'flex',
+  },
+  sticky: {
+    boxShadow: "none"
   }
 }));
 
@@ -254,8 +257,8 @@ export default withRouter(function PrimarySearchAppBar({history}) {
     history.push(SEARCH_ROUTE)
   }
   return (
-    <header>
-      <AppBar position="static">
+    <>
+      <AppBar position="sticky" classes={{positionSticky: classes.sticky}}>
         <Toolbar>
           <SideBar cartItemsCount={cartItemsCount.length} isAuth={isAuth}/>
           <Link className={classes.title} to="/">
@@ -350,6 +353,6 @@ export default withRouter(function PrimarySearchAppBar({history}) {
       </AppBar>
       {renderMobileMenu}
       {renderMenu}
-    </header>
+    </>
   );
 })

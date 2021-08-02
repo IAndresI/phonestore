@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useState} from 'react';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -44,15 +44,11 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-export default withRouter(function SignIn({location, history, setPageLoading}) {
+export default withRouter(function SignIn({location, history}) {
   const [selectedDate, setSelectedDate] = useState(new Date('2006-08-18T21:11:54'));
   const { control, handleSubmit, formState: { errors } } = useForm();
   const dispatch = useDispatch()
   const [image, setImage] = useState(null)
-
-  useEffect(() => {
-    return () => setPageLoading(true)
-  }, [])
 
   const handleDateChange = (date) => {
     setSelectedDate(date);
@@ -128,7 +124,7 @@ export default withRouter(function SignIn({location, history, setPageLoading}) {
 
   if (isAuth) return <Redirect to="/"/> 
   return (
-    <section className="section">
+    <section className="section page">
       {
         isLogin ? <h1 className="title">Login</h1>
         :

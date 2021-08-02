@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import { CircularProgress, Container, Grid } from '@material-ui/core';
+import {  Container, Grid } from '@material-ui/core';
 import CardMedia from '@material-ui/core/CardMedia';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
@@ -11,6 +11,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { addCompareItem, removeCompareItem, onChangeCartItem } from '../store/actions';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 import CompareIcon from '@material-ui/icons/Compare';
+import { usePageDataLoad } from '../customHooks';
+import Spinner from '../components/Spinner';
 
 const useStyles = makeStyles({
   media: {
@@ -19,47 +21,40 @@ const useStyles = makeStyles({
   },
 });
 
-export default function Phone({setPageLoading}) {
+export default function Phone() {
   //const phone = {id: 1, weight: 20, diagonal: 5, ram: 30, memory: 256, price: 1000, manufacturer_id: 1, name: "Iphone 12 Pro", color: "White", image: "7e8da54c-f815-42ba-b1f3-328c2fa24333.jpg"};
   const classes = useStyles();
-  const [phone, setPhone] = useState(null);
-  const [loading, setLoading] = useState(true);
   const {id} = useParams();
+  const [data, loading, error] = usePageDataLoad(() => getOnePhones(id), null)
 
   const dispatch = useDispatch();
   const cartList = useSelector(state => state.cart.cartList);
   const compareList = useSelector(state => state.compare.items);
 
-  const isInCart = cartList.find(e => e.phone_id === phone?.phone_id);
-  const isInCompare = compareList.find(e => +e === phone?.phone_id);
+  const isInCart = cartList.find(e => e.phone_id === data?.phone_id);
+  const isInCompare = compareList.find(e => +e === data?.phone_id);
 
   const removeFromCart = (phone) => dispatch(onChangeCartItem({
     ...phone,
     count: -1
   }))
 
-  const imagePath=`http://localhost:5000/${phone?.image ? phone?.image : "phone.jpg"}`
+  const imagePath=`http://localhost:5000/${data?.image ? data?.image : "phone.jpg"}`
   const info = [["Weight", "weight"], ["Diagonal", "diagonal"], ["RAM", "ram"], ["ROM", "memory"], ["Manufacturer", "manufacturer"], ["Camera", "camera"]]
-  useEffect(() => {
-    getOnePhones(id).then(data => {
-      setPhone(data)
-      setLoading(false)
-    })
 
-    return () => setPageLoading(true)
-  }, [])
+  if (loading) return <Spinner style={{position: "fixed", top: 0, left: 0, right: 0, bottom: 0}}/>
 
-  if (loading) return <CircularProgress style={{position: "fixed", top: 0, left: 0, right: 0, bottom: 0}}/>
+  if (error) return <h3>Theres an error: {error.message}</h3>
 
   return (
-    <section className="section">
-      <h1 className="title mini">{phone.name}</h1>
+    <section className="section page">
+      <h1 className="title mini">{data.name}</h1>
       <Container>
         <Grid>
           <CardMedia
             className={classes.media}
             image={imagePath}
-            title={phone.name}
+            title={data.name}
           />
         </Grid>
         {
@@ -67,7 +62,7 @@ export default function Phone({setPageLoading}) {
           (
             <Button
             onClick={() => {
-              removeFromCart({phone_id: phone.phone_id, name: phone.name, price: phone.price, image: phone.image});
+              removeFromCart({phone_id: data.phone_id, name: data.name, price: data.price, image: data.image});
             }}
             style={{backgroundColor:"tomato", marginBottom: 30, marginRight: 30}}
             variant="contained"
@@ -81,7 +76,7 @@ export default function Phone({setPageLoading}) {
           (
             <Button
             onClick={() => {
-              dispatch(onChangeCartItem({phone_id: phone.phone_id, name: phone.name, price: phone.price, image: phone.image}));
+              dispatch(onChangeCartItem({phone_id: data.phone_id, name: data.name, price: data.price, image: data.image}));
             }}
             style={{marginBottom: 30, marginRight: 30}}
             variant="contained"
@@ -98,7 +93,7 @@ export default function Phone({setPageLoading}) {
           (
             <Button
               onClick={() => {
-                dispatch(removeCompareItem(phone.phone_id));
+                dispatch(removeCompareItem(data.phone_id));
               }}
               style={{backgroundColor: "tomato", marginBottom: 30}}
               variant="contained"
@@ -112,7 +107,7 @@ export default function Phone({setPageLoading}) {
           (
             <Button
               onClick={() => {
-                dispatch(addCompareItem(phone.phone_id));
+                dispatch(addCompareItem(data.phone_id));
               }}
               style={{marginBottom: 30}}
               variant="contained"
@@ -129,7 +124,7 @@ export default function Phone({setPageLoading}) {
           {
             info.map((e, i) => (
               <Grid key={e} style={{backgroundColor: i % 2 === 0 ? "lightgray" : "transparent", padding: 10}}>
-                <strong>{e[0]}</strong>:    {Array.isArray(phone[e[1]]) ? phone[e[1]].join("x") : phone[e[1]]}
+                <strong>{e[0]}</strong>:    {Array.isArray(data[e[1]]) ? data[e[1]].join("x") : data[e[1]]}
               </Grid>
             ))
           }

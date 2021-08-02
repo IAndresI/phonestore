@@ -180,6 +180,7 @@ const removeCompareItem = (id) => {
   }
 }
 
+
 export {
   removeCompareItem,
   addCompareItem,

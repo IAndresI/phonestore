@@ -13,21 +13,28 @@ body {
 }
 
 .root {
-  transition: opacity .5s;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  animation: opacity 1.5s forwards;
 }
 
-.root.loading,
-.main-content.pageLoading {
-  opacity: 0;
+.header {
+  position: sticky;
 }
 
-.root.onload,
-.main-content.pageLoad {
-  opacity: 1;
-  transition: opacity .5s;
+@keyframes opacity {
+  0% {
+    opacity: 0
+  }
+
+  100% {
+    opacity: 1
+  }
+}
+
+.page {
+  animation: opacity 1.5s forwards;
 }
 
 #root .makeStyles-grow-1 {

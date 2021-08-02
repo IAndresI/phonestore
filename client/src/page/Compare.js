@@ -14,6 +14,8 @@ import { Link } from 'react-router-dom';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import { Button } from '@material-ui/core';
 import { removeCompareItem } from '../store/actions';
+import usePageDataLoad from '../customHooks/usePageDataLoad';
+
 
 const StyledTableCell = withStyles((theme) => ({
   head: {
@@ -96,32 +98,28 @@ const useStyles = makeStyles({
   }
 });
 
-const Compare = ({setPageLoading}) => {
+const Compare = () => {
 
   const dispatch = useDispatch()
 
   const storedId = useSelector(state => state.compare.items)
 
   const [items, setItems] = useState([])
-  const [loading, setLoading] = useState(true)
 
   const classes = useStyles();
 
+  const [data, loading, error] = usePageDataLoad(() => getSeveralPhones(storedId), null, storedId)  
+
   useEffect(() => {
-    setLoading(true)
-    getSeveralPhones(storedId)
-      .then(data => {
-        setItems(data)
-        setLoading(false)
-      })
-      .finally(err => setLoading(false))
-    return () => setPageLoading(true)
-  }, [storedId])
+    if(data) setItems(data)
+  }, [storedId, data])
 
   if(loading) return <Spinner />
 
+  if(error) return <h3>Some Error {error.message}</h3>
+
   return (
-    <section className="section">
+    <section className="section page">
       <h1 className="title">Compare</h1>
       <div>
         {

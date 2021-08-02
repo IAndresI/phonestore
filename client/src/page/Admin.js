@@ -1,13 +1,9 @@
-import React, {useEffect} from 'react';
+import React from 'react';
 
-const Admin = ({setPageLoading}) => {
-
-  useEffect(() => {
-    return () => setPageLoading(true)
-  }, [])
+const Admin = () => {
   
   return (
-    <section className="section">
+    <section className="section page">
       Admin
     </section>
   );

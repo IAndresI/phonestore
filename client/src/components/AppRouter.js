@@ -14,19 +14,6 @@ const AppRouter = () => {
   const [loading, setLoading] = useState(true)
   const isAuth = useSelector(state => state.user.isAuth)
 
-  const [pageLoading, setPageLoading] = useState(false)
-  const [classLoading, setClassLoading] = useState("main-content pageLoad")
-
-  useEffect(() => {
-    if(pageLoading) {
-      setClassLoading("main-content pageLoading")
-      setTimeout(() => {
-        setClassLoading("main-content pageLoad")
-        setPageLoading(false)
-      }, 500);
-    }
-  }, [pageLoading])
-
   useEffect(() => {
     check().then(data => {  
       dispatch(onLogin(data));
@@ -43,13 +30,13 @@ const AppRouter = () => {
   }, [])
 
   return (
-    <Layout loading={loading} classLoading={classLoading}>
+    <Layout loading={loading} classLoading={() => 1}>
       <Switch>
         {
-          isAuth && authRoutes.map(({path, Component}) => <Route key={path} path={path} render={() => <Component setPageLoading={setPageLoading}/>} exact/>)
+          isAuth && authRoutes.map(({path, Component}) => <Route key={path} path={path} render={() => <Component setPageLoading={() => 1}/>} exact/>)
         }
         {
-          publicRoutes.map(({path, Component}) => <Route key={path} path={path} render={() => <Component setPageLoading={setPageLoading}/>} exact/>)
+          publicRoutes.map(({path, Component}) => <Route key={path} path={path} render={() => <Component setPageLoading={() => 1}/>} exact/>)
         }
         <Redirect to={SHOP_ROUTE}/>
       </Switch>

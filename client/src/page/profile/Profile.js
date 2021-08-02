@@ -1,4 +1,4 @@
-import { Container, makeStyles, Snackbar } from '@material-ui/core';
+import { Container, Snackbar } from '@material-ui/core';
 import React, {useEffect, useState} from 'react';
 import { useSelector } from 'react-redux';
 import { changePassword, checkPassword, getProfile, putProfile } from '../../http/userAPI';
@@ -12,24 +12,20 @@ import MuiAlert from '@material-ui/lab/Alert';
 import ChangePassword from '../../components/profile/tabs/ChangePassword';
 import useStyles from './style';
 import Orders from '../../components/profile/tabs/Orders';
+import usePageDataLoad from '../../customHooks/usePageDataLoad';
 
-const Profile = ({setPageLoading}) => {
+const Profile = () => {
 
   const [profile, setProfile] = useState(null)
-  const [loading, setLoading] = useState(true)
   const clientId = useSelector(state => state.user.user.id);
   
   const classes = useStyles();
 
-  useEffect(() => {
-    setLoading(true)
-    getProfile(clientId).then(data => {
-      setProfile(data);
-      setLoading(false)
-    })
+  const [data, loading, error] = usePageDataLoad(() => getProfile(clientId))
 
-    return () => setPageLoading(true)
-  }, []);
+  useEffect(() => {
+    if(data) setProfile(data);
+  }, [data]);
 
   // Form handlers
 
@@ -162,9 +158,11 @@ const Profile = ({setPageLoading}) => {
   
   if(loading) return <Spinner />
 
+  if(error) return <h3>Some Error {error.message}</h3>
+
   const imagePath = `${process.env.REACT_APP_API_URL}/${profile.image ? profile.image : "user.png"}`
   return (
-    <section className="profile">
+    <section className="profile page">
       <h1 className="title">Profile</h1>
       <Container className={classes.container}>
         <div className={classes.aside}>

@@ -2,6 +2,8 @@ import { Container, makeStyles } from '@material-ui/core';
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Slider from '../components/Slider';
+import Spinner from '../components/Spinner';
+import usePageDataLoad from '../customHooks/usePageDataLoad';
 import { getNewestPhones } from '../http/phoneAPI';
 
 const useStyles = makeStyles(() => ({
@@ -27,23 +29,25 @@ const useStyles = makeStyles(() => ({
   }
 }));
 
-const Home = ({setPageLoading}) => {
+const Home = () => {
 
   const [newestPhones, setNewestPhones] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [data, loading, error] = usePageDataLoad(getNewestPhones)
 
   const classes = useStyles();
 
   useEffect(() => {
-    getNewestPhones().then(data => {
-      setNewestPhones(data)
-      setLoading(false)
-    })
-    return () => setPageLoading(true)
-  }, [])
+    if(data) setNewestPhones(data)
+  }, [data])
+
+  // Loading & Error Indicator
+
+  if(loading) return <Spinner />
+
+  if(error) return <h3>Some Error {error.message}</h3>
 
   return (
-    <section>
+    <section className="page">
       <h1 className="title">PhoneStore</h1>
       <Container>
         <Link className={classes.link} to="/shop">Let's shop!</Link>

@@ -6,6 +6,8 @@ import { getUserOrder } from '../http/orderAPI';
 import {makeStyles} from '@material-ui/core'
 import OrderTable from '../components/profile/components/OrderTable';
 import {useSelector} from 'react-redux'
+import usePageDataLoad from '../customHooks/usePageDataLoad';
+
 const useStyles = makeStyles({
   infoRow: {
     display: 'flex',
@@ -46,7 +48,7 @@ const useStyles = makeStyles({
   }
 })
 
-const Order = ({setPageLoading}) => {
+const Order = () => {
 
   const clientId = useSelector(state => state.user.user.clientId)
 
@@ -54,21 +56,18 @@ const Order = ({setPageLoading}) => {
 
   const classes = useStyles();
 
-  const [loading, setLoading] = useState(true)
-
   const [orderDetailsInfo, setOrderDetailsInfo] = useState({})
   const [orderInfo, setOrderInfo] = useState({})
 
-  useEffect(() => {
-    setLoading(true)
-    getUserOrder(id).then(order => {
-      setOrderDetailsInfo(order.orderDetailsInfo)
-      setOrderInfo(order.orderInfo)
-    })
-    .finally(() => setLoading(false))
+  const [data, loading, error] = usePageDataLoad(() => getUserOrder(id), null, id)
 
-    return () => setPageLoading(true)
-  }, [id])
+  useEffect(() => {
+    if(data) {
+      setOrderDetailsInfo(data.orderDetailsInfo)
+      setOrderInfo(data.orderInfo)
+    }
+    
+  }, [data])
 
   const formatStatus = (status) => {
     const statusesArray = status.filter(el => el);
@@ -82,10 +81,14 @@ const Order = ({setPageLoading}) => {
     }
   }
 
+  // Loading & Error Indicator
+
   if(loading) return <Spinner />
 
+  if(error) return <h3>Some Error {error.message}</h3>
+
   return (
-    <section>
+    <section className="page">
       <h1 className="title">Order № {orderInfo.order_id}</h1>
       <Container>
         <div className={classes.infoRow}>

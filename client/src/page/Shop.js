@@ -7,12 +7,45 @@ import { fetchingPhones, onPageSet } from '../store/actions';
 import { getAllPhones } from '../http/phoneAPI';
 import Pagination from '@material-ui/lab/Pagination';
 import Spinner from '../components/Spinner';
+import { usePageDataLoad } from '../customHooks';
 
-const Shop = ({setPageLoading}) => {
+const useStyles = makeStyles(() => ({
+  sort: {
+    width: 200
+  },
+  sortLabel: {
+    fontSize: 20,
+    color: 'black',
+    marginRight: 15,
+  },
+  pagination: {
+    display: 'flex',
+    justifyContent: 'center',
+    marginTop: 30,
+    width: '100%'
+  },
+  shopInner: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+  },
+  shopHeader: {
+    display: 'flex',
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'space-between'
+  }
+}));
+
+const Shop = () => {
 
   // store
 
   const dispatch = useDispatch();
+
+  // Styles
+
+  const classes = useStyles();
 
   // all phones
   
@@ -39,8 +72,6 @@ const Shop = ({setPageLoading}) => {
 
   const [sort, setSort] = useState("");
 
-  const [loading, setLoading] = useState(true)
-
   // on filter change and componentDidMount
 
   const handleChange = (event) => {
@@ -51,9 +82,11 @@ const Shop = ({setPageLoading}) => {
     dispatch(onPageSet(value))
   }
 
-  useEffect(() => {
-    setPageLoading(true)
-  }, [])
+  const [data, loading, error] = usePageDataLoad(
+    () => getAllPhones(page, limit, sort, pickedColor, pickedManufacturer, pickedPrice, pickedRam, pickedRom, pickedCamera, pickedDiagonal),
+    500,
+    page, limit, sort, pickedColor, pickedManufacturer, pickedRam, pickedRom, pickedCamera, pickedDiagonal, pickedPrice
+  )
 
   useEffect(() => {
     const pageCount = Math.ceil(totalCount/limit);
@@ -61,50 +94,15 @@ const Shop = ({setPageLoading}) => {
   }, [totalCount])
 
   useEffect(() => {
-    setLoading(true)
-    const timer = setTimeout(async () => {
-      await getAllPhones(page, limit, sort, pickedColor, pickedManufacturer, pickedPrice,pickedRam,pickedRom,pickedCamera,pickedDiagonal).then(data => {
-        dispatch(fetchingPhones(data));
-      });
-      setLoading(false)
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [page, sort, pickedColor, pickedManufacturer, pickedPrice,pickedRam,pickedRom,pickedCamera,pickedDiagonal, dispatch, limit])
+    if (data) dispatch(fetchingPhones(data));
+  }, [data])
 
-  // styles
+  // loading && error
 
-  const useStyles = makeStyles(() => ({
-    sort: {
-      width: 200
-    },
-    sortLabel: {
-      fontSize: 20,
-      color: 'black',
-      marginRight: 15,
-    },
-    pagination: {
-      display: 'flex',
-      justifyContent: 'center',
-      marginTop: 30,
-      width: '100%'
-    },
-    shopInner: {
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'space-between',
-    },
-    shopHeader: {
-      display: 'flex',
-      width: '100%',
-      alignItems: 'center',
-      justifyContent: 'space-between'
-    }
-  }));
-
-  const classes = useStyles();
+  if (error) return <h3>Theres an error: {error.message}</h3>
 
   return (
-    <section className="section">
+    <section className="section page">
       <h1 className="title">Shop</h1>
       <Container>
         <Grid className={classes.shopInner}>
@@ -131,7 +129,8 @@ const Shop = ({setPageLoading}) => {
               <Filter/>
             </Grid>
             {
-              !loading ? 
+              loading ? <Spinner/>
+              : 
               (
                 <Grid style={{display: 'flex', flexWrap: 'wrap', height: "100%", width:"100%",}}>
                   {
@@ -142,7 +141,6 @@ const Shop = ({setPageLoading}) => {
                   </div>
                 </Grid>
               )
-              : <Spinner/>
             }
           </div>
         </Grid>

@@ -4,13 +4,13 @@ import Header from './Header'
 
 const Layout = (props) => {
   return (
-    <div className={props.loading ? "root loading" : "root onload"}>
+    <div className="root">
       {
         props.loading ? null :
         (
           <>
-            <Header className="header" />
-            <main className={props.classLoading}>
+            <Header />
+            <main className="main-content loading-transition">
               {props.children}
             </main>
             <Footer className="footer"/>

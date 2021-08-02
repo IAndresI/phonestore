@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { onAddCartTotal, setPaymentMethod } from '../../store/actions';
 import { Button, Container, FormControlLabel, Radio, RadioGroup, TextField } from '@material-ui/core';
@@ -17,8 +17,9 @@ import useStyles from './style'
 import SnackBar from '../../components/cart/SnackBar';
 import ItemsList from '../../components/cart/ItemsList';
 import { isAlreadyRegistred } from '../../http/userAPI';
+import usePageDataLoad from '../../customHooks/usePageDataLoad';
 
-const Cart = ({setPageLoading}) => {
+const Cart = () => {
 
   // Dispatch
 
@@ -57,7 +58,6 @@ const Cart = ({setPageLoading}) => {
 
   // Loading Scripts And Queries
 
-  const [loading, setLoading] = useState(true)
   const [paypalSDK, setPaypalSDK] = useState(!!document.querySelector('#paypal-button'))
   const [googleSDK, setGoogleSDK] = useState(!!document.querySelector('#googlemaps'))
 
@@ -192,13 +192,7 @@ const Cart = ({setPageLoading}) => {
 
   // ComponentDidMount
 
-  useEffect(() => {
-
-    setLoading(true);
-    getCartData().then(() => setLoading(false))
-
-    return () => setPageLoading(true)
-  }, [])
+  const [data, loading, error] = usePageDataLoad(getCartData)
 
   //PayPal modal control
 
@@ -298,14 +292,16 @@ const Cart = ({setPageLoading}) => {
     currency: 'USD',
   });
 
-  // Loading Indicator
+  // Loading & Error Indicator
 
   if(loading) return <Spinner />
+
+  if(error) return <h3>Some Error {error.message}</h3>
 
   // Returning Component
 
   return (
-    <section className="section">
+    <section className="section page">
       <h1 className="title">Cart</h1>
       <Container>
         {

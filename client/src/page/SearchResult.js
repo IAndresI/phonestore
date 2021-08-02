@@ -7,6 +7,7 @@ import Spinner from '../components/Spinner';
 import {useDispatch, useSelector} from 'react-redux'
 import { onSearch } from '../store/actions';
 import Pagination from '@material-ui/lab/Pagination';
+import usePageDataLoad from '../customHooks/usePageDataLoad';
 
 const useStyles = makeStyles(() => ({
   input: {
@@ -27,12 +28,13 @@ const useStyles = makeStyles(() => ({
   },
 }));
   
-const SearchResult = ({setPageLoading}) => {
+const SearchResult = () => {
 
-  // Phones
   
-  const [findingPhone, setFindingPhone] = useState([])
-  const [loading, setLoading] = useState(true)
+  // Store
+
+  const dispatch = useDispatch()
+  const searchText = useSelector(state => state.search.text)
 
   // Pagination
 
@@ -44,10 +46,11 @@ const SearchResult = ({setPageLoading}) => {
     setPage(value)
   }
 
-  // Store
+  // Phones
+  
+  const [findingPhone, setFindingPhone] = useState([])
+  const [data, loading, error] = usePageDataLoad(() => search(searchText.toLowerCase(),limit, page), 500, searchText, page)
 
-  const dispatch = useDispatch()
-  const searchText = useSelector(state => state.search.text)
 
   const classes = useStyles();
 
@@ -56,32 +59,27 @@ const SearchResult = ({setPageLoading}) => {
   }
 
   useEffect(() => {
-    return () => setPageLoading(true)
-  }, [])
+    if(data) {
+      if(!searchText) {
+        setFindingPhone([])
+        setPage(1)
+      }
+      else {
+        setPage(1)
+        setFindingPhone([1]);
+        setFindingPhone(data.phones);
+        setPaginationCount(Math.ceil(data.count/limit))
+      }
+    }
+    
+  }, [data])
+  
+  // Error Indicator
 
-  useEffect(() => {
-    if(!searchText) {
-      setFindingPhone([])
-      setLoading(false)
-      setPage(1)
-    }
-    else {
-      setLoading(true)
-      setPage(1)
-      setFindingPhone([1]);
-      const timer = setTimeout(async () => {
-        search(searchText.toLowerCase(),limit, page).then(({count, phones}) => {
-          setFindingPhone(phones);
-          setPaginationCount(Math.ceil(count/limit))
-        })
-        setLoading(false)
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, [searchText, page])
+  if(error) return <h3>Some Error {error.message}</h3>
 
   return (
-    <section className="section">
+    <section className="section page">
       <h1 className="title">Search</h1>
       <Container>
         <form onSubmit={(e) => e.preventDefault()}>
