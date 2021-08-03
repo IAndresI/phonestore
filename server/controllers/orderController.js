@@ -80,6 +80,21 @@ class OrderController {
       return next(ApiError.badRequest(err.message));
     }
   }
+
+  async getHistory(req, res) {
+    try {
+      const {id} = req.params;
+      if(!id) {
+        return next(ApiError.badRequest('Enter ID!'))
+      }
+      const query = await db.query(`SELECT * FROM get_order_history($1)`, [id])
+      const data = query.rows;
+      return res.json(data)
+    }
+    catch(err) {
+      return next(new ApiError.badRequest(err.message));
+    }
+  }
 }
 
 module.exports = new OrderController();

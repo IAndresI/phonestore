@@ -6,5 +6,6 @@ router.post('/',orderController.create)
 router.get('/',orderController.getAll)
 router.get('/:id',orderController.getOne)
 router.get('/client/:id',orderController.getUserOrders)
+router.get('/history/:id',orderController.getHistory)
 
 module.exports = router;

@@ -19,7 +19,7 @@ class PhoneController {
     }
     const qeury = await db.query('SELECT ph.*,manuf.name as "manufacturer" FROM phone ph INNER JOIN manufacturer manuf ON manuf.manufacturer_id=ph.manufacturer_id WHERE phone_id=$1', [id]);
     const data = qeury.rows[0]
-    return res.json(data)
+    return data ? res.json(data) : next(ApiError.badRequest('Nothings found'))
   }
 
   async getAll(req, res,next) {
@@ -28,7 +28,7 @@ class PhoneController {
       const offset = page*limit-limit;
       const orderByArr = sort.split(' ')
       const orderBy = `${sort ? `ORDER BY ph.${orderByArr[0]} ${orderByArr[1]}` : ""}`;
-      const whereColor = color ? `AND ph.color_id IN(${color.join(',')})` : "";
+      const whereColor = color ? `AND col_det.color_id IN(${color.join(',')})` : "";
       const whereManufacturer = manufacturers ? `AND ph.manufacturer_name IN(${manufacturers.map(e=>`'${e}'`).join(',')})` : "";
       const wherePrice = price ? `AND ph.price >= ${price[0]}::money AND ph.price <= ${price[1]}::money` : "";
       const whereRam = ram ? `AND ph.ram IN(${ram.join(',')})` : "";
