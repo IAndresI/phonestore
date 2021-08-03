@@ -1,12 +1,14 @@
-import { Container } from '@material-ui/core';
+import { Accordion, AccordionDetails, AccordionSummary, Container } from '@material-ui/core';
 import React, {useEffect, useState} from 'react';
 import { Link, useParams } from 'react-router-dom';
 import Spinner from '../components/Spinner';
-import { getUserOrder } from '../http/orderAPI';
+import { getOrderHistory, getUserOrder } from '../http/orderAPI';
 import {makeStyles} from '@material-ui/core'
-import OrderTable from '../components/profile/components/OrderTable';
+import OrderTable from '../components/order/OrderTable';
 import {useSelector} from 'react-redux'
 import usePageDataLoad from '../customHooks/usePageDataLoad';
+import HistoryTable from '../components/order/HistoryTable'
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
 const useStyles = makeStyles({
   infoRow: {
@@ -35,6 +37,7 @@ const useStyles = makeStyles({
     transition: "all 500ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;",
     textDecoration: 'none',
     textTransform: "none",
+    cursor: "pointer",
     border: '1px solid #3f51b5',
     "&:hover, &:focus": {
       outline: "transparent",
@@ -45,6 +48,16 @@ const useStyles = makeStyles({
       color: "#ffffff",
       backgroundColor: "#3f51b5",
     }
+  },
+  accordionDetails: {
+    width: "100%"
+  },
+  accordionDetailsContainer: {
+    padding: 0
+  },
+  information: {
+    fontSize: 20,
+    textAlign: "center"
   }
 })
 
@@ -56,8 +69,11 @@ const Order = () => {
 
   const classes = useStyles();
 
-  const [orderDetailsInfo, setOrderDetailsInfo] = useState({})
-  const [orderInfo, setOrderInfo] = useState({})
+  const [showOrderHistory, setShowOrderHistory] = useState(false)
+
+  const [orderDetailsInfo, setOrderDetailsInfo] = useState(null)
+  const [orderInfo, setOrderInfo] = useState(null)
+  const [orderHistory, setOrderHistory] = useState(null)
 
   const [data, loading, error] = usePageDataLoad(() => getUserOrder(id), null, id)
 
@@ -68,6 +84,13 @@ const Order = () => {
     }
     
   }, [data])
+
+  useEffect(() => {
+    if(showOrderHistory && !orderHistory) {
+      getOrderHistory(id)
+        .then(data => setOrderHistory(data))
+    }
+  }, [showOrderHistory, id])
 
   const formatStatus = (status) => {
     const statusesArray = status.filter(el => el);
@@ -80,6 +103,8 @@ const Order = () => {
       default: return "In consideration"
     }
   }
+
+  const accordionStatusChange = (event, isExpanded) => setShowOrderHistory(isExpanded)
 
   // Loading & Error Indicator
 
@@ -158,6 +183,28 @@ const Order = () => {
           <h3 className={classes.infoData}>
             {orderInfo.total}
           </h3>
+        </div>
+        <div className={classes.history}>
+          <Accordion onChange={accordionStatusChange}>
+            <AccordionSummary
+              expandIcon={<ExpandMoreIcon />}
+              aria-controls="panel1a-content"
+              id="panel1a-header"
+            >
+              <h3 className={classes.heading}>Order History</h3>
+            </AccordionSummary>
+            <AccordionDetails classes={{root: classes.accordionDetailsContainer}}>
+              <div className={classes.accordionDetails}>
+                {
+                  orderHistory ?
+                    orderHistory.length <= 0 ? <h4 className={classes.information}>No Information</h4> : <HistoryTable history={orderHistory}/>
+                  :
+                  <Spinner />
+                }
+              </div>
+            </AccordionDetails>
+          </Accordion>
+          
         </div>
         <h2>Order Details</h2>
         <OrderTable orders={orderDetailsInfo}/>

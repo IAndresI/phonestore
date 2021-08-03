@@ -7,42 +7,12 @@ import TableCell from '@material-ui/core/TableCell';
 import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
-import {Link} from 'react-router-dom';
 
 const useStyles = makeStyles({
   row: {
     fontSize: 20,
     fontWeight: 600
   },
-  textLink: {
-    textDecoration: "none",
-    color: "inherit",
-    transition: "all 500ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;",
-    "&:hover": {
-      color: "#3f51b5"
-    },
-    "&:focus": {
-      color: "#3f51b5",
-      outline: "transparent"
-    },
-    "&:active": {
-      color: "inherit",
-    }
-  },
-  imageLink: {
-    transition: "all 500ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;",
-    display: "flex",
-    "&:hover": {
-      transform: "scale(1.2)"
-    },
-    "&:focus": {
-      transform: "scale(1.1)",
-      outline: "transparent"
-    },
-    "&:active": {
-      transform: "scale(1)"
-    }
-  }
 });
 
 const StyledTableCell = withStyles((theme) => ({
@@ -55,46 +25,36 @@ const StyledTableCell = withStyles((theme) => ({
   },
 }))(TableCell);
 
-const OrdersTable = ({orders}) => {
+const OrdersTable = ({history}) => {
 
   const classes = useStyles();
 
   const columns = [
-    { id: 'phone_id', label: 'Phone ID', minWidth: 70, align: 'center' },
     { 
-      id: 'image', 
-      label: 'Image', 
+      id: 'date_up', 
+      label: 'Date Up', 
       minWidth: 70, 
       align: 'center',
-      format: (value) => {
-        return (
-          <div>
-            <Link className={classes.imageLink} to={`/phone/${orders.find(el => el.image === value).phone_id}`}>
-              <img width={100} height={100} style={{objectFit: "contain"}} src={`${process.env.REACT_APP_API_URL}/${value ? value : "phone.jpg"}`} alt="Phone"/>
-            </Link>
-          </div>
-        )
-      }
-    },
-    { 
-      id: 'name', 
-      label: 'Phone Name',
-      align: 'center',
-      minWidth: 170,
-      format: (value) => <Link className={classes.textLink} to={`/phone/${orders.find(el => el.name === value).phone_id}`}>{value}</Link>,
+      format: (value) => new Date(value).toLocaleString().replace(',', " ")
     },
     {
-      id: 'price',
-      label: 'Price',
-      minWidth: 100,
-      align: 'center',
-    },
-    {
-      id: 'count',
-      label: 'Count',
+      id: 'status',
+      label: 'Status',
       minWidth: 150,
       align: 'center',
-      format: (value) => `x${value}`,
+      format: (value) => {
+        if(value) {
+          const statusesArray = value.filter(el => el);
+          const statusCode = statusesArray ? statusesArray.length : 0;
+          switch(statusCode) {
+            case 0: return "Expectation"
+            case 1: return "Processed"
+            case 2: return "Courier sent"
+            case 3: return "Delivered"
+            default: return "In consideration"
+          }
+        }
+      }
     }
   ];
 
@@ -109,7 +69,7 @@ const OrdersTable = ({orders}) => {
                   <StyledTableCell
                     key={column.id}
                     align={column.align}
-                    style={{ minWidth: column.minWidth }}
+                    style={{ minWidth: column.minWidth, fontSize: 20 }}
                   >
                     {column.label}
                   </StyledTableCell>
@@ -119,7 +79,7 @@ const OrdersTable = ({orders}) => {
           </TableHead>
           <TableBody>
             {
-              orders.map((row) => {
+              history.map((row) => {
                 return (
                   <TableRow key={row.order_id} hover role="checkbox" tabIndex={-1}>
                     {columns.map((column) => {
