@@ -81,7 +81,7 @@ const Cart = () => {
         deliveryAddress: clientAddress || null,
         dateOrderPaid: cartPaymentMethod === 2 ? new Date() : null, 
         total: cartTotal,
-        items: cartItems.map(e => [e.phone_id, e.count]),
+        items: cartItems.map(e => [e.phone_id, e.count, e.selectedColor.id || -1]),
         paymentMethod: cartPaymentMethod
       }
       const clientDeatils = {
@@ -99,7 +99,7 @@ const Cart = () => {
         pickupPoint: pickupPoints.find(el => el.address===formData.pickupPoint)?.pickup_point_id || null,
         deliveryAddress: clientAddress || null,
         total: cartTotal,
-        items: cartItems.map(e => [e.phone_id, e.count]),
+        items: cartItems.map(e => [e.phone_id, e.count, e.selectedColor.id || -1]),
         dateOrderPaid: cartPaymentMethod === 2 ? new Date() : null,
         paymentMethod: cartPaymentMethod,
       }
@@ -135,7 +135,7 @@ const Cart = () => {
           setApiErrors({})
           history.push({
             pathname: ORDER_STATUS,
-            state: { detail: orderId }
+            state: { details: orderId }
           })
         }
         catch(err) {
@@ -149,9 +149,10 @@ const Cart = () => {
 
           const orderDetails = getFullData(data, true)
           const details = await createUnregistredUserOrder(orderDetails.orderDeatils, orderDetails.clientDeatils)
+
           history.push({
             pathname: ORDER_STATUS,
-            state: { detail: {order: details.order.data} }
+            state: { details: details }
           })
         }
         catch(err) {

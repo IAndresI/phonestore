@@ -66,15 +66,17 @@ function setLocalStorageCart(state, newCart) {
 function updateCart(payload, state) {
 
   const stateCartList = state.cart.cartList;
-  const phoneInCart = stateCartList.find(e => e.phone_id === payload.phone_id);
+  const phoneInCart = stateCartList.find(e => e.phone_id === payload.phone_id && (payload.selectedColor?.id ? payload.selectedColor.id === e.selectedColor.id : true));
   let newCart;
 
   if(phoneInCart) {
     const oldCartItem = {...phoneInCart, count: payload.count || phoneInCart.count};
-    const oldIndex = stateCartList.findIndex(e => e.phone_id===oldCartItem.phone_id)
+    const oldIndex = stateCartList.findIndex(e => e.phone_id===oldCartItem.phone_id && (oldCartItem.selectedColor.id ? oldCartItem.selectedColor.id === e.selectedColor.id : true))
     newCart = [...stateCartList.slice(0,oldIndex),oldCartItem,...stateCartList.slice(oldIndex+1,stateCartList.length+1)]
+    console.log(newCart);
     if(oldCartItem.count < 1) {
       newCart.splice(oldIndex, 1);
+      console.log(newCart);
       setLocalStorageCart(state, newCart)
       return {
         ...state.cart,

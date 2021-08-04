@@ -18,7 +18,7 @@ const AppRouter = () => {
     check().then(data => {  
       dispatch(onLogin(data));
       getCart(data.cart_id).then(data => {
-        dispatch(setCart(data))
+        dispatch(setCart(data.map((el, i) => ({...el, selectedColor: {id: el.selectedColor[0][0], name: el.selectedColor[0][1], code: el.selectedColor[0][2]}}))))
       })
     })
     .catch(error => {

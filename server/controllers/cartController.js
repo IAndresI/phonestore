@@ -10,7 +10,12 @@ class CartController {
       if(!id) {
         return next(ApiError.badRequest('Enter ID!'))
       }
-      const qeury = await db.query('SELECT ph.phone_id,ph.name,ph.price,cart_det.count, ph.image FROM cart_details cart_det INNER JOIN phone ph ON ph.phone_id=cart_det.phone_id WHERE cart_id=$1', [id]);
+      const qeury = await db.query(`
+        SELECT ph.phone_id,ph.name,ph.price,cart_det.count, ph.image, (SELECT array_agg(ARRAY[col.color_id::TEXT, col.name::TEXT, col.code::TEXT]) FROM color col where col.color_id=cart_det.color_id) as "selectedColor" 
+        FROM cart_details cart_det 
+        INNER JOIN phone ph ON ph.phone_id=cart_det.phone_id 
+        WHERE cart_id=$1`, 
+        [id]);
       const data = qeury.rows
       return res.json(data)
     }

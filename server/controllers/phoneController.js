@@ -17,7 +17,7 @@ class PhoneController {
     if(!id) {
       return next(ApiError.badRequest('Enter ID!'))
     }
-    const qeury = await db.query('SELECT ph.*,manuf.name as "manufacturer" FROM phone ph INNER JOIN manufacturer manuf ON manuf.manufacturer_id=ph.manufacturer_id WHERE phone_id=$1', [id]);
+    const qeury = await db.query('SELECT ph.*,manuf.name as "manufacturer", get_all_phone_colors(ph.phone_id) AS "colors" FROM phone ph INNER JOIN manufacturer manuf ON manuf.manufacturer_id=ph.manufacturer_id WHERE phone_id=$1', [id]);
     const data = qeury.rows[0]
     return data ? res.json(data) : next(ApiError.badRequest('Nothings found'))
   }
@@ -36,19 +36,11 @@ class PhoneController {
       const whereCamera = camera ? `AND cardinality(ph.camera) IN(${camera.join(',')})` : "";
       const whereDiagonal = diagonal ? `AND ph.diagonal>=${diagonal[0]} AND ph.diagonal<=${diagonal[1]}` : "";
 
-      // console.log(`
-      //   SELECT DISTINCT ph.* 
-      //   FROM get_full_phones ph 
-      //   INNER JOIN color_details col_det ON col_det.phone_id=ph.phone_id 
-      //   WHERE TRUE ${whereColor} ${whereManufacturer} ${wherePrice} ${whereRam} ${whereRom} ${whereCamera} ${whereDiagonal}
-      //   ${orderBy} 
-      //   LIMIT ${limit} OFFSET ${offset};
-      // `);
-
       const qeury = await db.query(`
-        SELECT DISTINCT ph.* 
+        SELECT DISTINCT ph.*, get_all_phone_colors(ph.phone_id) AS "phone_colors"
         FROM get_full_phones ph 
-        INNER JOIN color_details col_det ON col_det.phone_id=ph.phone_id 
+        LEFT JOIN color_details col_det ON col_det.phone_id=ph.phone_id 
+        LEFT JOIN color col ON col_det.color_id=col.color_id 
         WHERE TRUE ${whereColor} ${whereManufacturer} ${wherePrice} ${whereRam} ${whereRom} ${whereCamera} ${whereDiagonal}
         ${orderBy} 
         LIMIT ${limit} OFFSET ${offset};
@@ -56,10 +48,12 @@ class PhoneController {
       const countQeury = await db.query(`
         SELECT COUNT(*) 
         FROM get_full_phones ph 
-        INNER JOIN color_details col_det ON col_det.phone_id=ph.phone_id 
+        LEFT JOIN color_details col_det ON col_det.phone_id=ph.phone_id 
+        LEFT JOIN color col ON col_det.color_id=col.color_id 
         WHERE TRUE ${whereColor} ${whereManufacturer} ${wherePrice} ${whereRam} ${whereRom} ${whereCamera} ${whereDiagonal}
         GROUP BY ph.phone_id;
       `);
+
       return res.json({count: countQeury.rows.length,phones: qeury.rows})
     }
     catch(err) {

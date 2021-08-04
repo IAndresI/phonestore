@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import {  Container, Grid } from '@material-ui/core';
 import CardMedia from '@material-ui/core/CardMedia';
@@ -13,6 +13,7 @@ import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 import CompareIcon from '@material-ui/icons/Compare';
 import { usePageDataLoad } from '../customHooks';
 import Spinner from '../components/Spinner';
+import ColorPicker from '../components/ColorPicker';
 
 const useStyles = makeStyles({
   media: {
@@ -22,8 +23,9 @@ const useStyles = makeStyles({
 });
 
 export default function Phone() {
-  //const phone = {id: 1, weight: 20, diagonal: 5, ram: 30, memory: 256, price: 1000, manufacturer_id: 1, name: "Iphone 12 Pro", color: "White", image: "7e8da54c-f815-42ba-b1f3-328c2fa24333.jpg"};
+
   const classes = useStyles();
+  
   const {id} = useParams();
   const [data, loading, error] = usePageDataLoad(() => getOnePhones(id), null)
 
@@ -31,7 +33,13 @@ export default function Phone() {
   const cartList = useSelector(state => state.cart.cartList);
   const compareList = useSelector(state => state.compare.items);
 
-  const isInCart = cartList.find(e => e.phone_id === data?.phone_id);
+  const [color, setColor] = useState(null)
+
+  useEffect(() => {
+    setColor({id: data?.colors[0][0], name: data?.colors[0][1]})
+  }, [data?.colors])
+
+  const inCart = cartList.find(e => e.phone_id===data?.phone_id && (color?.id ? e.selectedColor?.id === color?.id : true))
   const isInCompare = compareList.find(e => +e === data?.phone_id);
 
   const removeFromCart = (phone) => dispatch(onChangeCartItem({
@@ -58,11 +66,11 @@ export default function Phone() {
           />
         </Grid>
         {
-          isInCart ? 
+          inCart ? 
           (
             <Button
             onClick={() => {
-              removeFromCart({phone_id: data.phone_id, name: data.name, price: data.price, image: data.image});
+              removeFromCart({phone_id: data.phone_id, name: data.name, price: data.price, image: data.image, selectedColor:color});
             }}
             style={{backgroundColor:"tomato", marginBottom: 30, marginRight: 30}}
             variant="contained"
@@ -76,7 +84,7 @@ export default function Phone() {
           (
             <Button
             onClick={() => {
-              dispatch(onChangeCartItem({phone_id: data.phone_id, name: data.name, price: data.price, image: data.image}));
+              dispatch(onChangeCartItem({phone_id: data.phone_id, name: data.name, price: data.price, image: data.image, selectedColor: color}));
             }}
             style={{marginBottom: 30, marginRight: 30}}
             variant="contained"
@@ -118,8 +126,9 @@ export default function Phone() {
             </Button>
           )
         }
-        
-        <Typography style={{marginBottom: 30, fontSize: 20, fontWeight: 700}}>Характеристики:</Typography>
+        <Typography style={{marginBottom: 30, fontSize: 20, fontWeight: 700}}>Select Color:</Typography>
+        <ColorPicker colors={data.colors} currentColor={color} setColor={setColor}/>
+        <Typography style={{marginBottom: 30, fontSize: 20, fontWeight: 700}}>Characteristics:</Typography>
         <Grid>
           {
             info.map((e, i) => (

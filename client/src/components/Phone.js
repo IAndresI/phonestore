@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
@@ -9,6 +9,7 @@ import { PHONE_ROUTE } from '../utils/consts';
 import { Button } from '@material-ui/core';
 import { useDispatch, useSelector } from 'react-redux';
 import { onChangeCartItem } from '../store/actions';
+import MiniColorPicker from './MiniColorPicker'
 
 const useStyles = makeStyles({
   root: {
@@ -84,25 +85,33 @@ const useStyles = makeStyles({
     color: "black",
     fontSize: 16,
     fontWeight: 600
+  },
+  colors: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center"
   }
 });
 
 export default function Phone({phone}) {
-  const {image, phone_name: name, price, manufacturer_name, phone_id} = phone
+  const {image, phone_name: name, price, manufacturer_name, phone_id, phone_colors} = phone
   const dispatch = useDispatch()
   const classes = useStyles();
+
+  const [selectedColor, setSelectedColor] = useState(phone_colors ? {id: phone_colors[0][0], name: phone_colors[0][1]} : -1)
 
   // phones in cart
 
   const phonesInCart = useSelector(state => state.cart.cartList);
-  const inCart=phonesInCart.find(e => e.phone_id===phone_id)
+  const inCart=phonesInCart.find(e => e.phone_id===phone_id && (selectedColor.id ? e.selectedColor.id === selectedColor.id : true))
 
   const imagePath = `${process.env.REACT_APP_API_URL}/${image ? image : "phone.jpg"}`
   const addToCart = () => dispatch(onChangeCartItem({
     phone_id,
     name,
     price,
-    image
+    image,
+    selectedColor
   }))
 
   const removeFromCart = () => dispatch(onChangeCartItem({
@@ -110,12 +119,15 @@ export default function Phone({phone}) {
     name,
     price,
     image,
+    selectedColor,
     count: -1
   }))
 
+  const phoneLink = `${PHONE_ROUTE}/${phone_id}${phone_colors ? `?color=${selectedColor}` : ""}`
+
   return (
     <Card className={classes.root}>
-      <Link to={`${PHONE_ROUTE}/${phone_id}`}>
+      <Link to={phoneLink}>
         <CardMedia
           width={300}
           height={300}
@@ -125,7 +137,7 @@ export default function Phone({phone}) {
         />
       </Link>
       <CardContent>
-        <Link className={classes.name_link} to={`${PHONE_ROUTE}/${phone_id}`}>
+        <Link className={classes.name_link} to={phoneLink}>
           <Typography className={classes.name} gutterBottom variant="h5" component="h2">
             {name}
           </Typography>
@@ -133,6 +145,17 @@ export default function Phone({phone}) {
         <Typography variant="body2" color="textSecondary" component="p">
           {manufacturer_name}
         </Typography>
+        {
+          phone_colors ? 
+          <div className={classes.colors}>
+            <Typography variant="body2" color="textSecondary" component="p">
+              Colors:
+            </Typography>
+            <MiniColorPicker id={phone_id} colors={phone_colors} selected={selectedColor} setSelected={setSelectedColor}/>
+          </div>
+          :
+          null
+        }
         <div className={classes.footer}>
           <Typography className={classes.price} variant="body2" color="textSecondary" component="p">
             {price}

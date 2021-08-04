@@ -5,6 +5,14 @@ const useStyles = makeStyles(() => ({
     display: 'flex',
     justifyContent: 'center'
   },
+  colorDot: {
+    width: 10,
+    height: 10,
+    borderRadius: "50%",
+    marginLeft: 10,
+    border: "1px solid black",
+    display: "inline-block"
+  },
   imageContainer: {
     height: 120,
     width: 120,
@@ -14,16 +22,20 @@ const useStyles = makeStyles(() => ({
     overflow: 'hidden',
     marginRight: 20
   },
-  name: {
+  nameContainer: {
     textDecoration: 'none',
     color: 'black',
     transition: 'all 0.5s',
+    display: 'flex',
     '&:hover,&:focus': {
       color: "#3f51b5"
     },
     '&:active': {
       color: "inherit"
     }
+  },
+  name: {
+    margin: "0 0 10px 0"
   },
   image: {
     width: '100%',
@@ -177,6 +189,9 @@ const useStyles = makeStyles(() => ({
   },
   form: {
     width: '100%'
+  },
+  color: {
+    marginBottom: 10
   }
 }));
 

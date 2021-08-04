@@ -6,7 +6,7 @@ export const createUnregistredUserOrder = async (orderDeatils, clientDeatils) =>
 
   const order = await $host.post('api/order/', {clientId: clientData.client_id, ...orderDeatils});
 
-  return {client: clientData.client_id, order: order};
+  return {client: clientData.client_id, order: order.data};
 }
 
 export const createRegistredUserOrder = async (orderDeatils) => {

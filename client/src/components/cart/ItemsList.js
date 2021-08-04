@@ -13,9 +13,9 @@ const ItemsList = ({cartItems, classes}) => {
 
   // Change Phone In Cart Count
 
-  const countChange = (e, id) => {
+  const countChange = (e, id, colorId) => {
     const count = e.target.value;
-    dispatch(onChangeCartItem({phone_id: id, count}))
+    dispatch(onChangeCartItem({phone_id: id, count, selectedColor:colorId}))
   }
 
   return (
@@ -26,7 +26,7 @@ const ItemsList = ({cartItems, classes}) => {
           return (
             <div key={item.phone_id} className={classes.item} >
               <Button 
-                onClick={() => countChange({target:{value: -1}}, item.phone_id)}
+                onClick={() => countChange({target:{value: -1}}, item.phone_id, item.selectedColor)}
                 className={classes.removeButton}>
                 <HighlightOffIcon />
               </Button>
@@ -35,8 +35,15 @@ const ItemsList = ({cartItems, classes}) => {
                   <img className={classes.image} alt={item.name} height="42" width="42" src={imagePath} />
                 </Link>
                 <div>
-                  <Link className={classes.name} to={`/phone/${item.phone_id}`}><h3>{item.name}</h3></Link>
+                  <Link className={classes.nameContainer} to={`/phone/${item.phone_id}`}><h3 className={classes.name}>{item.name}</h3></Link>
+                  {
+                    item.selectedColor ? 
+                    <div className={classes.color}>{item.selectedColor.name}<span className={classes.colorDot} style={{backgroundColor: item.selectedColor.code}}></span></div>
+                    :
+                    null
+                  }
                   <div className={classes.price}>{item.price}</div>
+                  <div></div>
                 </div>
           
               </div>
@@ -44,7 +51,7 @@ const ItemsList = ({cartItems, classes}) => {
                 <TextField
                   className={classes.count}
                   onChange={(e) => countChange(e, item.phone_id)}
-                  id="outlined-from-input"
+                  id={`outlined-from-input-${item.phone_id}`}
                   type="number"
                   name="min"
                   defaultValue={item.count}
