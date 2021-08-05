@@ -27,7 +27,7 @@ export default function Phone() {
   const classes = useStyles();
   
   const {id} = useParams();
-  const [data, loading, error] = usePageDataLoad(() => getOnePhones(id), null)
+  const [data, setData, loading, error] = usePageDataLoad(() => getOnePhones(id), null)
 
   const dispatch = useDispatch();
   const cartList = useSelector(state => state.cart.cartList);

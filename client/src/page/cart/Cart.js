@@ -193,7 +193,7 @@ const Cart = () => {
 
   // ComponentDidMount
 
-  const [data, loading, error] = usePageDataLoad(getCartData)
+  const [data, setData, loading, error] = usePageDataLoad(getCartData)
 
   //PayPal modal control
 

@@ -108,7 +108,7 @@ const Compare = () => {
 
   const classes = useStyles();
 
-  const [data, loading, error] = usePageDataLoad(() => getSeveralPhones(storedId), null, storedId)  
+  const [data, setData, loading, error] = usePageDataLoad(() => getSeveralPhones(storedId), null, storedId)  
 
   useEffect(() => {
     if(data) setItems(data)

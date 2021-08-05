@@ -24,12 +24,10 @@ const usePageDataLoad = (fetchingData, time, ...dependencies) => {
       })
   }
   
-
   useEffect(() => {
     setLoading(true)
 
     if (time) {
-      setLoading(true)
       const timer = setTimeout(() => {
         fetching()
       }, time);
@@ -42,7 +40,7 @@ const usePageDataLoad = (fetchingData, time, ...dependencies) => {
     
   }, [...dependencies])
   
-  return [data, loading, error]
+  return [data, setData, loading, error]
 }
 
 export default usePageDataLoad;

@@ -21,7 +21,7 @@ const Profile = () => {
   
   const classes = useStyles();
 
-  const [data, loading, error] = usePageDataLoad(() => getProfile(clientId))
+  const [data, setData, loading, error] = usePageDataLoad(() => getProfile(clientId))
 
   useEffect(() => {
     if(data) setProfile(data);

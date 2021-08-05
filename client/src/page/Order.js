@@ -75,7 +75,7 @@ const Order = () => {
   const [orderInfo, setOrderInfo] = useState(null)
   const [orderHistory, setOrderHistory] = useState(null)
 
-  const [data, loading, error] = usePageDataLoad(() => getUserOrder(id), null, id)
+  const [data, setData, loading, error] = usePageDataLoad(() => getUserOrder(id), null, id)
 
   useEffect(() => {
     if(data) {

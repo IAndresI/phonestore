@@ -5,8 +5,7 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import { Checkbox, Slider, TextField } from '@material-ui/core';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchingColor, fetchingManufacturer, onCameraCountChange, onColorChange, onDiagonalChange, onManufacturerChange, onPageSet, onPriceChange, onRamChange, onRomChange } from '../store/actions';
-import { getFilter } from '../http/phoneAPI';
+import { onCameraCountChange, onColorChange, onDiagonalChange, onManufacturerChange, onPageSet, onPriceChange, onRamChange, onRomChange } from '../store/actions';
 import Accordion from '@material-ui/core/Accordion';
 import AccordionSummary from '@material-ui/core/AccordionSummary';
 import AccordionDetails from '@material-ui/core/AccordionDetails';
@@ -49,31 +48,58 @@ const useStyles = makeStyles({
   },
   accordionInner: {
     width: '100%'
+  },
+  button: {
+    backgroundColor: "#3f51b5",
+    borderRadius: 10,
+    width: '100%',
+    marginBottom: 20,
+    cursor: 'pointer',
+    textAlign: 'center',
+    fontSize: 18,
+    fontWeight: 500,
+    padding: '15px 30px',
+    color: "#ffffff",
+    transition: "all 500ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;",
+    textDecoration: 'none',
+    textTransform: "none",
+    border: '1px solid #3f51b5',
+    "&:hover, &:focus": {
+      outline: "transparent",
+      color: "#3f51b5",
+      backgroundColor: "#ffffff",
+    },
+    "&:active": {
+      color: "#ffffff",
+      backgroundColor: "#3f51b5",
+    }
   }
 });
 
-const Filter = () => {
+const Filter = ({color, price: {min, max}, manufacturer, diagonal, camera, memory, ram}) => {
 
   // Store
   
   const dispatch = useDispatch();
   const currentFilter = useSelector(state => state.filter)
 
-  // Data for filter
+  // State
 
-  const [minMaxPrice, setMinMaxPrice] = useState([0, 10000000]);
-  const [minMaxDiagonal, setMinMaxDiagonal] = useState([0, 10]);
-  const [colorList, setColorList] = useState([]);
-  const [manufacturerList, setManufacturerList] = useState([]);
-  const [cameraList, setCameraList] = useState([]);
-  const [ramList, setRamList] = useState([]);
-  const [memoryList, setMemoryList] = useState([]);
+  const [firstRender, setFirstRender] = useState(true)
+  
+  // All Filtres Form DB
+
+  const minMaxPriceFormatter = [parseInt(min.slice(1, min.length).replace(",","")),parseInt(max.slice(1, max.length).replace(",",""))]
+  const minMaxDiagonalFormatter = [+diagonal.min, +diagonal.max]
+  const ramFormatter = ram.map(e => e.ram);
+  const romFormatter = memory.map(e => e.memory)
 
   // Data that user pick
 
   const [checkedManufacturer, setCheckedManufacturer] = useState([]);
   const [checkedColor, setCheckedColor] = useState([]);
-  const [price, setPrice] = useState([0, 10000000]);
+  const [checkedPrice, setCheckedPrice] = useState([]);
+  const [checkedDiagonal, setCheckedDiagonal] = useState([])
   const [checkedCamera, setCheckedCamera] = useState([]);
   const [checkedRam, setCheckedRam] = useState([]);
   const [checkedMemory, setCheckedMemory] = useState([]);
@@ -82,30 +108,55 @@ const Filter = () => {
 
   const classes = useStyles();
 
-  // on filter change and componentDidMount
+  const clearFilters = async () => {
+    setCheckedManufacturer([])
+    setCheckedColor([])
+    setCheckedPrice([])
+    setCheckedDiagonal([])
+    setCheckedCamera([])
+    setCheckedRam([])
+    setCheckedMemory([])
+
+    dispatch(onPriceChange(minMaxPriceFormatter));
+    dispatch(onDiagonalChange([+diagonal.min, +diagonal.max]));
+    dispatch(onColorChange([]));
+    dispatch(onManufacturerChange([]));
+    dispatch(onCameraCountChange([]));
+    dispatch(onRamChange([]));
+    dispatch(onRomChange([]));
+    dispatch(onPageSet(1))
+  }
+
+  // Form Event Handlers
 
   const diagonalChange = (event) => {
     if(event.target.name==="min") {
-      if(+event.target.value > minMaxDiagonal[1] || +event.target.value < minMaxDiagonal[0]) {
-        dispatch(onDiagonalChange([minMaxDiagonal[0], currentFilter.diagonal[1]]))
-        event.target.value=minMaxDiagonal[0].toFixed(2)
+      if(+event.target.value > minMaxDiagonalFormatter[1] || +event.target.value < minMaxDiagonalFormatter[0]) {
+        setCheckedDiagonal([minMaxDiagonalFormatter[0], currentFilter.diagonal[1]])
+        event.target.value=minMaxDiagonalFormatter[0].toFixed(2)
       }
-      else dispatch(onDiagonalChange([+event.target.value, currentFilter.diagonal[1]]))
+      if(+event.target.value > checkedDiagonal[1]) {
+        setCheckedDiagonal([+event.target.value, +event.target.value])
+      }
+      else setCheckedDiagonal([+event.target.value, currentFilter.diagonal[1]])
     }
     else {
-      if(+event.target.value > minMaxDiagonal[1] || +event.target.value < minMaxDiagonal[0]) {
-        dispatch(onDiagonalChange([currentFilter.diagonal[0], minMaxDiagonal[1]]))
-        event.target.value=minMaxDiagonal[1].toFixed(2)
+      if(+event.target.value > minMaxDiagonalFormatter[1] || +event.target.value < minMaxDiagonalFormatter[0]) {
+        setCheckedDiagonal([currentFilter.diagonal[0], minMaxDiagonalFormatter[1]])
+        event.target.value=minMaxDiagonalFormatter[1].toFixed(2)
       }
-      else dispatch(onDiagonalChange([currentFilter.diagonal[0], +event.target.value]))
+      if(+event.target.value < checkedDiagonal[0]) {
+        setCheckedDiagonal([+event.target.value, +event.target.value])
+      }
+      else setCheckedDiagonal([currentFilter.diagonal[0], +event.target.value])
     }
   }
 
-  const handleChange = (event, newValue) => {
-    setPrice(newValue);
+  const handleCheckedPriceChange = (event, newValue) => {
+    setCheckedPrice(newValue);
   };
 
-  const handleToggle = (value, state, changeState, action, type) => () => {
+  const handleCheckBoxToggle = (value, state, changeState, action, type) => () => {
     let previewCurrentIndex, currentIndex;
     switch (type) {
       case "man":
@@ -140,42 +191,40 @@ const Filter = () => {
     dispatch(onPageSet(1))
   };
 
-  useEffect(() => {
-    getFilter().then(({color, price: {min, max}, manufacturer, diagonal, camera, memory, ram}) => {
+  // Dispatch Time Out
 
-      setRamList(ram.map(e => e.ram))
-
-      setMemoryList(memory.map(e => e.memory))
-
-      setCameraList(camera)
-
-      setMinMaxDiagonal([+diagonal.min, +diagonal.max]);
-      dispatch(onDiagonalChange([+diagonal.min, +diagonal.max]))
-
-      setManufacturerList(manufacturer)
-      dispatch(fetchingManufacturer(manufacturer))
-
-      const minMaxPri = [parseInt(min.slice(1, min.length).replace(",","")),parseInt(max.slice(1, max.length).replace(",",""))]
-      setMinMaxPrice(minMaxPri);
-      dispatch(onPriceChange(minMaxPri))
-
-      setColorList(color);
-      dispatch(fetchingColor(color))
-    });
-  }, [dispatch]);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      dispatch(onPriceChange(price))
+  const dispatchTimeOut = (actionCreator, checked, initial) => {
+    return setTimeout(() => {
+      dispatch(actionCreator(checked.length > 0 ? checked : initial))
       dispatch(onPageSet(1))
     }, 500);
-    return () => {
-      clearTimeout(timer)
-    }
-  }, [price, dispatch])
+  }
 
+  useEffect(() => {
+    if(!firstRender) {
+      const timer = dispatchTimeOut(onPriceChange,checkedPrice,minMaxPriceFormatter);
+      return () => {
+        clearTimeout(timer)
+      }
+    }
+    else setFirstRender(false)
+  }, [checkedPrice, dispatch])
+
+  useEffect(() => {
+    if(!firstRender) {
+      const timer = dispatchTimeOut(onDiagonalChange,checkedDiagonal,minMaxDiagonalFormatter);
+      return () => {
+        clearTimeout(timer)
+      }
+    }
+    else setFirstRender(false)
+  }, [checkedDiagonal, dispatch])
+
+  // Component
+  
   return (
     <div className={classes.root}>
+      <button className={classes.button} onClick={() => clearFilters()}>Clear All Filtres</button>
       <Accordion>
         <AccordionSummary
           expandIcon={<ExpandMoreIcon />}
@@ -187,12 +236,12 @@ const Filter = () => {
         <AccordionDetails>
           <div className={classes.accordionInner}>
             <Slider
-              value={price || currentFilter.price}
-              max={minMaxPrice[1]}
-              min={minMaxPrice[0]}
+              value={checkedPrice.length > 0 ? checkedPrice : currentFilter.price.length> 0 ? currentFilter.price : minMaxPriceFormatter}
+              max={minMaxPriceFormatter[1]}
+              min={minMaxPriceFormatter[0]}
               step={100}
               className={classes.range}
-              onChange={handleChange}
+              onChange={handleCheckedPriceChange}
               valueLabelDisplay="on"
               aria-labelledby="range-slider"
             />
@@ -212,10 +261,10 @@ const Filter = () => {
             <List multiple component="nav" aria-label="manyfacturer filter">
               <div className={classes.listItemContainer}>
                 {
-                  manufacturerList.map(e => {
+                  manufacturer.map(e => {
                     const labelId = `checkbox-list-label-${e.name}`;
                     return (
-                      <ListItem key={e.name} role={undefined} dense button onClick={handleToggle(e.name, checkedManufacturer, setCheckedManufacturer, onManufacturerChange, "man")}>
+                      <ListItem key={e.name} role={undefined} dense button onClick={handleCheckBoxToggle(e.name, checkedManufacturer, setCheckedManufacturer, onManufacturerChange, "man")}>
                         <Checkbox
                           edge="start"
                           checked={checkedManufacturer.indexOf(e.name) !== -1 || currentFilter.manufacturer.includes(e.name)}
@@ -246,10 +295,10 @@ const Filter = () => {
             <List multiple component="nav" aria-label="colors filter">
               <div className={classes.listItemContainer}>
                 {
-                  colorList.map(e => {
+                  color.map(e => {
                     const labelId = `checkbox-list-label-${e.name}`;
                     return (
-                      <ListItem key={e.name} dense button onClick={handleToggle(e.color_id, checkedColor, setCheckedColor, onColorChange, "col")}>
+                      <ListItem key={e.name} dense button onClick={handleCheckBoxToggle(e.color_id, checkedColor, setCheckedColor, onColorChange, "col")}>
                         <Checkbox
                           edge="start"
                           checked={checkedColor.indexOf(e.color_id) !== -1 || currentFilter.color.includes(e.color_id)}
@@ -284,7 +333,8 @@ const Filter = () => {
                 id="outlined-from-input"
                 type="number"
                 name="min"
-                inputProps={{ min: minMaxDiagonal[0], max: minMaxDiagonal[1], step: "0.01", placeholder: minMaxDiagonal[0]}}
+                value={checkedDiagonal[0] || currentFilter.diagonal[0] || minMaxDiagonalFormatter[0]}
+                inputProps={{ min: minMaxDiagonalFormatter[0], max: minMaxDiagonalFormatter[1], step: "0.01"}}
                 variant="outlined"
               />
               <span>-</span>
@@ -293,7 +343,8 @@ const Filter = () => {
                 id="outlined-to-input"
                 type="number"
                 name="max"
-                inputProps={{ min: minMaxDiagonal[0], max: minMaxDiagonal[1], step: "0.01", placeholder: minMaxDiagonal[1]}}
+                value={checkedDiagonal[1] || currentFilter.diagonal[1] || minMaxDiagonalFormatter[1]}
+                inputProps={{ min: minMaxDiagonalFormatter[0], max: minMaxDiagonalFormatter[1], step: "0.01"}}
                 variant="outlined"
               />
             </div>
@@ -313,10 +364,10 @@ const Filter = () => {
             <List multiple component="nav" aria-label="camera count filter">
               <div className={classes.listItemContainer}>
                 {
-                  cameraList.map(e => {
+                  camera.map(e => {
                     const labelId = `checkbox-list-label-${e.name}`;
                     return (
-                      <ListItem key={e.camera_count} dense button onClick={handleToggle(e.camera_count, checkedCamera, setCheckedCamera, onCameraCountChange, "cam")}>
+                      <ListItem key={e.camera_count} dense button onClick={handleCheckBoxToggle(e.camera_count, checkedCamera, setCheckedCamera, onCameraCountChange, "cam")}>
                         <Checkbox
                           edge="start"
                           checked={checkedCamera.indexOf(e.camera_count) !== -1 || currentFilter.camera.includes(e.camera_count)}
@@ -348,10 +399,10 @@ const Filter = () => {
               <h2></h2>
               <div className={classes.listItemContainer}>
               {
-                ramList.map(e => {
+                ramFormatter.map(e => {
                   const labelId = `checkbox-list-label-${e}`;
                   return (
-                    <ListItem key={e} dense button onClick={handleToggle(e, checkedRam, setCheckedRam, onRamChange, "ram")}>
+                    <ListItem key={e} dense button onClick={handleCheckBoxToggle(e, checkedRam, setCheckedRam, onRamChange, "ram")}>
                       <Checkbox
                         edge="start"
                         checked={checkedRam.indexOf(e) !== -1 || currentFilter.ram.includes(e)}
@@ -382,10 +433,10 @@ const Filter = () => {
             <List multiple component="nav" aria-label="ROM filter">
               <div className={classes.listItemContainer}>
               {
-                memoryList.map(e => {
+                romFormatter.map(e => {
                   const labelId = `checkbox-list-label-${e}`;
                   return (
-                    <ListItem key={e} dense button onClick={handleToggle(e, checkedMemory, setCheckedMemory, onRomChange, "mem")}>
+                    <ListItem key={e} dense button onClick={handleCheckBoxToggle(e, checkedMemory, setCheckedMemory, onRomChange, "mem")}>
                       <Checkbox
                         edge="start"
                         checked={checkedMemory.indexOf(e) !== -1 || currentFilter.rom.includes(e)}

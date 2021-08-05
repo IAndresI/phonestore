@@ -32,7 +32,7 @@ const useStyles = makeStyles(() => ({
 const Home = () => {
 
   const [newestPhones, setNewestPhones] = useState([])
-  const [data, loading, error] = usePageDataLoad(getNewestPhones)
+  const [data, setData, loading, error] = usePageDataLoad(getNewestPhones)
 
   const classes = useStyles();
 

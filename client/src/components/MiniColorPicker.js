@@ -21,8 +21,8 @@ const useStyles = makeStyles({
     }
   },
   radioLabel: {
-    width: 20,
-    height: 20,
+    width: 22,
+    height: 22,
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',

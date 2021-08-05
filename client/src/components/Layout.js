@@ -1,12 +1,13 @@
-import React, {useState} from 'react';
+import React from 'react';
 import Footer from './Footer';
 import Header from './Header'
+import Spinner from './Spinner';
 
 const Layout = (props) => {
   return (
     <div className="root">
       {
-        props.loading ? null :
+        props.loading ? <Spinner /> :
         (
           <>
             <Header />
