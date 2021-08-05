@@ -36,6 +36,14 @@ class PhoneController {
       const whereCamera = camera ? `AND cardinality(ph.camera) IN(${camera.join(',')})` : "";
       const whereDiagonal = diagonal ? `AND ph.diagonal>=${diagonal[0]} AND ph.diagonal<=${diagonal[1]}` : "";
 
+      // console.log(`SELECT DISTINCT ph.*, get_all_phone_colors(ph.phone_id) AS "phone_colors"
+      // FROM get_full_phones ph 
+      // LEFT JOIN color_details col_det ON col_det.phone_id=ph.phone_id 
+      // LEFT JOIN color col ON col_det.color_id=col.color_id 
+      // WHERE TRUE ${whereColor} ${whereManufacturer} ${wherePrice} ${whereRam} ${whereRom} ${whereCamera} ${whereDiagonal}
+      // ${orderBy} 
+      // LIMIT ${limit} OFFSET ${offset}`);
+
       const qeury = await db.query(`
         SELECT DISTINCT ph.*, get_all_phone_colors(ph.phone_id) AS "phone_colors"
         FROM get_full_phones ph 
@@ -45,6 +53,7 @@ class PhoneController {
         ${orderBy} 
         LIMIT ${limit} OFFSET ${offset};
       `);
+      
       const countQeury = await db.query(`
         SELECT COUNT(*) 
         FROM get_full_phones ph 
