@@ -333,7 +333,7 @@ const Filter = ({color, price: {min, max}, manufacturer, diagonal, camera, memor
                 id="outlined-from-input"
                 type="number"
                 name="min"
-                value={checkedDiagonal[0] || currentFilter.diagonal[0] || minMaxDiagonalFormatter[0]}
+                value={checkedDiagonal[0] || currentFilter.diagonal ? currentFilter.diagonal[0] : null || minMaxDiagonalFormatter[0]}
                 inputProps={{ min: minMaxDiagonalFormatter[0], max: minMaxDiagonalFormatter[1], step: "0.01"}}
                 variant="outlined"
               />
@@ -343,7 +343,7 @@ const Filter = ({color, price: {min, max}, manufacturer, diagonal, camera, memor
                 id="outlined-to-input"
                 type="number"
                 name="max"
-                value={checkedDiagonal[1] || currentFilter.diagonal[1] || minMaxDiagonalFormatter[1]}
+                value={checkedDiagonal[1] || currentFilter.diagonal ? currentFilter.diagonal[1] : null || minMaxDiagonalFormatter[1]}
                 inputProps={{ min: minMaxDiagonalFormatter[0], max: minMaxDiagonalFormatter[1], step: "0.01"}}
                 variant="outlined"
               />
