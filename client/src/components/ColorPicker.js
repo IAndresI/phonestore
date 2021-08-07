@@ -36,7 +36,7 @@ const ColorPicker = ({colors, currentColor, setColor}) => {
         value={currentColor.id}
       >
         {
-          colors.map(e => <MenuItem onClick={() => setColor({id: e[0],name: e[1], code: e[2]})} value={+e[0]}>{e[1]}<span className={classes.color} style={{backgroundColor: e[2]}}></span></MenuItem>)
+          colors.map(e => <MenuItem key={e[0]} onClick={() => setColor({id: e[0],name: e[1], code: e[2]})} value={+e[0]}>{e[1]}<span className={classes.color} style={{backgroundColor: e[2]}}></span></MenuItem>)
         }
       </Select>
     </div>

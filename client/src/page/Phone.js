@@ -14,11 +14,13 @@ import CompareIcon from '@material-ui/icons/Compare';
 import { usePageDataLoad } from '../customHooks';
 import Spinner from '../components/Spinner';
 import ColorPicker from '../components/ColorPicker';
+import Tab from '../components/phone/tabs';
 
 const useStyles = makeStyles({
   media: {
     height: 400,
-    backgroundSize: "contain !important"
+    backgroundSize: "contain !important",
+    marginBottom: 30
   },
 });
 
@@ -27,7 +29,7 @@ export default function Phone() {
   const classes = useStyles();
   
   const {id} = useParams();
-  const [data, setData, loading, error] = usePageDataLoad(() => getOnePhones(id), null)
+  const [phone, setPhone, loading, error] = usePageDataLoad(() => getOnePhones(id), null)
 
   const dispatch = useDispatch();
   const cartList = useSelector(state => state.cart.cartList);
@@ -36,18 +38,18 @@ export default function Phone() {
   const [color, setColor] = useState(null)
 
   useEffect(() => {
-    setColor({id: data?.colors[0][0], name: data?.colors[0][1]})
-  }, [data?.colors])
+    setColor({id: phone?.colors[0][0], name: phone?.colors[0][1]})
+  }, [phone?.colors])
 
-  const inCart = cartList.find(e => e.phone_id===data?.phone_id && (color?.id ? e.selectedColor?.id === color?.id : true))
-  const isInCompare = compareList.find(e => +e === data?.phone_id);
+  const inCart = cartList.find(e => e.phone_id===phone?.phone_id && (color?.id ? e.selectedColor?.id === color?.id : true))
+  const isInCompare = compareList.find(e => +e === phone?.phone_id);
 
   const removeFromCart = (phone) => dispatch(onChangeCartItem({
     ...phone,
     count: -1
   }))
 
-  const imagePath=`http://localhost:5000/${data?.image ? data?.image : "phone.jpg"}`
+  const imagePath=`http://localhost:5000/${phone?.image ? phone?.image : "phone.jpg"}`
   const info = [["Weight", "weight"], ["Diagonal", "diagonal"], ["RAM", "ram"], ["ROM", "memory"], ["Manufacturer", "manufacturer"], ["Camera", "camera"]]
 
   if (loading) return <Spinner style={{position: "fixed", top: 0, left: 0, right: 0, bottom: 0}}/>
@@ -56,13 +58,13 @@ export default function Phone() {
 
   return (
     <section className="section page">
-      <h1 className="title mini">{data.name}</h1>
+      <h1 className="title mini">{phone.name}</h1>
       <Container>
         <Grid>
           <CardMedia
             className={classes.media}
             image={imagePath}
-            title={data.name}
+            title={phone.name}
           />
         </Grid>
         {
@@ -70,7 +72,7 @@ export default function Phone() {
           (
             <Button
             onClick={() => {
-              removeFromCart({phone_id: data.phone_id, name: data.name, price: data.price, image: data.image, selectedColor:color});
+              removeFromCart({phone_id: phone.phone_id, name: phone.name, price: phone.price, image: phone.image, selectedColor:color});
             }}
             style={{backgroundColor:"tomato", marginBottom: 30, marginRight: 30}}
             variant="contained"
@@ -84,7 +86,7 @@ export default function Phone() {
           (
             <Button
             onClick={() => {
-              dispatch(onChangeCartItem({phone_id: data.phone_id, name: data.name, price: data.price, image: data.image, selectedColor: color}));
+              dispatch(onChangeCartItem({phone_id: phone.phone_id, name: phone.name, price: phone.price, image: phone.image, selectedColor: color}));
             }}
             style={{marginBottom: 30, marginRight: 30}}
             variant="contained"
@@ -101,7 +103,7 @@ export default function Phone() {
           (
             <Button
               onClick={() => {
-                dispatch(removeCompareItem(data.phone_id));
+                dispatch(removeCompareItem(phone.phone_id));
               }}
               style={{backgroundColor: "tomato", marginBottom: 30}}
               variant="contained"
@@ -115,7 +117,7 @@ export default function Phone() {
           (
             <Button
               onClick={() => {
-                dispatch(addCompareItem(data.phone_id));
+                dispatch(addCompareItem(phone.phone_id));
               }}
               style={{marginBottom: 30}}
               variant="contained"
@@ -127,17 +129,8 @@ export default function Phone() {
           )
         }
         <Typography style={{marginBottom: 30, fontSize: 20, fontWeight: 700}}>Select Color:</Typography>
-        <ColorPicker colors={data.colors} currentColor={color} setColor={setColor}/>
-        <Typography style={{marginBottom: 30, fontSize: 20, fontWeight: 700}}>Characteristics:</Typography>
-        <Grid>
-          {
-            info.map((e, i) => (
-              <Grid key={e} style={{backgroundColor: i % 2 === 0 ? "lightgray" : "transparent", padding: 10}}>
-                <strong>{e[0]}</strong>:    {Array.isArray(data[e[1]]) ? data[e[1]].join("x") : data[e[1]]}
-              </Grid>
-            ))
-          }
-        </Grid>
+        <ColorPicker colors={phone.colors} currentColor={color} setColor={setColor}/>
+        <Tab characteristics={{info, phone}}/>
       </Container>
     </section>
   );

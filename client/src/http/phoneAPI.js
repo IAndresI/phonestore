@@ -18,6 +18,11 @@ export const getOnePhones = async (id) => {
   return data;
 }
 
+export const getReviews = async (id) => {
+  const {data} = await $host.get('api/phone/reviews/'+id);
+  return data;
+}
+
 export const getAllPhones = async (page=1, limit=9, sort=null, color, manufacturers, price,ram,rom,camera, diagonal) => {
   const {data} = await $host.get(`api/phone`, {params: {page, limit, sort, color, manufacturers, price, ram,rom,camera, diagonal}});
   return data;

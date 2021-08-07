@@ -15,11 +15,26 @@ class PhoneController {
   async getOne(req, res, next) {
     const {id} = req.params;
     if(!id) {
-      return next(ApiError.badRequest('Enter ID!'))
+      return next(ApiError.badRequest('Enter ID!'));
     }
     const qeury = await db.query('SELECT ph.*,manuf.name as "manufacturer", get_all_phone_colors(ph.phone_id) AS "colors" FROM phone ph INNER JOIN manufacturer manuf ON manuf.manufacturer_id=ph.manufacturer_id WHERE phone_id=$1', [id]);
-    const data = qeury.rows[0]
-    return data ? res.json(data) : next(ApiError.badRequest('Nothings found'))
+    const data = qeury.rows[0];
+    return data ? res.json(data) : next(ApiError.badRequest('Nothings found'));
+  }
+
+  async getReviews(req, res,next) {
+    try {
+      const {id} = req.params;
+      if(!id) {
+        return next(ApiError.badRequest('Enter ID!'));
+      }
+      const qeury = await db.query(`SELECT * FROM get_phone_reviews($1);`, [id]);
+      const data = qeury.rows;
+      return res.json(data);
+    }
+    catch(err) {
+      return next(ApiError.badRequest(err.message));
+    }
   }
 
   async getAll(req, res,next) {
