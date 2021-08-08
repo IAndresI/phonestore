@@ -1,10 +1,116 @@
-import { Avatar, Divider, Grid } from '@material-ui/core';
-import React, {useState, useEffect} from 'react';
+import { Avatar, Divider, Grid, makeStyles } from '@material-ui/core';
+import React, {useState} from 'react';
 import { usePageDataLoad } from '../../../customHooks';
 import { getReviews } from '../../../http/phoneAPI';
 import Spinner from '../../Spinner';
+import CustomizedRatings from '../components/Rating';
+import Pagination from '@material-ui/lab/Pagination';
 
-function time_ago(time) {
+const useStyles = makeStyles({
+  commentHeader: {
+    display: 'flex', 
+    justifyContent: 'space-between', 
+    alignItems: 'center'
+  },
+  fio: { 
+    margin: 0, 
+    textAlign: "left"
+  },
+  text: { 
+    textAlign: "left" 
+  },
+  commentDate: { 
+    textAlign: "left", 
+    color: "gray" 
+  },
+  devider: {
+    marginBottom: 30
+  },
+  noComments: {
+    textAlign: "center"
+  },
+  pagination: {
+    width: "fit-content",
+    margin: "30px auto 0"
+  },
+  paginationHide: {
+    display: "none"
+  },
+  paginationShow: {
+    display: "block"
+  }
+});
+
+const Comments = ({phoneId, page, setPage}) => {
+
+  const [limit, setLimit] = useState(5)
+
+  const [reviews, setReviews, loading, error] = usePageDataLoad(() => getReviews(phoneId, limit, page), null, page)
+
+  const paginationChange = (event, value) => {
+    setPage(value)
+  }
+
+  const classes = useStyles();
+
+  if(loading) return <Spinner />
+
+  if(error) return <h3>Some Error {error.message}</h3>
+
+  const pageCount = Math.ceil(+reviews.count/limit);
+
+  return (
+    <div>
+      {
+        reviews.data.length > 0 ?
+        (
+          <>
+            {
+              reviews.data.map((review, i) => {
+                const imgLink = `${process.env.REACT_APP_API_URL}/${review.image ? review.image : "user.png"}`
+                return <div key={review.review_id}>
+                  <Grid container wrap="nowrap" spacing={2}>
+                    <Grid item>
+                      <Avatar alt="Remy Sharp" src={imgLink} />
+                    </Grid>
+                    <Grid justifyContent="left" item xs zeroMinWidth>
+                      <div className={classes.commentHeader}>
+                        <h4 className={classes.fio}>{review.fio}</h4>
+                        <CustomizedRatings value={review.rating}/>
+                      </div>
+                      
+                      <p className={classes.text}>
+                        {review.comment}
+                      </p>
+                      <p className={classes.commentDate}>
+                        Posted {timeAgo(Date.now() - (Date.now() - (new Date(review.created_at)).valueOf()))}
+                      </p>
+                    </Grid>
+                  </Grid>
+                  {
+                    i === reviews.data.length-1 ? null : <Divider variant="fullWidth" className={classes.devider} />
+                  }
+                </div>
+              })
+            }
+            <Pagination 
+              className={`${classes.pagination} ${pageCount <= 1 ? classes.paginationHide : classes.paginationShow}`} 
+              page={page} 
+              onChange={paginationChange}
+              count={pageCount} 
+              variant="outlined" 
+              color="primary" 
+            />
+          </>
+        )
+        :
+        <h3 className={classes.noComments}>Theres No Comments</h3>
+      }
+    </div>
+  );
+};
+
+function timeAgo(time) {
 
   switch (typeof time) {
     case 'number':
@@ -58,46 +164,5 @@ function time_ago(time) {
     }
   return time;
 }
-
-const Comments = ({phoneId}) => {
-
-  const [reviews, setReviews, loading, error] = usePageDataLoad(() => getReviews(phoneId))
-
-  if(loading) return <Spinner />
-
-  if(error) return <h3>Some Error {error.message}</h3>
-
-  return (
-    <div>
-      {
-        reviews.length > 0 ?
-        reviews.map((review, i) => {
-          const imgLink = `${process.env.REACT_APP_API_URL}/${review.image ? review.image : "user.png"}`
-          return <div key={review.review_id}>
-            <Grid container wrap="nowrap" spacing={2}>
-              <Grid item>
-                <Avatar alt="Remy Sharp" src={imgLink} />
-              </Grid>
-              <Grid justifyContent="left" item xs zeroMinWidth>
-                <h4 style={{ margin: 0, textAlign: "left" }}>{review.fio}</h4>
-                <p style={{ textAlign: "left" }}>
-                  {review.comment}
-                </p>
-                <p style={{ textAlign: "left", color: "gray" }}>
-                  Posted {time_ago(Date.now() - (Date.now() - (new Date(review.created_at)).valueOf()))}
-                </p>
-              </Grid>
-            </Grid>
-            {
-              i === reviews.length-1 ? null : <Divider variant="fullWidth" style={{ margin: "30px 0" }} />
-            }
-          </div>
-        })
-        :
-        <h3 style={{textAlign: "center"}}>Theres No Comments</h3>
-      }
-    </div>
-  );
-};
 
 export default Comments;
