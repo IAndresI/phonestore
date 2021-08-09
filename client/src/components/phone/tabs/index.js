@@ -54,9 +54,11 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function ScrollableTabsButtonForce({characteristics}) {
+
   const classes = useStyles();
   const [value, setValue] = useState(0);
-  const [commentPage, setCommentPage] = useState(1)
+
+  const [reviewPage, setReviewPage] = useState(1)
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -81,7 +83,7 @@ export default function ScrollableTabsButtonForce({characteristics}) {
         <Characteristics characteristics={characteristics}/>
       </TabPanel>
       <TabPanel className={classes.panel} value={value} index={1}>
-        <Comments phoneId={characteristics?.phone?.phone_id} page={commentPage} setPage={setCommentPage}/>
+        <Comments phoneId={characteristics?.phone?.phone_id} page={reviewPage} setPage={setReviewPage}/>
       </TabPanel>
     </div>
   );

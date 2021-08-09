@@ -5,7 +5,7 @@ import CardMedia from '@material-ui/core/CardMedia';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import AddShoppingCartIcon from '@material-ui/icons/AddShoppingCart';
-import { useParams } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import { getOnePhones } from '../http/phoneAPI';
 import { useDispatch, useSelector } from 'react-redux';
 import { addCompareItem, removeCompareItem, onChangeCartItem } from '../store/actions';
@@ -24,11 +24,15 @@ const useStyles = makeStyles({
   },
 });
 
-export default function Phone() {
+export default function Phone(props) {
 
   const classes = useStyles();
-  
+
+  const history = useHistory();
+
   const {id} = useParams();
+  const {selectedColor} = history.location.state || false;
+
   const [phone, setPhone, loading, error] = usePageDataLoad(() => getOnePhones(id), null)
 
   const dispatch = useDispatch();
@@ -38,7 +42,7 @@ export default function Phone() {
   const [color, setColor] = useState(null)
 
   useEffect(() => {
-    setColor({id: phone?.colors[0][0], name: phone?.colors[0][1]})
+    setColor(selectedColor || {id: phone?.colors[0][0], name: phone?.colors[0][1]})
   }, [phone?.colors])
 
   const inCart = cartList.find(e => e.phone_id===phone?.phone_id && (color?.id ? e.selectedColor?.id === color?.id : true))

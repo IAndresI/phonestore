@@ -4,7 +4,10 @@ import { usePageDataLoad } from '../../../customHooks';
 import { getReviews } from '../../../http/phoneAPI';
 import Spinner from '../../Spinner';
 import CustomizedRatings from '../components/Rating';
+import ReviewModal from '../components/ReviewModal'
 import Pagination from '@material-ui/lab/Pagination';
+import {useSelector} from 'react-redux'
+
 
 const useStyles = makeStyles({
   commentHeader: {
@@ -38,12 +41,23 @@ const useStyles = makeStyles({
   },
   paginationShow: {
     display: "block"
+  },
+  header: {
+    display: "flex",
+    justifyContent: "space-between",
+    akignContent: "center",
+    marginBottom: 30
   }
 });
 
 const Comments = ({phoneId, page, setPage}) => {
 
+  const classes = useStyles();
+
+  const isAuth = useSelector(state => state.user.isAuth)
+
   const [limit, setLimit] = useState(5)
+  const [openReviewModal, setOpenReviewModal] = useState(false);
 
   const [reviews, setReviews, loading, error] = usePageDataLoad(() => getReviews(phoneId, limit, page), null, page)
 
@@ -51,7 +65,9 @@ const Comments = ({phoneId, page, setPage}) => {
     setPage(value)
   }
 
-  const classes = useStyles();
+  const handleOpen = () => {
+    setOpenReviewModal(true);
+  };
 
   if(loading) return <Spinner />
 
@@ -65,6 +81,19 @@ const Comments = ({phoneId, page, setPage}) => {
         reviews.data.length > 0 ?
         (
           <>
+            {
+              isAuth ?
+              (
+                <div className={classes.header}>
+                  <h3>Overall: {reviews.count}</h3>
+                  <button className="button button--mini" onClick={handleOpen}>
+                    Make Review
+                  </button>
+                </div>
+              )
+              :
+              null
+            }
             {
               reviews.data.map((review, i) => {
                 const imgLink = `${process.env.REACT_APP_API_URL}/${review.image ? review.image : "user.png"}`
@@ -106,6 +135,7 @@ const Comments = ({phoneId, page, setPage}) => {
         :
         <h3 className={classes.noComments}>Theres No Comments</h3>
       }
+      <ReviewModal open={openReviewModal} setOpen={setOpenReviewModal}/>
     </div>
   );
 };

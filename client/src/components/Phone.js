@@ -4,7 +4,7 @@ import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
 import Typography from '@material-ui/core/Typography';
-import {Link } from 'react-router-dom'
+import {Link, useParams } from 'react-router-dom'
 import { PHONE_ROUTE } from '../utils/consts';
 import { Button } from '@material-ui/core';
 import { useDispatch, useSelector } from 'react-redux';
@@ -94,6 +94,7 @@ const useStyles = makeStyles({
 });
 
 export default function Phone({phone}) {
+
   const {image, phone_name: name, price, manufacturer_name, phone_id, phone_colors} = phone
   const dispatch = useDispatch()
   const classes = useStyles();
@@ -123,7 +124,11 @@ export default function Phone({phone}) {
     count: -1
   }))
 
-  const phoneLink = `${PHONE_ROUTE}/${phone_id}${phone_colors ? `?color=${selectedColor}` : ""}`
+
+  const phoneLink = {
+    pathname: `${PHONE_ROUTE}/${phone_id}`,
+    state: { selectedColor }
+  }
 
   return (
     <Card className={classes.root}>
