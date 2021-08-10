@@ -42,7 +42,7 @@ export default function Phone(props) {
   const [color, setColor] = useState(null)
 
   useEffect(() => {
-    setColor(selectedColor || {id: phone?.colors[0][0], name: phone?.colors[0][1]})
+    setColor(selectedColor || phone?.colors ? {id: phone?.colors[0][0], name: phone?.colors[0][1]} : false)
   }, [phone?.colors])
 
   const inCart = cartList.find(e => e.phone_id===phone?.phone_id && (color?.id ? e.selectedColor?.id === color?.id : true))
@@ -132,8 +132,14 @@ export default function Phone(props) {
             </Button>
           )
         }
-        <Typography style={{marginBottom: 30, fontSize: 20, fontWeight: 700}}>Select Color:</Typography>
-        <ColorPicker colors={phone.colors} currentColor={color} setColor={setColor}/>
+        {
+          color ? (
+            <>
+              <Typography style={{marginBottom: 30, fontSize: 20, fontWeight: 700}}>Select Color:</Typography>
+              <ColorPicker colors={phone.colors} currentColor={color} setColor={setColor}/>
+            </>
+          ) : null
+        }
         <Tab characteristics={{info, phone}}/>
       </Container>
     </section>

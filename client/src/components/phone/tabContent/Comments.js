@@ -3,7 +3,7 @@ import React, {useState} from 'react';
 import { usePageDataLoad } from '../../../customHooks';
 import { getReviews } from '../../../http/phoneAPI';
 import Spinner from '../../Spinner';
-import CustomizedRatings from '../components/Rating';
+import Rating from '../components/Rating';
 import ReviewModal from '../components/ReviewModal'
 import Pagination from '@material-ui/lab/Pagination';
 import {useSelector} from 'react-redux'
@@ -20,7 +20,9 @@ const useStyles = makeStyles({
     textAlign: "left"
   },
   text: { 
-    textAlign: "left" 
+    textAlign: "left",
+    width: "100%",
+    overflow: "hidden"
   },
   commentDate: { 
     textAlign: "left", 
@@ -55,6 +57,7 @@ const Comments = ({phoneId, page, setPage}) => {
   const classes = useStyles();
 
   const isAuth = useSelector(state => state.user.isAuth)
+  const clientId = useSelector(state => state.user.user.id)
 
   const [limit, setLimit] = useState(5)
   const [openReviewModal, setOpenReviewModal] = useState(false);
@@ -75,6 +78,8 @@ const Comments = ({phoneId, page, setPage}) => {
 
   const pageCount = Math.ceil(+reviews.count/limit);
 
+  const alreadyReviewed = reviews.data.find(el => el.client_id===clientId);
+
   return (
     <div>
       {
@@ -87,7 +92,7 @@ const Comments = ({phoneId, page, setPage}) => {
                 <div className={classes.header}>
                   <h3>Overall: {reviews.count}</h3>
                   <button className="button button--mini" onClick={handleOpen}>
-                    Make Review
+                    {alreadyReviewed ? "Edit Review" : "Make Review"}
                   </button>
                 </div>
               )
@@ -102,10 +107,10 @@ const Comments = ({phoneId, page, setPage}) => {
                     <Grid item>
                       <Avatar alt="Remy Sharp" src={imgLink} />
                     </Grid>
-                    <Grid justifyContent="left" item xs zeroMinWidth>
+                    <Grid item xs zeroMinWidth>
                       <div className={classes.commentHeader}>
                         <h4 className={classes.fio}>{review.fio}</h4>
-                        <CustomizedRatings value={review.rating}/>
+                        <Rating readOnly defaultValue={review.rating}/>
                       </div>
                       
                       <p className={classes.text}>
@@ -135,7 +140,7 @@ const Comments = ({phoneId, page, setPage}) => {
         :
         <h3 className={classes.noComments}>Theres No Comments</h3>
       }
-      <ReviewModal open={openReviewModal} setOpen={setOpenReviewModal}/>
+      <ReviewModal clientId={clientId} phoneId={phoneId} open={openReviewModal} setOpen={setOpenReviewModal} alreadyReviewed={alreadyReviewed}/>
     </div>
   );
 };

@@ -99,7 +99,7 @@ export default function Phone({phone}) {
   const dispatch = useDispatch()
   const classes = useStyles();
 
-  const [selectedColor, setSelectedColor] = useState(phone_colors ? {id: phone_colors[0][0], name: phone_colors[0][1]} : -1)
+  const [selectedColor, setSelectedColor] = useState(phone_colors ? {id: phone_colors[0][0], name: phone_colors[0][1]} : false)
 
   // phones in cart
 

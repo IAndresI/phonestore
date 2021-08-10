@@ -23,6 +23,16 @@ export const getReviews = async (id, limit = 5, page = 1) => {
   return data;
 }
 
+export const createReview = async (id, details) => {
+  const {data} = await $host.post('api/phone/reviews/'+id, details);
+  return data;
+}
+
+export const editReview = async (id, details) => {
+  const {data} = await $host.put('api/phone/reviews/'+id, details);
+  return data;
+}
+
 export const getAllPhones = async (page=1, limit=9, sort=null, color, manufacturers, price,ram,rom,camera, diagonal) => {
   const {data} = await $host.get(`api/phone`, {params: {page, limit, sort, color, manufacturers, price, ram,rom,camera, diagonal}});
   return data;

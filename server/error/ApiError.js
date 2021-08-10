@@ -18,7 +18,7 @@ class ApiError extends Error {
     return new ApiError(403, `API error: ${message}`, 3);
   }
 
-  static duplicateEmail(message) {
+  static duplicateError(message) {
     return new ApiError(409, `API error: ${message}`, 4);
   }
 }

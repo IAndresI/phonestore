@@ -4,6 +4,8 @@ const phoneController = require('../controllers/phoneController');
 
 router.get('/get_several',phoneController.getSeveral);
 router.get('/reviews/:id',phoneController.getReviews);
+router.post('/reviews/:id',phoneController.createReview);
+router.put('/reviews/:id',phoneController.editReview);
 router.get('/newest',phoneController.getNewest);
 router.get('/filter', phoneController.getAllFilter);
 router.get('/search', phoneController.search);

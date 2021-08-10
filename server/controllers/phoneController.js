@@ -31,11 +31,56 @@ class PhoneController {
       }
 
       const offset = page*limit-limit;
-      const qeury = await db.query(`SELECT * FROM get_phone_reviews($1) ORDER BY created_at DESC LIMIT $2 OFFSET $3;`, [id, limit, offset]);
+      const qeury = await db.query(`SELECT * FROM get_phone_reviews($1, $2, $3);`, [id, limit, offset]);
       const countQuery = await db.query(`SELECT COUNT(*) FROM get_phone_reviews($1);`, [id]);
       const data = qeury.rows;
       const {count} = countQuery.rows[0];
       return res.json({data, count});
+    }
+    catch(err) {
+      return next(ApiError.badRequest(err.message));
+    }
+  }
+
+  async createReview(req, res,next) {
+    try {
+      const {id} = req.params;
+      const {clientId, rating, comment} = req.body;
+      if(!clientId) {
+        return next(ApiError.badRequest('Please, login before make review!'));
+      }
+      await db.query(`INSERT INTO 
+        review( phone_id, client_id, rating, text)
+        VALUES ($1, $2, $3, $4);`, [id, clientId, rating, comment], (err) => {
+          if(!err) {
+            return res.status(201).json({message:"Successfully created"});;
+          }
+          else {
+            if(err.code === '23505') {
+              return next(ApiError.duplicateError(err.message));
+            }
+            else return next(ApiError.badRequest(err.message));
+          }
+        });
+    }
+    catch(err) {
+      return next(ApiError.badRequest(err.message));
+    }
+  }
+
+  async editReview(req, res,next) {
+    try {
+      const {id} = req.params;
+      const {rating, comment} = req.body;
+      if(!id) {
+        return next(ApiError.badRequest('Review Not Found'));
+      }
+      await db.query(`UPDATE review SET rating=$1, "text"=$2, verified=false WHERE review_id=$3`, [rating, comment, id], (err) => {
+          if(!err) {
+            return res.status(201).json({message:"Successfully edited"});;
+          }
+          else return next(ApiError.badRequest(err));
+        });
     }
     catch(err) {
       return next(ApiError.badRequest(err.message));

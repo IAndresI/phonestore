@@ -54,7 +54,7 @@ class UserController {
         [hashedPassword, email, firstName, lastName, phone],
         (err, response) => {
           if(err) {
-            if(err.code==="23505") next(ApiError.duplicateEmail("This email already exists! Please, login before creating order!"));
+            if(err.code==="23505") next(ApiError.duplicateError("This email already exists! Please, login before creating order!"));
             else next(ApiError.badRequest(err.message));
           }
           else {
