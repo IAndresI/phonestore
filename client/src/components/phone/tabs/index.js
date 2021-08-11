@@ -9,7 +9,8 @@ import RateReviewIcon from '@material-ui/icons/RateReview';
 import Box from '@material-ui/core/Box';
 import Characteristics from '../tabContent/Characteristics';
 import Comments from '../tabContent/Comments';
-
+import Description from '../tabContent/Description';
+import DescriptionIcon from '@material-ui/icons/Description';
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
 
@@ -75,14 +76,18 @@ export default function ScrollableTabsButtonForce({characteristics}) {
           textColor="primary"
           aria-label="phone tabs"
         >
-          <Tab label="Characteristics" icon={<PhonelinkSetupIcon />} {...a11yProps(0)} />
-          <Tab label="Reviews" icon={<RateReviewIcon />} {...a11yProps(1)} />
+          <Tab label="Description" icon={<DescriptionIcon />} {...a11yProps(0)} />
+          <Tab label="Characteristics" icon={<PhonelinkSetupIcon />} {...a11yProps(1)} />
+          <Tab label="Reviews" icon={<RateReviewIcon />} {...a11yProps(2)} />
         </Tabs>
       </AppBar>
       <TabPanel className={classes.panel} value={value} index={0}>
-        <Characteristics characteristics={characteristics}/>
+        <Description description={characteristics?.phone?.description}/>
       </TabPanel>
       <TabPanel className={classes.panel} value={value} index={1}>
+        <Characteristics characteristics={characteristics}/>
+      </TabPanel>
+      <TabPanel className={classes.panel} value={value} index={2}>
         <Comments phoneId={characteristics?.phone?.phone_id} page={reviewPage} setPage={setReviewPage}/>
       </TabPanel>
     </div>

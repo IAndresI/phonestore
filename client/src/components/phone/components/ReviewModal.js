@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Modal from '@material-ui/core/Modal';
-import ReviewRating from './Rating';
+import ReviewRating from './ReviewRating';
 import { useForm, Controller  } from "react-hook-form";
 import { TextField } from '@material-ui/core';
 import Alert from '@material-ui/lab/Alert';

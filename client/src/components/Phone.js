@@ -4,12 +4,14 @@ import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
 import Typography from '@material-ui/core/Typography';
-import {Link, useParams } from 'react-router-dom'
+import {Link } from 'react-router-dom'
 import { PHONE_ROUTE } from '../utils/consts';
 import { Button } from '@material-ui/core';
 import { useDispatch, useSelector } from 'react-redux';
 import { onChangeCartItem } from '../store/actions';
 import MiniColorPicker from './MiniColorPicker'
+import ReviewRating from './phone/components/ReviewRating';
+import SmsIcon from '@material-ui/icons/Sms';
 
 const useStyles = makeStyles({
   root: {
@@ -90,12 +92,23 @@ const useStyles = makeStyles({
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center"
+  },
+  ratingContainer: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 10
+  },
+  reviewContainer: {
+    display: "flex",
+    alignItems: "center",
   }
 });
 
 export default function Phone({phone}) {
 
-  const {image, phone_name: name, price, manufacturer_name, phone_id, phone_colors} = phone
+  const {image, phone_name: name, price, manufacturer_name, phone_id, phone_colors, rating, review_count} = phone
+
   const dispatch = useDispatch()
   const classes = useStyles();
 
@@ -161,6 +174,15 @@ export default function Phone({phone}) {
           :
           null
         }
+        <div className={classes.ratingContainer}>
+          <div>
+            <ReviewRating readOnly defaultValue={rating}/>
+          </div>
+          <div className={classes.reviewContainer}>
+            <SmsIcon size="small" color="primary"/>
+            {review_count}
+          </div>
+        </div>
         <div className={classes.footer}>
           <Typography className={classes.price} variant="body2" color="textSecondary" component="p">
             {price}

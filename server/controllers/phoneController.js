@@ -103,7 +103,7 @@ class PhoneController {
       const whereCamera = camera ? `AND cardinality(ph.camera) IN(${camera.join(',')})` : "";
       const whereDiagonal = diagonal ? `AND ph.diagonal>=${diagonal[0]} AND ph.diagonal<=${diagonal[1]}` : "";
 
-      // console.log(`SELECT DISTINCT ph.*, get_all_phone_colors(ph.phone_id) AS "phone_colors"
+      // console.log(`SELECT DISTINCT ph.phone_id, ph.price, ph.manufacturer_name, ph.phone_name, ph.image, ph.rating, ph.review_count, get_all_phone_colors(ph.phone_id) AS "phone_colors"
       // FROM get_full_phones ph 
       // LEFT JOIN color_details col_det ON col_det.phone_id=ph.phone_id 
       // LEFT JOIN color col ON col_det.color_id=col.color_id 
@@ -112,7 +112,7 @@ class PhoneController {
       // LIMIT ${limit} OFFSET ${offset}`);
 
       const qeury = await db.query(`
-        SELECT DISTINCT ph.*, get_all_phone_colors(ph.phone_id) AS "phone_colors"
+        SELECT DISTINCT ph.phone_id, ph.price, ph.manufacturer_name, ph.phone_name, ph.image, ph.rating, ph.review_count, get_all_phone_colors(ph.phone_id) AS "phone_colors"
         FROM get_full_phones ph 
         LEFT JOIN color_details col_det ON col_det.phone_id=ph.phone_id 
         LEFT JOIN color col ON col_det.color_id=col.color_id 
@@ -122,7 +122,7 @@ class PhoneController {
       `);
       
       const countQeury = await db.query(`
-        SELECT COUNT(*) 
+        SELECT COUNT(ph.phone_id) 
         FROM get_full_phones ph 
         LEFT JOIN color_details col_det ON col_det.phone_id=ph.phone_id 
         LEFT JOIN color col ON col_det.color_id=col.color_id 

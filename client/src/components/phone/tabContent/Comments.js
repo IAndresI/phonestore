@@ -3,7 +3,7 @@ import React, {useState} from 'react';
 import { usePageDataLoad } from '../../../customHooks';
 import { getReviews } from '../../../http/phoneAPI';
 import Spinner from '../../Spinner';
-import Rating from '../components/Rating';
+import Rating from '../components/ReviewRating';
 import ReviewModal from '../components/ReviewModal'
 import Pagination from '@material-ui/lab/Pagination';
 import {useSelector} from 'react-redux'
@@ -80,8 +80,7 @@ const Comments = ({phoneId, page, setPage}) => {
   const reviewOnVerification = reviews.clientReview?.verified;
 
   const pageCount = Math.ceil(+reviews.count/limit);
-  const allReviews = reviewOnVerification ?  [reviews.clientReview, ...reviews.otherClientReview] : reviews.otherClientReview;
-  console.log(reviewOnVerification);
+  const allReviews = reviewOnVerification && page === 1 ?  [reviews.clientReview, ...reviews.otherClientReview] : reviews.otherClientReview;
 
   return (
     <div>
