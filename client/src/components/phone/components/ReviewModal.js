@@ -65,7 +65,7 @@ export default function ReviewModal({setOpen, open, phoneId, clientId, alreadyRe
         })
     }
     else {
-      createReview(phoneId, {...data, clientId})
+      createReview(phoneId, {...data, clientId, phoneId})
         .then(data => {
           setStatusMessage(data.message)
           setLoading(false)

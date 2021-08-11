@@ -62,7 +62,7 @@ const Comments = ({phoneId, page, setPage}) => {
   const [limit, setLimit] = useState(5)
   const [openReviewModal, setOpenReviewModal] = useState(false);
 
-  const [reviews, setReviews, loading, error] = usePageDataLoad(() => getReviews(phoneId, limit, page), null, page)
+  const [reviews, setReviews, loading, error] = usePageDataLoad(() => getReviews(phoneId, clientId, limit, page), null, page)
 
   const paginationChange = (event, value) => {
     setPage(value)
@@ -76,14 +76,17 @@ const Comments = ({phoneId, page, setPage}) => {
 
   if(error) return <h3>Some Error {error.message}</h3>
 
-  const pageCount = Math.ceil(+reviews.count/limit);
+  const alreadyReviewed = !!reviews.clientReview;
+  const reviewOnVerification = reviews.clientReview?.verified;
 
-  const alreadyReviewed = reviews.data.find(el => el.client_id===clientId);
+  const pageCount = Math.ceil(+reviews.count/limit);
+  const allReviews = reviewOnVerification ?  [reviews.clientReview, ...reviews.otherClientReview] : reviews.otherClientReview;
+  console.log(reviewOnVerification);
 
   return (
     <div>
       {
-        reviews.data.length > 0 ?
+        allReviews.length > 0 ?
         (
           <>
             {
@@ -91,18 +94,28 @@ const Comments = ({phoneId, page, setPage}) => {
               (
                 <div className={classes.header}>
                   <h3>Overall: {reviews.count}</h3>
-                  <button className="button button--mini" onClick={handleOpen}>
-                    {alreadyReviewed ? "Edit Review" : "Make Review"}
-                  </button>
+                  {
+                    reviewOnVerification===false ?
+                    (
+                      <button className="button button--mini" onClick={handleOpen}>You have already written review and it is being reviewed. You can change your review</button>
+                    )
+                    :
+                    (
+                      <button className="button button--mini" onClick={handleOpen}>
+                        {alreadyReviewed ? "Edit Review" : "Make Review"}
+                      </button>
+                    )
+                  }
                 </div>
               )
               :
               null
             }
             {
-              reviews.data.map((review, i) => {
+              allReviews.map((review, i) => {
                 const imgLink = `${process.env.REACT_APP_API_URL}/${review.image ? review.image : "user.png"}`
-                return <div key={review.review_id}>
+                return review.verified ? 
+                <div key={review.review_id}>
                   <Grid container wrap="nowrap" spacing={2}>
                     <Grid item>
                       <Avatar alt="Remy Sharp" src={imgLink} />
@@ -122,9 +135,11 @@ const Comments = ({phoneId, page, setPage}) => {
                     </Grid>
                   </Grid>
                   {
-                    i === reviews.data.length-1 ? null : <Divider variant="fullWidth" className={classes.devider} />
+                    i === allReviews.length-1 ? null : <Divider variant="fullWidth" className={classes.devider} />
                   }
                 </div>
+                :
+                null
               })
             }
             <Pagination 
@@ -140,7 +155,7 @@ const Comments = ({phoneId, page, setPage}) => {
         :
         <h3 className={classes.noComments}>Theres No Comments</h3>
       }
-      <ReviewModal clientId={clientId} phoneId={phoneId} open={openReviewModal} setOpen={setOpenReviewModal} alreadyReviewed={alreadyReviewed}/>
+      <ReviewModal clientId={clientId} phoneId={phoneId} open={openReviewModal} setOpen={setOpenReviewModal} alreadyReviewed={reviews.clientReview}/>
     </div>
   );
 };

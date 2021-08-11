@@ -117,9 +117,10 @@ class UserController {
 
   async putProfile(req, res, next) {
     try {
-      const {client_id, date_of_birth, email, first_name, last_name, gender, image} = req.body;
+      console.log(req.body);
+      const {clientId, date_of_birth, email, first_name, last_name, gender, image} = req.body;
 
-      if(!client_id) {
+      if(!clientId) {
         return next(ApiError.badRequest('Enter ID!'))
       }
 
@@ -135,7 +136,7 @@ class UserController {
         UPDATE client 
         SET first_name = $1, last_name = $2, email = $3, gender = $4, date_of_birth = $5 ${filename ? `, image = '${filename}'` : ""} 
         WHERE client_id=$6`, 
-        [first_name, last_name, email, gender, date_of_birth, client_id], 
+        [first_name, last_name, email, gender, date_of_birth, clientId], 
         (err) => {
           if(!err) {
             if(filename)img.mv(path.resolve(__dirname, '..','static', filename))

@@ -25,17 +25,19 @@ class PhoneController {
   async getReviews(req, res,next) {
     try {
       const {id} = req.params;
-      const {limit, page} = req.query;
+      const {limit, page, clientId} = req.query;
       if(!id) {
         return next(ApiError.badRequest('Enter ID!'));
       }
 
       const offset = page*limit-limit;
-      const qeury = await db.query(`SELECT * FROM get_phone_reviews($1, $2, $3);`, [id, limit, offset]);
-      const countQuery = await db.query(`SELECT COUNT(*) FROM get_phone_reviews($1);`, [id]);
-      const data = qeury.rows;
-      const {count} = countQuery.rows[0];
-      return res.json({data, count});
+      const otherClientReviewsQuery = await db.query(`SELECT * FROM get_other_phone_reviews($1, $2, $3, $4);`, [id, clientId, limit, offset]);
+      const clientReviewsQuery = await db.query(`SELECT * FROM get_client_phone_reviews($1, $2);`, [id, clientId]);
+      const overallCountQuery = await db.query(`SELECT COUNT(*) FROM get_phone_reviews($1);`, [id]);
+      const otherClientReview = otherClientReviewsQuery.rows;
+      const clientReview = clientReviewsQuery.rows[0];
+      const {count} = overallCountQuery.rows[0];
+      return res.json({otherClientReview,clientReview, count});
     }
     catch(err) {
       return next(ApiError.badRequest(err.message));

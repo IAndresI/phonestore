@@ -18,8 +18,8 @@ export const getOnePhones = async (id) => {
   return data;
 }
 
-export const getReviews = async (id, limit = 5, page = 1) => {
-  const {data} = await $host.get('api/phone/reviews/'+id, {params: {limit, page}});
+export const getReviews = async (id,clientId, limit = 5, page = 1) => {
+  const {data} = await $host.get('api/phone/reviews/'+id, {params: {limit, page, clientId}});
   return data;
 }
 

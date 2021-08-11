@@ -50,16 +50,19 @@ const Profile = () => {
       formData.append('clientId',`${clientId}` )
       if(image) formData.append('image', image)
       formData.append('image', null)
+
       const put = await putProfile(clientId, formData).then(data => {
         handleClick();
-        getProfile(clientId).then(data => {
-          setProfile(data);
-          setLoad(false)
-        })
+        getProfile(clientId)
+          .then(data => {
+            setProfile(data);
+            setLoad(false)
+          })
       });
       return put;
     }
     catch(e) {
+      setLoad(false)
       alert(e.response?.data?.message?.detail || e.response?.data?.message || e.message)
     }
   }
