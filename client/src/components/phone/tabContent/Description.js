@@ -20,9 +20,11 @@ const Description = ({description}) => {
 
   const classes = useStyles();
 
-  return description ?  (
+  return description 
+    ? 
     <div dangerouslySetInnerHTML={{__html: description}} className={classes.root} />
-  ) : <div className={classes.noDescription}>Theres Is No Description Yet</div>;
+    :
+    <div className={classes.noDescription}>Theres Is No Description Yet</div>;
 };
 
 export default Description;

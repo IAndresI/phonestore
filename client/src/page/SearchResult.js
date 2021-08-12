@@ -49,7 +49,7 @@ const SearchResult = () => {
   // Phones
   
   const [findingPhone, setFindingPhone] = useState([])
-  const [data, setData, loading, error] = usePageDataLoad(() => search(searchText.toLowerCase(),limit, page), 500, searchText, page)
+  const [data, setData, loading, error] = usePageDataLoad(() => search(searchText?.toLowerCase(),limit, page), 500, searchText, page)
 
 
   const classes = useStyles();

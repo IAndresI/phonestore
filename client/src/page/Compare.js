@@ -108,11 +108,11 @@ const Compare = () => {
 
   const classes = useStyles();
 
-  const [data, setData, loading, error] = usePageDataLoad(() => getSeveralPhones(storedId), null, storedId)  
+  const [data, setData, loading, error] = usePageDataLoad(() => getSeveralPhones(storedId), null)  
 
   useEffect(() => {
     if(data) setItems(data)
-  }, [storedId, data])
+  }, [data])
 
   if(loading) return <Spinner />
 
@@ -149,7 +149,10 @@ const Compare = () => {
                           <h4 className={classes.name}>{phone.phone_name}</h4>
                         </Link>
                         <Button 
-                          onClick={() => dispatch(removeCompareItem(phone.phone_id))}
+                          onClick={() => {
+                            dispatch(removeCompareItem(phone.phone_id))
+                            setItems((prev) => prev.filter(el => el.phone_id !== phone.phone_id))
+                          }}
                           className={classes.removeButton}>
                           <HighlightOffIcon />
                         </Button>
