@@ -17,7 +17,7 @@ import { withRouter, Link} from 'react-router-dom';
 import { onLogout, setCart } from '../store/actions';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 import Badge from '@material-ui/core/Badge';
-import { SEARCH_ROUTE } from '../utils/consts';
+import { ADMIN_ROUTE, ROLE_ADMIN, SEARCH_ROUTE } from '../utils/consts';
 import {onSearch} from '../store/actions'
 import SideBar from './SideBar';
 import PersonAddIcon from '@material-ui/icons/PersonAdd';
@@ -111,7 +111,7 @@ export default withRouter(function PrimarySearchAppBar({history}) {
 
   const dispatch = useDispatch()
   const isAuth = useSelector((state) => state.user.isAuth, shallowEqual)
-  const {cart_id, id} = useSelector((state) => state.user.user, shallowEqual)
+  const {cart_id, id, role} = useSelector((state) => state.user.user, shallowEqual)
   const cartItemsCount = useSelector((state) => state.cart.cartList, shallowEqual)
 
   const classes = useStyles();
@@ -177,6 +177,25 @@ export default withRouter(function PrimarySearchAppBar({history}) {
       {
         isAuth ? (
           <div style={{marginLeft: "auto"}}>
+            {
+              role === ROLE_ADMIN ? 
+              (
+                <MenuItem onClick={() => history.push(ADMIN_ROUTE)}>
+                  <Icon
+                      className={classes.icon}
+                      aria-label="account of current user"
+                      aria-controls="primary-search-account-menu"
+                      aria-haspopup="true"
+                      color="inherit"
+                    >
+                      <AccountCircle />
+                    </Icon>
+                    <p>Admin Panel</p>
+                </MenuItem>
+              )
+              :
+              null
+            }
             <MenuItem onClick={handleProfileMenuOpen}>
               <Icon
                 className={classes.icon}
@@ -187,6 +206,7 @@ export default withRouter(function PrimarySearchAppBar({history}) {
               >
                 <AccountCircle />
               </Icon>
+              
               <p>Profile</p>
             </MenuItem>
             <MenuItem onClick={() => isAuth ? history.push("/cart/"+cart_id) : history.push("/cart")}>
@@ -256,6 +276,7 @@ export default withRouter(function PrimarySearchAppBar({history}) {
     dispatch(onSearch(searchText.toLowerCase()))
     history.push(SEARCH_ROUTE)
   }
+
   return (
     <>
       <AppBar position="sticky" classes={{positionSticky: classes.sticky}}>
@@ -286,6 +307,16 @@ export default withRouter(function PrimarySearchAppBar({history}) {
             isAuth ? (
               <>
                 <div className={classes.sectionDesktop}>
+                  {
+                    role === ROLE_ADMIN ? 
+                    (
+                      <Link to={ADMIN_ROUTE} className="button button--reverse">
+                        Admin Panel
+                      </Link>
+                    )
+                    :
+                    null
+                  }
                   <IconButton onClick={() => history.push("/cart/"+cart_id)}  aria-label="show" color="inherit">
                     <Badge badgeContent={cartItemsCount.length} color="secondary">
                       <ShoppingCartIcon />

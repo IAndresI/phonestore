@@ -5,15 +5,21 @@ const db = require('../db');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
-function generateJwt(id, email, cart_id) {
+function generateJwt(userData) {
   return jwt.sign(
-    {id, email, cart_id}, 
+    userData, 
     process.env.SECRET_KEY, 
     {expiresIn: '24h'}
   )
 }
 
 class UserController {
+
+  async auth(req, res, next) {
+    const { client_id, email, cart_id, role } = req.user;
+    const token = generateJwt(req.user)
+    res.json({token})
+  }
 
   async create(req, res, next) {
     try {
@@ -73,12 +79,13 @@ class UserController {
     try {
       const {email, password} = req.body;
       let client;
-      const qeury = await db.query(`SELECT a.password,a.email,a.client_id,b.cart_id FROM client a INNER JOIN cart b ON b.client_id=a.client_id WHERE a.email=$1`,[email], async (err,resp) => {
+      const qeury = await db.query(`SELECT a.password,a.email,a.client_id,a.role, b.cart_id FROM client a INNER JOIN cart b ON b.client_id=a.client_id WHERE a.email=$1`,[email], async (err,resp) => {
         if(err) return next(ApiError.internalError('Incorrect'))
         if(resp.rows[0]) {
           client=resp.rows[0];
           if(bcrypt.compareSync(password, client.password || undefined)) {
-            const token = generateJwt(client.client_id, client.email, client.cart_id)
+            const {client_id, email, cart_id, role} = client;
+            const token = generateJwt({client_id, email, cart_id, role})
             return res.json({token})
           }
           else {
@@ -93,11 +100,6 @@ class UserController {
     catch(err) {
       next(ApiError.badRequest(err.message));
     }
-  }
-
-  async auth(req, res, next) {
-    const token = generateJwt(req.user.id, req.user.email, req.user.cart_id)
-    res.json({token})
   }
 
   async getProfile(req, res, next) {
@@ -117,7 +119,6 @@ class UserController {
 
   async putProfile(req, res, next) {
     try {
-      console.log(req.body);
       const {clientId, date_of_birth, email, first_name, last_name, gender, image} = req.body;
 
       if(!clientId) {

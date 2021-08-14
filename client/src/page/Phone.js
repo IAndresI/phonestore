@@ -42,7 +42,7 @@ export default function Phone(props) {
   const [color, setColor] = useState(null)
 
   useEffect(() => {
-    setColor(selectedColor || phone?.colors ? {id: phone?.colors[0][0], name: phone?.colors[0][1]} : false)
+    setColor(selectedColor || phone?.colors ? {id: phone?.colors[0][0], name: phone?.colors[0][1], code: phone?.colors[0][2]} : false)
   }, [phone?.colors])
 
   const inCart = cartList.find(e => e.phone_id===phone?.phone_id && (color?.id ? e.selectedColor?.id === color?.id : true))

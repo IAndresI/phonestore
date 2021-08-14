@@ -69,7 +69,7 @@ export default withRouter(function SignIn({location, history}) {
       if(isLogin) {
         user = await login(data.email, data.password);
         dispatch(onLogin(user))
-        getCart(user.cart_id).then(data => dispatch(setCart(data)));
+        getCart(user.cart_id).then(data => dispatch(setCart(data.map((el, i) => ({...el, selectedColor: {id: el.selectedColor[0][0], name: el.selectedColor[0][1], code: el.selectedColor[0][2]}})))));
       }
       else {
         const month = selectedDate.getUTCMonth() + 1;

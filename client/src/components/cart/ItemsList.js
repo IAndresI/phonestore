@@ -38,7 +38,7 @@ const ItemsList = ({cartItems, classes}) => {
                   <Link className={classes.nameContainer} to={`/phone/${item.phone_id}`}><h3 className={classes.name}>{item.name}</h3></Link>
                   {
                     item.selectedColor ? 
-                    <div className={classes.color}>{item.selectedColor.name}<span className={classes.colorDot} style={{backgroundColor: item.selectedColor.code}}></span></div>
+                    <div className={classes.color}><span className={classes.colorDot} style={{backgroundColor: item.selectedColor.code}}/>{item.selectedColor.name}</div>
                     :
                     null
                   }

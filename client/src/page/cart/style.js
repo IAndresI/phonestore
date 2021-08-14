@@ -9,7 +9,7 @@ const useStyles = makeStyles(() => ({
     width: 10,
     height: 10,
     borderRadius: "50%",
-    marginLeft: 10,
+    marginRight: 10,
     border: "1px solid black",
     display: "inline-block"
   },

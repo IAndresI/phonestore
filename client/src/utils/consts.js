@@ -10,3 +10,5 @@ export const ORDER_STATUS ='/order_status'
 export const COMPARE_ROUTE ='/compare'
 export const ORDER_ROUTE='/order'
 export const HOME_ROUTE = '/'
+
+export const ROLE_ADMIN = "ADMIN"

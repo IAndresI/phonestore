@@ -4,7 +4,7 @@ const Admin = () => {
   
   return (
     <section className="section page">
-      Admin
+      <h1 className="title">Admin Panel</h1>
     </section>
   );
 };
