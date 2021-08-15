@@ -7,6 +7,7 @@ const cartRouter = require('./cartRouter');
 const orderRouter = require('./orderRouter');
 const paypalRouter = require('./paypalRouter');
 const emailRouter = require('./emailRouter');
+const adminRouter = require('./adminRouter');
 
 router.use('/email', emailRouter)
 router.use('/paypal', paypalRouter)
@@ -15,5 +16,6 @@ router.use('/manufacturer', manufacturerRouter)
 router.use('/cart', cartRouter)
 router.use('/user', userRouter)
 router.use('/order', orderRouter)
+router.use('/admin', adminRouter)
 
 module.exports = router;

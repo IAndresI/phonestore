@@ -17,7 +17,7 @@ class UserController {
 
   async auth(req, res, next) {
     const { client_id, email, cart_id, role } = req.user;
-    const token = generateJwt(req.user)
+    const token = generateJwt({client_id, email, cart_id, role})
     res.json({token})
   }
 
