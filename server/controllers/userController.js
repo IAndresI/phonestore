@@ -16,8 +16,8 @@ function generateJwt(userData) {
 class UserController {
 
   async auth(req, res, next) {
-    const { client_id, email, cart_id, role } = req.user;
-    const token = generateJwt({client_id, email, cart_id, role})
+    const { id, email, cart_id, role } = req.user;
+    const token = generateJwt({id, email, cart_id, role})
     res.json({token})
   }
 
@@ -85,7 +85,7 @@ class UserController {
           client=resp.rows[0];
           if(bcrypt.compareSync(password, client.password || undefined)) {
             const {client_id, email, cart_id, role} = client;
-            const token = generateJwt({client_id, email, cart_id, role})
+            const token = generateJwt({id: client_id, email, cart_id, role})
             return res.json({token})
           }
           else {

@@ -28,3 +28,13 @@ export const getOrderHistory = async (orderId) => {
   const {data} = await $host.get('api/order/history/' + orderId);
   return data;
 }
+
+export const getAllOrders = async (limit, page) => {
+  const {data} = await $host.get('api/order', {params: {limit, page}});
+  return data;
+}
+
+export const getOrderDetails = async (orderId) => {
+  const {data} = await $host.get('api/order/details/' + orderId);
+  return data;
+}

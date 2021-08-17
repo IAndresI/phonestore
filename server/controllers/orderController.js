@@ -45,15 +45,47 @@ class OrderController {
   }
 
   async getAll(req, res, next) {
+    const page = +req.query.page;
+    const limit = +req.query.limit
+    const offset = limit*(page+1)-limit;
     try {
-      const query = await db.query('SELECT * FROM order');
-      const data = query.rows;
+      const dataQuery = await db.query('SELECT * FROM order_preview LIMIT $1 OFFSET $2;', [limit, offset]);
+      const countQuery = await db.query('SELECT COUNT(order_id) FROM order_preview;');
+      const data = dataQuery.rows;
+      const {count} = countQuery.rows[0];
+      return res.json({data, count})
+    }
+    catch(err) {
+      return next(ApiError.badRequest(err.message));
+    }
+  }
+
+  async getOrderDetails(req, res, next) {
+    try {
+      const {id} = req.params;
+      if(!id) {
+        return next(ApiError.badRequest('Enter ID!'))
+      }
+      const orderDetailsInfo = await db.query(`
+        SELECT ph.phone_id,
+        ph.name,
+        ph.price,
+        ph.image,
+        ord_det.count
+    
+        FROM order_details ord_det
+        JOIN phone ph ON ph.phone_id = ord_det.phone_id 
+        WHERE ord_det.order_id=$1;`,
+        [id]
+      );
+      const data = orderDetailsInfo.rows
       return res.json(data)
     }
     catch(err) {
       return next(ApiError.badRequest(err.message));
     }
   }
+
 
   async getOne(req, res, next) {
     try {
@@ -62,13 +94,13 @@ class OrderController {
         return next(ApiError.badRequest('Enter ID!'))
       }
       const orderInfo = await db.query('SELECT * FROM order_info WHERE order_id=$1;', [id]);
-      const orderDetailsInfo = await db.query(`
+      const orderDetailsInfo = await await db.query(`
         SELECT ph.phone_id,
         ph.name,
         ph.price,
         ph.image,
         ord_det.count
-    
+      
         FROM order_details ord_det
         JOIN phone ph ON ph.phone_id = ord_det.phone_id 
         WHERE ord_det.order_id=$1;`,
