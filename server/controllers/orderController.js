@@ -127,6 +127,38 @@ class OrderController {
       return next(new ApiError.badRequest(err.message));
     }
   }
+
+  async changeOrderStatus(req, res, next) { 
+    try {
+
+      const { id } = req.params;
+
+      const {prevStatus, newStatus } = req.body;
+
+      await db.query(`UPDATE order_status SET ${prevStatus} = false, ${newStatus} = true WHERE order_id=${id};`);
+
+      return res.json({message: "Status successfully changed!"})
+    }
+    catch(err) {
+      next(ApiError.badRequest(err.message));
+    }
+  }
+
+  async removeOrder(req, res, next) { 
+    try {
+
+      const { id } = req.params;
+
+      await db.query(`DELETE FROM "order" WHERE order_id=${id};`);
+
+      return res.json({message: "Order successfully removed!"})
+    }
+    catch(err) {
+      next(ApiError.badRequest(err.message));
+    }
+  }
 }
+
+
 
 module.exports = new OrderController();

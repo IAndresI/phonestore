@@ -1,9 +1,10 @@
-import React from 'react'
+import React, {useState} from 'react'
 import { makeStyles, Table,TableBody, TableCell, TableHead, TableRow } from '@material-ui/core';
 import Spinner from '../../Spinner';
 import { usePageDataLoad } from '../../../customHooks';
-import { getOrderDetails } from '../../../http/orderAPI';
+import { deleteOrder, getOrderDetails } from '../../../http/orderAPI';
 import { Link } from 'react-router-dom';
+import DialogModal from './DialogModal';
 
 const useStyles = makeStyles({
   root: {
@@ -39,6 +40,10 @@ const useStyles = makeStyles({
     "&:active": {
       transform: "scale(1)"
     }
+  },
+  button: {
+    margin: "20px 0",
+    backgroundColor: "tomato"
   }
 });
 
@@ -46,48 +51,68 @@ const OrderDetailsSubTable = ({orderId}) => {
 
   const [details, setDetails, loading, error] = usePageDataLoad(() => getOrderDetails(orderId));
 
+  const [modalOpen, setModalOpen] = useState(false);
+
   const classes = useStyles();
+
+  const fetchDeleteOrder = async () => {
+    await deleteOrder(orderId)
+  }
 
   if(loading) return <Spinner />
 
   if(error) return <h3>Some Error</h3>
   
   return (
-    <Table className={classes.root} aria-label="purchases">
-      <TableHead>
-        <TableRow>
-          <TableCell align="center">Phone ID</TableCell>
-          <TableCell align="center">Phone Name</TableCell>
-          <TableCell align="center">Image</TableCell>
-          <TableCell align="center">Price</TableCell>
-          <TableCell align="center">Count</TableCell>
-        </TableRow>
-      </TableHead>
-      <TableBody>
-        {details.map((detailsRow) => (
-          <TableRow key={detailsRow.phone_id}>
-            <TableCell align="center" component="th" scope="row">
-              {detailsRow.phone_id}
-            </TableCell>
-            <TableCell align="center" component="th" scope="row">
-              <Link className={classes.textLink} to={`/phone/${detailsRow.phone_id}`}>
-                {detailsRow.name}
-              </Link>
-            </TableCell>
-            <TableCell align="center">
-              <Link className={classes.imageLink} to={`/phone/${detailsRow.phone_id}`}>
-                <img width={100} height={100} style={{objectFit: "contain"}} src={`${process.env.REACT_APP_API_URL}/${detailsRow.image ? detailsRow.image : "phone.jpg"}`} alt="Phone"/>
-              </Link>
-            </TableCell>
-            <TableCell align="center">{detailsRow.price}</TableCell>
-            <TableCell align="center">
-              {detailsRow.count}
-            </TableCell>
+    <>
+      <Table className={classes.root} aria-label="purchases">
+        <TableHead>
+          <TableRow>
+            <TableCell align="center">Phone ID</TableCell>
+            <TableCell align="center">Phone Name</TableCell>
+            <TableCell align="center">Image</TableCell>
+            <TableCell align="center">Price</TableCell>
+            <TableCell align="center">Count</TableCell>
           </TableRow>
-        ))}
-      </TableBody>
-    </Table>
-            
+        </TableHead>
+        <TableBody>
+          {details.map((detailsRow) => (
+            <TableRow key={detailsRow.phone_id}>
+              <TableCell align="center" component="th" scope="row">
+                {detailsRow.phone_id}
+              </TableCell>
+              <TableCell align="center" component="th" scope="row">
+                <Link className={classes.textLink} to={`/phone/${detailsRow.phone_id}`}>
+                  {detailsRow.name}
+                </Link>
+              </TableCell>
+              <TableCell align="center">
+                <Link className={classes.imageLink} to={`/phone/${detailsRow.phone_id}`}>
+                  <img width={100} height={100} style={{objectFit: "contain"}} src={`${process.env.REACT_APP_API_URL}/${detailsRow.image ? detailsRow.image : "phone.jpg"}`} alt="Phone"/>
+                </Link>
+              </TableCell>
+              <TableCell align="center">{detailsRow.price}</TableCell>
+              <TableCell align="center">
+                {detailsRow.count}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+      <button
+       className={`${classes.button} button`}
+       onClick={() => setModalOpen(true)}
+      >
+        Delete This Order
+      </button>
+      <DialogModal
+        open={modalOpen}
+        setOpen={setModalOpen}
+        title="Order"
+        text="Are you sure you want to delete this order?"
+        onYes={fetchDeleteOrder}
+      />
+    </>
   );
 };
 

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Box from '@material-ui/core/Box';
 import Collapse from '@material-ui/core/Collapse';
@@ -13,8 +13,11 @@ import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
-import { TablePagination } from '@material-ui/core';
+import { FormControl, MenuItem, TablePagination } from '@material-ui/core';
 import OrderDetailsSubTable from './OrderDetailsSubTable';
+import Select from '@material-ui/core/Select';
+import { changeOrderStatus } from '../../../http/orderAPI';
+import DialogModal from './DialogModal';
 
 const useRowStyles = makeStyles({
   root: {
@@ -22,26 +25,63 @@ const useRowStyles = makeStyles({
       borderBottom: 'unset',
     },
   },
+  statusSelect: {
+    maxWidth: 150,
+    width: "100%",
+    height: 60,
+  },
+  selectSelectItem: {
+    whiteSpace: "initial",
+    fontSize: 16,
+    fontWeight: 600
+  },
+  emailColumn: {
+    maxWidth: 150,
+    whiteSpace: "initial",
+    wordWrap: "break-word"
+  }
 });
 
-function setStatus(status) {
-  const currentStatus = status.lastIndexOf(true)
-  switch(currentStatus) {
-    case 0:
-      return <Typography style={{color: 'goldenRod'}} variant="h6">Processed</Typography>
-    case 1:
-      return <Typography style={{color: 'darkSeaGreen'}} variant="h6">Sent For Delivery</Typography>
-    case 2:
-      return <Typography style={{color: 'green'}} variant="h6">Delivered</Typography>
-    case 3:
-      return <Typography style={{color: 'tomato'}} variant="h6">Rejected</Typography>
-    default: return <Typography style={{color: 'goldenRod'}} variant="h6">Processed</Typography>
+function setStatusName(statusCode) {
+  switch (statusCode) {
+    case 0: 
+      return "processed";
+    case 1: 
+      return "sent_for_delivery";
+    case 2: 
+      return "delivered";
+    case 3: 
+      return "rejected";
+    default: throw new Error("Unkniwn status!")
   }
 }
 
 function Row({order}) {
-  const [open, setOpen] = React.useState(false);
+
+  const [open, setOpen] = useState(false);
+
+  const [modalOpen, setModalOpen] = useState(false);
+
   const classes = useRowStyles();
+
+  const [status, setStatus] = useState(order.status[0].lastIndexOf(true));
+  const [newStatus, setNewStatus] = useState(null)
+
+  const applyNewStatus = async () => {
+    let prevStatusText = setStatusName(status);
+    let newStatusText = setStatusName(newStatus)
+
+    setStatus(newStatus);
+    setNewStatus(null)
+
+    await changeOrderStatus(order.order_id, prevStatusText, newStatusText)
+  }
+
+  const handleChange = (event) => {
+    setModalOpen(true)
+    setNewStatus(event.target.value)
+  };
+
   return (
     <React.Fragment>
       <TableRow className={classes.root}>
@@ -53,8 +93,21 @@ function Row({order}) {
         <TableCell component="th" scope="row">
           {order.order_id}
         </TableCell>
-        <TableCell align="center">{order.email}</TableCell>
-        <TableCell align="center">{setStatus(order.status[0])}</TableCell>
+        <TableCell  align="center"><Typography className={classes.emailColumn}>{order.email}</Typography></TableCell>
+        <TableCell align="center">
+          <FormControl variant="outlined">
+            <Select
+              className={classes.statusSelect}
+              value={status}
+              onChange={handleChange}
+            >
+              <MenuItem value={0}><Typography className={classes.selectSelectItem} style={{color: 'goldenRod'}} >Processed</Typography></MenuItem>
+              <MenuItem value={1}><Typography className={classes.selectSelectItem} style={{color: 'darkSeaGreen'}} >Sent For Delivery</Typography></MenuItem>
+              <MenuItem value={2}><Typography className={classes.selectSelectItem} style={{color: 'green'}} >Delivered</Typography></MenuItem>
+              <MenuItem value={3}><Typography className={classes.selectSelectItem} style={{color: 'tomato'}}>Rejected</Typography></MenuItem>
+            </Select>
+          </FormControl>
+        </TableCell>
         <TableCell align="center">{new Date(order.date_order_placed).toLocaleString().replace(',', " ")}</TableCell>
         <TableCell align="center">{new Date(order.date_order_paid).toLocaleString().replace(',', " ")}</TableCell>
         <TableCell align="center">{order.total}</TableCell>
@@ -73,6 +126,13 @@ function Row({order}) {
           </Collapse>
         </TableCell>
       </TableRow>
+      <DialogModal 
+        open={modalOpen} 
+        setOpen={setModalOpen} 
+        title="Order" 
+        text="Are you sure you want to change the status of this order?" 
+        onYes={applyNewStatus}
+      />
     </React.Fragment>
   );
 }

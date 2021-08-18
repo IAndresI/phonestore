@@ -38,3 +38,13 @@ export const getOrderDetails = async (orderId) => {
   const {data} = await $host.get('api/order/details/' + orderId);
   return data;
 }
+
+export const changeOrderStatus = async(orderId, prevStatus, newStatus) => {
+  const {data} = await $host.put('api/order/status/' + orderId, {prevStatus, newStatus});
+  return data;
+}
+
+export const deleteOrder = async(orderId) => {
+  const {data} = await $host.delete('api/order/' + orderId);
+  return data;
+}

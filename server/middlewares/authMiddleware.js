@@ -14,6 +14,6 @@ module.exports = function(req, res, next) {
     next()
   }
   catch(err) {
-    res.status(401).json({message: "User is not logged in!"})
+    res.status(401).json({message: "Some error in jwt!"})
   }
 }

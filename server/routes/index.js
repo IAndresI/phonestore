@@ -15,7 +15,7 @@ router.use('/phone', phoneRouter)
 router.use('/manufacturer', manufacturerRouter)
 router.use('/cart', cartRouter)
 router.use('/user', userRouter)
-router.use('/order', orderRouter)
 router.use('/admin', adminRouter)
+router.use('/order', orderRouter)
 
 module.exports = router;
