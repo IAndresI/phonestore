@@ -1,10 +1,10 @@
 import React, {useEffect, useState} from 'react';
 import { getAllOrders } from '../../../http/orderAPI';
-import OrdersTable from '../components/OrderTable';
+import OrdersTable from '../components/OrdersTable';
 import {usePageDataLoad} from '../../../customHooks'
 import Spinner from '../../Spinner'
 
-const Orders = () => {
+const Orders = ({makeAlert}) => {
 
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -17,6 +17,11 @@ const Orders = () => {
     setRowsPerPage(+event.target.value);
     setPage(0);
   };
+
+  const refreshPage = async () => {
+    const orders = await getAllOrders(rowsPerPage, page);
+    setOrders(orders)
+  }
 
   const [orders, setOrders, loading, error] = usePageDataLoad(() => getAllOrders(rowsPerPage, page));
 
@@ -36,9 +41,11 @@ const Orders = () => {
                 orders={orders.data}
                 count={orders.count}
                 page={page}
+                refreshPage={refreshPage}
                 rowsPerPage={rowsPerPage}
                 handleChangePage={handleChangePage}
                 handleChangeRowsPerPage={handleChangeRowsPerPage}
+                makeAlert={makeAlert}
               />
         }
       </div>

@@ -56,7 +56,7 @@ function setStatusName(statusCode) {
   }
 }
 
-function Row({order}) {
+function Row({order, makeAlert, refreshPage}) {
 
   const [open, setOpen] = useState(false);
 
@@ -74,7 +74,16 @@ function Row({order}) {
     setStatus(newStatus);
     setNewStatus(null)
 
-    await changeOrderStatus(order.order_id, prevStatusText, newStatusText)
+    makeAlert({type: 'loading'})
+    try {
+      await changeOrderStatus(order.order_id, prevStatusText, newStatusText)
+      makeAlert({type: 'success', message: 'Success!'})
+    }
+    catch(err) {
+      makeAlert({type: 'error', message: err.message})
+    } 
+
+    
   }
 
   const handleChange = (event) => {
@@ -90,10 +99,10 @@ function Row({order}) {
             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
         </TableCell>
-        <TableCell component="th" scope="row">
+        <TableCell align="center" component="th" scope="row">
           {order.order_id}
         </TableCell>
-        <TableCell  align="center"><Typography className={classes.emailColumn}>{order.email}</Typography></TableCell>
+        <TableCell align="center"><Typography className={classes.emailColumn}>{order.email}</Typography></TableCell>
         <TableCell align="center">
           <FormControl variant="outlined">
             <Select
@@ -121,7 +130,7 @@ function Row({order}) {
               <Typography variant="h4" gutterBottom component="div">
                 Details
               </Typography>
-              <OrderDetailsSubTable orderId={order.order_id}/>
+              <OrderDetailsSubTable refreshPage={refreshPage} makeAlert={makeAlert} orderId={order.order_id}/>
             </Box>
           </Collapse>
         </TableCell>
@@ -142,8 +151,10 @@ export default function OrdersTable({
   count,
   page,
   rowsPerPage,
+  refreshPage,
   handleChangePage,
   handleChangeRowsPerPage,
+  makeAlert
 }) {
   return (
     <>
@@ -164,7 +175,7 @@ export default function OrdersTable({
           </TableHead>
           <TableBody>
             {orders.map((order) => (
-              <Row key={order.order_id} order={order} />
+              <Row key={order.order_id} makeAlert={makeAlert} order={order} refreshPage={refreshPage} />
             ))}
           </TableBody>
         </Table>

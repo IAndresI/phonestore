@@ -10,6 +10,7 @@ import {
   Phones,
   Users 
 } from '../tabContent';
+import SnackBar from '../components/SnackBar';
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -70,6 +71,41 @@ export default function AdminTabs() {
   const classes = useStyles();
   const [tab, setTab] = useState(0);
 
+  const [openSnackBar, setOpenSnackBar] = useState(false);
+  const [snackBarState, setSnackBarState] = useState("success")
+  const [snackBarText, setSnackBarText] = useState("")
+
+  const handleSnackBarClick = ({message, type}) => {
+    setOpenSnackBar(true);
+    setOpenSnackBar(true);
+    switch(type) {
+      case "success":
+        setSnackBarState("success");
+        setSnackBarText(message || "Success");
+        break;
+      case "error":
+        setSnackBarState("error");
+        setSnackBarText(message || "Error");
+        break;
+      case "loading":
+        setSnackBarState("warning");
+        setSnackBarText("Loading");
+        break;
+      default: 
+        setSnackBarState("info");
+        setSnackBarText(message || "Unhandled State!");
+        break;
+    }
+  };
+
+  const handleSnackBarClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+
+    setOpenSnackBar(false);
+  };
+
   const tabHandleChange = (event, newValue) => {
     setTab(newValue);
   };
@@ -98,7 +134,7 @@ export default function AdminTabs() {
         <Users />
       </TabPanel>
       <TabPanel className={classes.tabPanel} value={tab} index={2}>
-        <Orders />
+        <Orders makeAlert={handleSnackBarClick} />
       </TabPanel>
       <TabPanel className={classes.tabPanel} value={tab} index={3}>
         <Phones />
@@ -106,6 +142,13 @@ export default function AdminTabs() {
       <TabPanel className={classes.tabPanel} value={tab} index={4}>
         <Manufacturers />
       </TabPanel>
+      <SnackBar 
+        open={openSnackBar} 
+        handleClose={handleSnackBarClose}
+        handleClick={handleSnackBarClick} 
+        snackBarState={snackBarState}
+        text={snackBarText}
+      />
     </div>
   );
 }

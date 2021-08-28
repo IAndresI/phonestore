@@ -43,11 +43,10 @@ const useStyles = makeStyles({
   },
   button: {
     margin: "20px 0",
-    backgroundColor: "tomato"
   }
 });
 
-const OrderDetailsSubTable = ({orderId}) => {
+const OrderDetailsSubTable = ({orderId, makeAlert, refreshPage}) => {
 
   const [details, setDetails, loading, error] = usePageDataLoad(() => getOrderDetails(orderId));
 
@@ -56,7 +55,15 @@ const OrderDetailsSubTable = ({orderId}) => {
   const classes = useStyles();
 
   const fetchDeleteOrder = async () => {
-    await deleteOrder(orderId)
+    makeAlert({type: 'loading'})
+    try {
+      await deleteOrder(orderId);
+      refreshPage();
+      makeAlert({type: 'success', message: 'Success!'})
+    }catch(err) {
+      makeAlert({type: 'error', message: err.message})
+    }
+    
   }
 
   if(loading) return <Spinner />
@@ -100,7 +107,7 @@ const OrderDetailsSubTable = ({orderId}) => {
         </TableBody>
       </Table>
       <button
-       className={`${classes.button} button`}
+       className={`${classes.button} button button--danger`}
        onClick={() => setModalOpen(true)}
       >
         Delete This Order

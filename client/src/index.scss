@@ -105,6 +105,18 @@ body {
       background-color: #ffffff;
     }
   }
+
+  &--danger {
+
+    background-color: tomato;
+    border-color: tomato;
+
+    &:hover {
+      color: tomato;
+      border-color: tomato;
+    }
+
+  }
 }
 
 code {
