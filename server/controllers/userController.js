@@ -208,7 +208,6 @@ class UserController {
       const page = +req.query.page;
       const limit = +req.query.limit
       const offset = limit*(page+1)-limit;
-      console.log({page, offset});
 
       const dataQuery = await db.query('SELECT client_id, image, first_name, last_name, email, role FROM client ORDER BY date_registred DESC LIMIT $1 OFFSET $2;', [limit, offset])
       const countQuery = await db.query('SELECT COUNT(client_id) FROM client;');
@@ -231,6 +230,20 @@ class UserController {
       await db.query(`UPDATE client SET role=$1 WHERE client_id=$2;`, [newRole, id]);
 
       return res.json({message: "Status successfully changed!"})
+    }
+    catch(err) {
+      next(ApiError.badRequest(err.message));
+    }
+  }
+
+  async deleteUser(req, res, next) { 
+    try {
+
+      const { id } = req.params;
+
+      await db.query('DELETE FROM client WHERE client_id=$1;', [id]);
+
+      return res.json({message: "Client successfully deleted!"})
     }
     catch(err) {
       next(ApiError.badRequest(err.message));

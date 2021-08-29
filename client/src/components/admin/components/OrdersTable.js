@@ -24,6 +24,7 @@ const useRowStyles = makeStyles({
     '& > *': {
       borderBottom: 'unset',
     },
+    height: 80
   },
   statusSelect: {
     maxWidth: 150,
@@ -118,7 +119,7 @@ function Row({order, makeAlert, refreshPage}) {
           </FormControl>
         </TableCell>
         <TableCell align="center">{new Date(order.date_order_placed).toLocaleString().replace(',', " ")}</TableCell>
-        <TableCell align="center">{new Date(order.date_order_paid).toLocaleString().replace(',', " ")}</TableCell>
+        <TableCell align="center">{order.date_order_paid ? new Date(order.date_order_paid).toLocaleString().replace(',', " ") : "Not Paid"}</TableCell>
         <TableCell align="center">{order.total}</TableCell>
         <TableCell align="center">{order.payment_method}</TableCell>
         <TableCell align="center">{order.delivery_address || order.point_address}</TableCell>

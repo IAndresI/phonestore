@@ -51,7 +51,7 @@ const ItemsList = ({cartItems, classes}) => {
                 <TextField
                   className={classes.count}
                   onChange={(e) => countChange(e, item.phone_id)}
-                  id={`outlined-from-input-${item.phone_id}`}
+                  id={`count-input-${item.phone_id}`}
                   type="number"
                   name="min"
                   defaultValue={item.count}

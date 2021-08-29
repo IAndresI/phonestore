@@ -18,6 +18,7 @@ import OrderDetailsSubTable from './OrderDetailsSubTable';
 import Select from '@material-ui/core/Select';
 import { changeUserRole } from '../../../http/userAPI';
 import DialogModal from './DialogModal';
+import UserInfo from './UserInfo';
 
 const useRowStyles = makeStyles({
   root: {
@@ -38,7 +39,8 @@ const useRowStyles = makeStyles({
   emailColumn: {
     maxWidth: 150,
     whiteSpace: "initial",
-    wordWrap: "break-word"
+    wordWrap: "break-word",
+    margin: "0 auto"
   },
   large: {
     width: 50,
@@ -81,7 +83,7 @@ function Row({user, makeAlert, refreshPage}) {
     <React.Fragment>
       <TableRow className={classes.root}>
         <TableCell>
-          <IconButton aria-label="expand row" size="small" onClick={() => setOpen(!open)}>
+          <IconButton id={user.client_id} aria-label="expand row" size="small" onClick={() => setOpen(!open)}>
             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
         </TableCell>
@@ -91,8 +93,8 @@ function Row({user, makeAlert, refreshPage}) {
         <TableCell align="center" component="th" scope="row">
           {user.client_id}
         </TableCell>
-        <TableCell align="center"><Typography className={classes.emailColumn}>{`${user.first_name} ${user.last_name}`}</Typography></TableCell>
-        <TableCell align="center">{user.email}</TableCell>
+        <TableCell align="center">{`${user.first_name} ${user.last_name}`}</TableCell>
+        <TableCell align="center"><Typography className={classes.emailColumn}>{user.email}</Typography></TableCell>
         <TableCell align="center">
           <FormControl variant="outlined">
             <Select
@@ -111,9 +113,9 @@ function Row({user, makeAlert, refreshPage}) {
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Box margin={1}>
               <Typography variant="h4" gutterBottom component="div">
-                Details
+                Information
               </Typography>
-              <OrderDetailsSubTable refreshPage={refreshPage} makeAlert={makeAlert} orderId={user.order_id}/>
+              <UserInfo refreshPage={refreshPage} makeAlert={makeAlert} clientId={user.client_id}/>
             </Box>
           </Collapse>
         </TableCell>
@@ -146,10 +148,10 @@ export default function UsersTable({
           <TableHead>
             <TableRow>
               <TableCell />
-              <TableCell align="center">Client Image</TableCell>
-              <TableCell align="center">Client ID</TableCell>
-              <TableCell align="center">Client Name</TableCell>
-              <TableCell align="center">Client Email</TableCell>
+              <TableCell align="center">Image</TableCell>
+              <TableCell align="center">ID</TableCell>
+              <TableCell align="center">Name</TableCell>
+              <TableCell align="center">Email</TableCell>
               <TableCell align="center">Role</TableCell>
             </TableRow>
           </TableHead>

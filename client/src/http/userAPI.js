@@ -60,3 +60,8 @@ export const changeUserRole = async (id, newRole) => {
   const {data} = await $authHost.put('api/user/role/'+id, {newRole});
   return data;
 }
+
+export const deleteUser = async (id) => {
+  const {data} = await $authHost.delete('api/user/'+id);
+  return data;
+}
