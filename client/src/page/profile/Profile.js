@@ -50,8 +50,9 @@ const Profile = () => {
       formData.append('clientId',`${clientId}` )
       if(image) formData.append('image', image)
       formData.append('image', null)
+      console.log(formData);
 
-      const put = await putProfile(clientId, formData).then(data => {
+      const put = await putProfile(formData).then(data => {
         handleClick();
         getProfile(clientId)
           .then(data => {

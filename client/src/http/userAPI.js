@@ -27,12 +27,12 @@ export const check = async () => {
 }
 
 export const getProfile = async (id) => {
-  const {data} = await $authHost.get('api/user/profile/'+id);
+  const {data} = await $authHost.get('api/user/profile', {params: {id}});
   return data;
 }
 
-export const putProfile = async (id, formData) => {
-  const {data} = await $authHost.put('api/user/profile/'+id, formData);
+export const putProfile = async (formData) => {
+  const {data} = await $authHost.put('api/user/profile', formData);
   return data;
 }
 
@@ -48,5 +48,15 @@ export const checkPassword = async (clientId, password) => {
 
 export const changePassword = async (clientId, password) => {
   const {data} = await $authHost.put('api/user/password_change', {clientId, password});
+  return data;
+}
+
+export const getAllUsers = async (limit, page) => {
+  const {data} = await $authHost.get('api/user/all', {params: {limit, page}});
+  return data;
+}
+
+export const changeUserRole = async (id, newRole) => {
+  const {data} = await $authHost.put('api/user/role/'+id, {newRole});
   return data;
 }

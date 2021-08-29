@@ -111,7 +111,7 @@ export default withRouter(function PrimarySearchAppBar({history}) {
 
   const dispatch = useDispatch()
   const isAuth = useSelector((state) => state.user.isAuth, shallowEqual)
-  const {cart_id, id, role} = useSelector((state) => state.user.user, shallowEqual)
+  const {cart_id, role} = useSelector((state) => state.user.user, shallowEqual)
   const cartItemsCount = useSelector((state) => state.cart.cartList, shallowEqual)
 
   const classes = useStyles();
@@ -151,7 +151,7 @@ export default withRouter(function PrimarySearchAppBar({history}) {
     >
       <MenuItem onClick={() => {
         handleMenuClose();
-        history.push("/profile/"+id);
+        history.push("/profile");
       }}>Profile</MenuItem>
       <MenuItem onClick={() => {
         dispatch(onLogout());

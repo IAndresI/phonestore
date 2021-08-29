@@ -104,7 +104,7 @@ class UserController {
 
   async getProfile(req, res, next) {
     try {
-      const {id} = req.params;
+      const {id} = req.query;
       if(!id) {
         return next(ApiError.badRequest('Enter ID!'))
       }
@@ -202,6 +202,41 @@ class UserController {
       next(ApiError.badRequest(err.message));
     }
   }
+
+  async getAllUsers(req, res, next) {
+    try {
+      const page = +req.query.page;
+      const limit = +req.query.limit
+      const offset = limit*(page+1)-limit;
+      console.log({page, offset});
+
+      const dataQuery = await db.query('SELECT client_id, image, first_name, last_name, email, role FROM client ORDER BY date_registred DESC LIMIT $1 OFFSET $2;', [limit, offset])
+      const countQuery = await db.query('SELECT COUNT(client_id) FROM client;');
+      const data = dataQuery.rows;
+      const {count} = countQuery.rows[0];
+      return res.json({data, count})
+    }
+    catch(err) {
+      next(ApiError.badRequest(err.message));
+    }
+  }
+
+  async changeUserRole(req, res, next) { 
+    try {
+
+      const { id } = req.params;
+
+      const { newRole } = req.body;
+
+      await db.query(`UPDATE client SET role=$1 WHERE client_id=$2;`, [newRole, id]);
+
+      return res.json({message: "Status successfully changed!"})
+    }
+    catch(err) {
+      next(ApiError.badRequest(err.message));
+    }
+  }
+
 }
 
 module.exports = new UserController();

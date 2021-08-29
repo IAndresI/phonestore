@@ -59,6 +59,7 @@ const PersonalData = ({profile: {email,first_name,last_name, date_of_birth, gend
   }
 
   const imagePath = userImage ? URL.createObjectURL(userImage) : null;
+
   return (
     <div className="profile__personal">
       <Title>Personal Data</Title>

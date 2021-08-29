@@ -131,7 +131,7 @@ export default function AdminTabs() {
         <Dashboard />
       </TabPanel>
       <TabPanel className={classes.tabPanel} value={tab} index={1}>
-        <Users />
+        <Users makeAlert={handleSnackBarClick} />
       </TabPanel>
       <TabPanel className={classes.tabPanel} value={tab} index={2}>
         <Orders makeAlert={handleSnackBarClick} />
