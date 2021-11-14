@@ -21,13 +21,14 @@ const Orders = ({clientId}) => {
 
   if(loading) return <Spinner/>
 
+  console.log(orders);
   return (
     <div>
       <Title>Your Orders</Title>
       {
-        orders.count === 0 ?
+        +orders.count === 0 ?
         (
-          <h2>You Рave Тo Щrders</h2>
+          <h2>You Don't Have Orders</h2>
         )
         :
         (

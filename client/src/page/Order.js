@@ -208,7 +208,7 @@ const Order = () => {
         </div>
         <h2>Order Details</h2>
         <OrderTable orders={orderDetailsInfo}/>
-        <Link to={`/profile/${clientId}`} className={classes.button}>
+        <Link to={`/profile`} className={classes.button}>
           Back To Profile
         </Link>
       </Container>

@@ -98,7 +98,7 @@ export default function ReviewModal({setOpen, open, phoneId, clientId, alreadyRe
       case 'comment':
         switch (err[errorType].type) {
           case "minLength":
-            errorText = "Comment lengthshould be more than 50 characters!"
+            errorText = "Comment length should be more than 50 characters!"
             break;
           default:
             errorText = "Comment is required!"

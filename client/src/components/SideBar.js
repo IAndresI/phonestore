@@ -107,7 +107,7 @@ export default function SideBar({isAuth, cartItemsCount}) {
           (
             <>
               {
-                [['Profile', `${PROFILE_ROUTE}/${user.id}`]].map((item, index) => (
+                [['Profile', `${PROFILE_ROUTE}`]].map((item, index) => (
                   <Link to={item[1]} key={item[0]} className={classes.link}>
                     <ListItem button>
                       <ListItemIcon>
