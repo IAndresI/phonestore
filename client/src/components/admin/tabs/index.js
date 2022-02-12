@@ -5,7 +5,7 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import {
   Dashboard,
-  Manufacturers,
+  Reviews,
   Orders,
   Phones,
   Users 
@@ -92,7 +92,7 @@ export default function AdminTabs() {
         <Tab className={classes.tab} label="Users" {...a11yProps(1)} />
         <Tab className={classes.tab} label="Orders" {...a11yProps(2)} />
         <Tab className={classes.tab} label="Phones" {...a11yProps(3)} />
-        <Tab className={classes.tab} label="Manufacturers" {...a11yProps(4)} />
+        <Tab className={classes.tab} label="Reviews" {...a11yProps(4)} />
       </Tabs>
       <TabPanel  className={classes.tabPanel} value={tab} index={0}>
         <Dashboard />
@@ -107,7 +107,7 @@ export default function AdminTabs() {
         <Phones />
       </TabPanel>
       <TabPanel className={classes.tabPanel} value={tab} index={4}>
-        <Manufacturers />
+        <Reviews />
       </TabPanel>
     </div>
   );

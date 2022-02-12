@@ -153,7 +153,7 @@ const UserInfo = ({clientId, makeAlert, refreshPage}) => {
       <DialogModal
         open={modalOpen}
         setOpen={setModalOpen}
-        title="Order"
+        title="Delete account?"
         text="Are you sure you want to delete this account?"
         onYes={fetchDeleteOrder}
       />

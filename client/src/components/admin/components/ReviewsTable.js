@@ -132,8 +132,8 @@ function Row({user, makeAlert, refreshPage}) {
   );
 }
 
-export default function PhonesTable({
-  phones,
+export default function ReviwesTable({
+  reviews,
   count,
   page,
   rowsPerPage,
@@ -150,14 +150,14 @@ export default function PhonesTable({
             <TableRow>
               <TableCell />
               <TableCell align="center">ID</TableCell>
-              <TableCell align="center">Image</TableCell>
-              <TableCell align="center">Name</TableCell>
-              <TableCell align="center">Price</TableCell>
-              <TableCell align="center">Number</TableCell>
+              <TableCell align="center">User</TableCell>
+              <TableCell align="center">Text</TableCell>
+              <TableCell align="center">Rating</TableCell>
+              <TableCell align="center">Status</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {phones?.map((user) => (
+            {reviews?.map((user) => (
               <Row key={user?.order_id} makeAlert={makeAlert} user={user} refreshPage={refreshPage} />
             ))}
           </TableBody>

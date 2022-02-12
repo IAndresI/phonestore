@@ -1,7 +1,6 @@
 import React, {useState} from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import Modal from '@material-ui/core/Modal';
-
+import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@material-ui/core';
 
 function getModalStyle() {
   const top = 50;
@@ -42,42 +41,32 @@ export default function DialogModal({title, text, onYes, open, setOpen}) {
     setOpen(false);
   };
 
-  const body = (
-    <div style={modalStyle} className={classes.paper}>
-      <h2 id="simple-modal-title">{title}</h2>
-      <p id="simple-modal-description">
-        {text}
-      </p>
-      <div className={classes.buttonsContainer}>
-        <button 
-          className="button"
-          style={{ marginRight: 15 }}
+  return (
+    <Dialog onClose={handleClose} open={open}>
+      <DialogTitle>{title}</DialogTitle>
+      <DialogContent>
+        <DialogContentText id="alert-dialog-description">
+          {text}
+        </DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <Button
           onClick={() => {
             handleClose();
             onYes()
-          }}>
+          }}
+          variant="contained"
+        >
           Yes
-        </button>
-        <button 
-          className="button"
-          onClick={handleClose}>
+        </Button>
+        <Button
+          variant="contained"
+          onClick={handleClose} 
+          autoFocus
+        >
           No
-        </button>
-      </div>
-      <DialogModal />
-    </div>
-  );
-
-  return (
-    <div>
-      <Modal
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="simple-modal-title"
-        aria-describedby="simple-modal-description"
-      >
-        {body}
-      </Modal>
-    </div>
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 }

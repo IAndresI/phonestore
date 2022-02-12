@@ -1,10 +1,10 @@
 import React, {useEffect, useState} from 'react';
-import PhonesTable from '../components/PhonesTable';
+import ReviewsTable from '../components/ReviewsTable';
 import {usePageDataLoad} from '../../../customHooks'
 import Spinner from '../../Spinner'
 import { getAllUsers } from '../../../http/userAPI';
 
-const Phones = ({makeAlert}) => {
+const Reviews = ({makeAlert}) => {
 
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -23,7 +23,7 @@ const Phones = ({makeAlert}) => {
     setUsers(users)
   }
 
-  const [phones, setUsers, loading, error] = usePageDataLoad(() => getAllUsers(rowsPerPage, page));
+  const [users, setUsers, loading, error] = usePageDataLoad(() => getAllUsers(rowsPerPage, page));
 
   useEffect(() => {
     getAllUsers(rowsPerPage, page)
@@ -32,14 +32,14 @@ const Phones = ({makeAlert}) => {
 
   return (
     <div className="admin">
-      <h1 className="admin__title">Phones</h1>
+      <h1 className="admin__title">Reviews</h1>
       <div className="admin__tab-panel">
         {
           error ? <h3>Some Error</h3> :
             loading ? <Spinner /> : 
-              <PhonesTable 
-                users={phones?.data}
-                count={phones?.count}
+              <ReviewsTable 
+                users={users?.data}
+                count={users?.count}
                 page={page}
                 refreshPage={refreshPage}
                 rowsPerPage={rowsPerPage}
@@ -53,4 +53,4 @@ const Phones = ({makeAlert}) => {
   );
 };
 
-export default Phones;
+export default Reviews;

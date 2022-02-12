@@ -1,12 +1,12 @@
 import Dashboard from "./Dashboard";
-import Manufacturers from "./Manufacturers";
+import Reviews from "./Reviews";
 import Orders from "./Orders";
 import Phones from "./Phones";
 import Users from "./Users";
 
 export {
   Dashboard,
-  Manufacturers,
+  Reviews,
   Orders,
   Phones,
   Users
