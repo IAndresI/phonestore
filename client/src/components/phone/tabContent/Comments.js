@@ -62,7 +62,7 @@ const Comments = ({phoneId, page, setPage}) => {
   const [limit, setLimit] = useState(5)
   const [openReviewModal, setOpenReviewModal] = useState(false);
 
-  const [reviews, setReviews, loading, error] = usePageDataLoad(() => getReviews(phoneId, clientId, limit, page), null, page)
+  const [reviews, setReviews, loading, error] = usePageDataLoad(() => getReviews(phoneId, clientId || -1, limit, page), null, page)
 
   const paginationChange = (event, value) => {
     setPage(value)

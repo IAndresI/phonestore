@@ -1,5 +1,6 @@
 import React from 'react';
 import {Switch, Route, Redirect} from 'react-router-dom';
+import withAlert from '../hoc/withAlert';
 import { authRoutes, publicRoutes } from '../routes';
 import { HOME_ROUTE } from '../utils/consts';
 import Layout from './Layout';
@@ -20,4 +21,4 @@ const AppRouter = ({loading, isAuth}) => {
   );
 };
 
-export default AppRouter;
+export default withAlert(AppRouter);

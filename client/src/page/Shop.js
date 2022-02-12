@@ -1,4 +1,4 @@
-import { Container, Grid, InputLabel, makeStyles, Select } from '@material-ui/core';
+import { Container, Grid, InputLabel, makeStyles, Select, MenuItem } from '@material-ui/core';
 import React, { useEffect, useState } from 'react';
 import Filter from '../components/Filter';
 import { useDispatch, useSelector } from 'react-redux';
@@ -151,15 +151,14 @@ const Shop = () => {
               <InputLabel className={classes.sortLabel} htmlFor="outlined-age-native-simple">Sort By</InputLabel>
                 <Select
                 className={classes.sort}
-                native
                 value={sort}
                 onChange={handleChange}
                 label="sort">
-                  <option value="">No sort</option>
-                  <option value="price ASC">Price: low to high</option>
-                  <option value="price DESC">Price: high to low</option>
-                  <option value="phone_name ASC">Name: A-Z</option>
-                  <option value="phone_name DESC">Name: Z-A</option>
+                  <MenuItem value="">No sort</MenuItem>
+                  <MenuItem value="price ASC">TwentPrice: low to highy</MenuItem>
+                  <MenuItem value="price DESC">Price: high to low</MenuItem>
+                  <MenuItem value="phone_name ASC">Name: A-Z</MenuItem>
+                  <MenuItem value="phone_name DESC">Name: Z-A</MenuItem>
               </Select>
             </div>
           </Grid>

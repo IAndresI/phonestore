@@ -8,8 +8,6 @@ const Dashboard = () => {
   const [dashboardCounts, setDashboardCounts, loading, error] = usePageDataLoad(getDashboardCounts, null)  
 
   if(loading) return <Spinner />
-
-  console.log(dashboardCounts);
   
   return (
     <div className="admin">

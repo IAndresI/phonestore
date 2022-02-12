@@ -1,5 +1,5 @@
 import { Container, Snackbar } from '@material-ui/core';
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import { useSelector } from 'react-redux';
 import { changePassword, checkPassword, getProfile, putProfile } from '../../http/userAPI';
 import Spinner from '../../components/Spinner';
@@ -8,16 +8,18 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import Box from '@material-ui/core/Box';
 import PersonalData from '../../components/profile/tabs/PersonalData';
-import MuiAlert from '@material-ui/lab/Alert';
 import ChangePassword from '../../components/profile/tabs/ChangePassword';
 import useStyles from './style';
 import Orders from '../../components/profile/tabs/Orders';
 import usePageDataLoad from '../../customHooks/usePageDataLoad';
+import alertContext from '../../context/alertContext';
+import { ALERT } from '../../utils/consts';
 
 const Profile = () => {
 
   const [profile, setProfile] = useState(null)
   const clientId = useSelector(state => state.user.user.id);
+  const makeAlert = useContext(alertContext)
   
   const classes = useStyles();
 
@@ -39,7 +41,6 @@ const Profile = () => {
     }, setLoad) => {
     try {
       setLoad(true)
-      handleClose();
       const formData = new FormData();
 
       formData.append('date_of_birth', `${date_of_birth}`)
@@ -50,10 +51,8 @@ const Profile = () => {
       formData.append('clientId',`${clientId}` )
       if(image) formData.append('image', image)
       formData.append('image', null)
-      console.log(formData);
-
       const put = await putProfile(formData).then(data => {
-        handleClick();
+        makeAlert({type: ALERT.SUCCESS})
         getProfile(clientId)
           .then(data => {
             setProfile(data);
@@ -74,7 +73,6 @@ const Profile = () => {
     try {
       setApiErrors({})
       setLoading(true)
-      handleClose();
       if(data.new_password !== data.confirm_password) {
         setApiErrors({new_not_match: true})
         setLoading(false)
@@ -83,7 +81,7 @@ const Profile = () => {
       else {
         const check = await checkPassword(clientId, data.current_password)
         if(check) {
-          const put = await changePassword(clientId, data.new_password).then(data => handleClick());
+          const put = await changePassword(clientId, data.new_password).then(data => makeAlert({type: ALERT.SUCCESS}));
 
           return put;
         }
@@ -139,27 +137,6 @@ const Profile = () => {
     setValue(newValue);
   };
 
-  // Alert
-
-  const [open, setOpen] = React.useState(false);
-
-  const handleClick = () => {
-    setOpen(true);
-  };
-
-  const handleClose = (event, reason) => {
-    if (reason === 'clickaway') {
-      return;
-    }
-
-    setOpen(false);
-  };
-
-  function Alert(props) {
-    return <MuiAlert elevation={6} variant="filled" {...props} />;
-  }
-
-  
   if(loading) return <Spinner />
 
   if(error) return <h3>Some Error {error.message}</h3>
@@ -202,11 +179,6 @@ const Profile = () => {
           </TabPanel>
         </div>
       </Container>
-      <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
-        <Alert onClose={handleClose} severity="success">
-          Success!
-        </Alert>
-      </Snackbar>
     </section>
   );
 };

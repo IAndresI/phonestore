@@ -1,4 +1,4 @@
-import React, { useState} from 'react';
+import React, { useContext, useState} from 'react';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -12,7 +12,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import { useSelector, useDispatch } from 'react-redux';
 import {Redirect, withRouter} from 'react-router-dom';
-import { LOGIN_ROUTE } from '../utils/consts';
+import { ALERT, LOGIN_ROUTE } from '../utils/consts';
 import {KeyboardDatePicker} from '@material-ui/pickers';
 import { registration, login } from '../http/userAPI';
 import { useForm, Controller  } from "react-hook-form";
@@ -20,6 +20,7 @@ import Alert from '@material-ui/lab/Alert';
 import {onLogin, setCart} from '../store/actions'
 import { InputLabel, MenuItem, Select } from '@material-ui/core';
 import { getCart } from '../http/cartAPI';
+import alertContext from '../context/alertContext';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -49,6 +50,7 @@ export default withRouter(function SignIn({location, history}) {
   const { control, handleSubmit, formState: { errors } } = useForm();
   const dispatch = useDispatch()
   const [image, setImage] = useState(null)
+  const makeAlert = useContext(alertContext);
 
   const handleDateChange = (date) => {
     setSelectedDate(date);
@@ -91,7 +93,7 @@ export default withRouter(function SignIn({location, history}) {
       }
     }
     catch(e) {
-      alert(e.response.data.message.detail || e.response.data.message)
+      makeAlert({type: ALERT.ERROR, message: e.response.data.message.detail || e.response.data.message})
     }
   }
 

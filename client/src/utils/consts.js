@@ -12,3 +12,10 @@ export const ORDER_ROUTE='/order'
 export const HOME_ROUTE = '/'
 
 export const ROLE_ADMIN = "ADMIN"
+
+export const ALERT = {
+  SUCCESS: "success",
+  INFO: "info",
+  ERROR: "error",
+  WARNING: "warning"
+} 
