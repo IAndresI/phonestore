@@ -23,6 +23,11 @@ export const getReviews = async (id,clientId, limit = 5, page = 1) => {
   return data;
 }
 
+export const getAllReviews = async (limit = 5, page = 1) => {
+  const {data} = await $host.get('api/phone/reviews', {params: {limit, page}});
+  return data;
+}
+
 export const createReview = async (id, details) => {
   const {data} = await $host.post('api/phone/reviews/'+id, details);
   return data;
@@ -30,6 +35,11 @@ export const createReview = async (id, details) => {
 
 export const editReview = async (id, details) => {
   const {data} = await $host.put('api/phone/reviews/'+id, details);
+  return data;
+}
+
+export const removeReview = async (id) => {
+  const {data} = await $host.delete('api/phone/reviews/'+id);
   return data;
 }
 

@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useContext, useState} from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Box from '@material-ui/core/Box';
 import Collapse from '@material-ui/core/Collapse';
@@ -15,9 +15,9 @@ import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
 import { Avatar, FormControl, MenuItem, TablePagination } from '@material-ui/core';
 import Select from '@material-ui/core/Select';
-import { changeUserRole } from '../../../http/userAPI';
 import DialogModal from './DialogModal';
-import UserInfo from './UserInfo';
+import { editReview, removeReview } from '../../../http/phoneAPI';
+import alertContext from '../../../context/alertContext'
 
 const useRowStyles = makeStyles({
   root: {
@@ -46,24 +46,30 @@ const useRowStyles = makeStyles({
     height: 50,
     margin: "0 auto"
   },
+  button: {
+    margin: "20px 0",
+  }
 });
 
-function Row({user, makeAlert, refreshPage}) {
+function Row({review, refreshPage}) {
 
   const [open, setOpen] = useState(false);
 
   const [modalOpen, setModalOpen] = useState(false);
 
+  const [verified, setVerified] = useState(review?.verified);
+
+  const [action, setAction] = useState("")
+
   const classes = useRowStyles();
 
-  const [status, setStatus] = useState(user.role);
-  const [newStatus, setNewStatus] = useState(null)
+  const makeAlert = useContext(alertContext)
 
   const applyNewStatus = async () => {
     makeAlert({type: 'loading'})
     try {
-      await changeUserRole(user.client_id, newStatus)
-      setStatus(newStatus)
+      await editReview(review.review_id, {status: !verified, comment: review.comment,rating: review.rating})
+      setVerified((prevStatus) => !prevStatus)
       makeAlert({type: 'success', message: 'Success!'})
     }
     catch(err) {
@@ -71,40 +77,50 @@ function Row({user, makeAlert, refreshPage}) {
     } 
   }
 
-  const handleChange = (event) => {
+  const applyRemoveReview = async () => {
+    makeAlert({type: 'loading'})
+    try {
+      await removeReview(review.review_id)
+        .then(() => refreshPage());
+      makeAlert({type: 'success', message: 'Success!'})
+    }
+    catch(err) {
+      makeAlert({type: 'error', message: err.message})
+    } 
+  }
+
+  const handleChange = () => {
+    setAction("edit")
     setModalOpen(true)
-    setNewStatus(event.target.value)
   };
 
-  const imagePath=`http://localhost:5000/${user?.image ? user?.image : "user.jpg"}`
-  
-  return "";
+  const imagePath=`http://localhost:5000/${review?.image ? review?.image : "user.jpg"}`
 
   return (
     <React.Fragment>
       <TableRow className={classes.root}>
         <TableCell>
-          <IconButton id={user.client_id} aria-label="expand row" size="small" onClick={() => setOpen(!open)}>
+          <IconButton id={review.review_id} aria-label="expand row" size="small" onClick={() => setOpen(!open)}>
             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
         </TableCell>
         <TableCell align="center" component="th" scope="row">
-          <Avatar alt={`${user.first_name} ${user.last_name}`} src={imagePath} className={classes.large} />
+          <Avatar alt={`${review.fio}`} src={imagePath} className={classes.large} />
         </TableCell>
         <TableCell align="center" component="th" scope="row">
-          {user.client_id}
+          {review.review_id}
         </TableCell>
-        <TableCell align="center">{`${user.first_name} ${user.last_name}`}</TableCell>
-        <TableCell align="center"><Typography className={classes.emailColumn}>{user.email}</Typography></TableCell>
+        <TableCell align="left">{review.comment}</TableCell>
+        <TableCell align="center"><Typography className={classes.emailColumn}>{review.rating}</Typography></TableCell>
         <TableCell align="center">
           <FormControl variant="outlined">
             <Select
               className={classes.statusSelect}
-              value={status}
+              value={verified}
               onChange={handleChange}
             >
-              <MenuItem value="CLIENT"><Typography className={classes.selectSelectItem} style={{color: 'darkSeaGreen'}} >CLIENT</Typography></MenuItem>
-              <MenuItem value='ADMIN'><Typography className={classes.selectSelectItem} style={{color: 'tomato'}} >ADMIN</Typography></MenuItem>
+              <MenuItem value={true}><Typography className={classes.selectSelectItem} style={{color: 'green'}} >Verified</Typography></MenuItem>
+              <MenuItem value={false}><Typography className={classes.selectSelectItem} style={{color: 'tomato'}}>Not Verified</Typography></MenuItem>
             </Select>
           </FormControl>
         </TableCell>
@@ -113,20 +129,28 @@ function Row({user, makeAlert, refreshPage}) {
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={12}>
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Box margin={1}>
-              <Typography variant="h4" gutterBottom component="div">
-                Information
-              </Typography>
-              <UserInfo refreshPage={refreshPage} makeAlert={makeAlert} clientId={user.client_id}/>
+              <button
+                className={`${classes.button} button button--danger`}
+                onClick={() => {
+                  setModalOpen(true)
+                  setAction("del")
+                }}
+              >
+                Delete This Review
+              </button>
             </Box>
           </Collapse>
         </TableCell>
       </TableRow>
       <DialogModal 
-        open={modalOpen} 
+        open={modalOpen}  
         setOpen={setModalOpen} 
-        title="User" 
-        text="Are you sure you want to change the status of this user?" 
-        onYes={applyNewStatus}
+        title={action === "edit" ? "Edit Review" : "Remove Review"}
+        text={action === "edit" ? 
+        "Are you sure you want to change the status of this review?"
+        :
+        "Are you sure you want to remove this review?"} 
+        onYes={action === "edit" ? applyNewStatus : applyRemoveReview}
       />
     </React.Fragment>
   );
@@ -157,8 +181,8 @@ export default function ReviwesTable({
             </TableRow>
           </TableHead>
           <TableBody>
-            {reviews?.map((user) => (
-              <Row key={user?.order_id} makeAlert={makeAlert} user={user} refreshPage={refreshPage} />
+            {reviews?.map((review) => (
+              <Row key={review?.review_id} makeAlert={makeAlert} review={review} refreshPage={refreshPage} />
             ))}
           </TableBody>
         </Table>

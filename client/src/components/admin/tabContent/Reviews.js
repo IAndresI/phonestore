@@ -2,12 +2,14 @@ import React, {useEffect, useState} from 'react';
 import ReviewsTable from '../components/ReviewsTable';
 import {usePageDataLoad} from '../../../customHooks'
 import Spinner from '../../Spinner'
-import { getAllUsers } from '../../../http/userAPI';
+import { getAllReviews } from '../../../http/phoneAPI';
 
-const Reviews = ({makeAlert}) => {
+const Reviews = () => {
 
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+
+  const [reviews, setReviews, loading, error] = usePageDataLoad(() => getAllReviews(rowsPerPage, page+1), null, page)
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -19,15 +21,16 @@ const Reviews = ({makeAlert}) => {
   };
 
   const refreshPage = async () => {
-    const users = await getAllUsers(rowsPerPage, page);
-    setUsers(users)
+    const users = await getAllReviews(rowsPerPage, page+1);
+    setReviews(users)
   }
 
-  const [users, setUsers, loading, error] = usePageDataLoad(() => getAllUsers(rowsPerPage, page));
-
   useEffect(() => {
-    getAllUsers(rowsPerPage, page)
-      .then(data => setUsers(data)) 
+    getAllReviews(rowsPerPage, page+1)
+      .then(data => {
+        setReviews(data);
+        console.log(data);
+      }) 
   }, [page, rowsPerPage])
 
   return (
@@ -38,14 +41,13 @@ const Reviews = ({makeAlert}) => {
           error ? <h3>Some Error</h3> :
             loading ? <Spinner /> : 
               <ReviewsTable 
-                users={users?.data}
-                count={users?.count}
+                reviews={reviews?.reviews}
+                count={reviews?.count}
                 page={page}
                 refreshPage={refreshPage}
                 rowsPerPage={rowsPerPage}
                 handleChangePage={handleChangePage}
                 handleChangeRowsPerPage={handleChangeRowsPerPage}
-                makeAlert={makeAlert}
               />
         }
       </div>

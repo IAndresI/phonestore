@@ -1,5 +1,5 @@
 import { Avatar, Divider, Grid, makeStyles } from '@material-ui/core';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import { usePageDataLoad } from '../../../customHooks';
 import { getReviews } from '../../../http/phoneAPI';
 import Spinner from '../../Spinner';
@@ -7,7 +7,6 @@ import Rating from '../components/ReviewRating';
 import ReviewModal from '../components/ReviewModal'
 import Pagination from '@material-ui/lab/Pagination';
 import {useSelector} from 'react-redux'
-
 
 const useStyles = makeStyles({
   commentHeader: {
@@ -64,6 +63,14 @@ const Comments = ({phoneId, page, setPage}) => {
 
   const [reviews, setReviews, loading, error] = usePageDataLoad(() => getReviews(phoneId, clientId || -1, limit, page), null, page)
 
+  const [alreadyReviewed, setAlreadyReviewed] = useState(!!reviews?.clientReview)
+
+  useEffect(async () => {
+    const reviews = await getReviews(phoneId, clientId || -1, limit, page);
+    setReviews(reviews);
+  }, [alreadyReviewed])
+  
+  
   const paginationChange = (event, value) => {
     setPage(value)
   }
@@ -76,7 +83,6 @@ const Comments = ({phoneId, page, setPage}) => {
 
   if(error) return <h3>Some Error {error.message}</h3>
 
-  const alreadyReviewed = !!reviews.clientReview;
   const reviewOnVerification = reviews.clientReview?.verified;
 
   const pageCount = Math.ceil(+reviews.count/limit);
@@ -85,31 +91,31 @@ const Comments = ({phoneId, page, setPage}) => {
   return (
     <div>
       {
+        isAuth ?
+        (
+          <div className={classes.header}>
+            <h3>Overall: {reviews.count}</h3>
+            {
+              reviewOnVerification===false ?
+              (
+                <button className="button button--mini" onClick={handleOpen}>You have already written review and it is being reviewed. You can change your review</button>
+              )
+              :
+              (
+                <button className="button button--mini" onClick={handleOpen}>
+                  {alreadyReviewed ? "Edit Review" : "Make Review"}
+                </button>
+              )
+            }
+          </div>
+        )
+        :
+        null
+      }
+      {
         allReviews.length > 0 ?
         (
           <>
-            {
-              isAuth ?
-              (
-                <div className={classes.header}>
-                  <h3>Overall: {reviews.count}</h3>
-                  {
-                    reviewOnVerification===false ?
-                    (
-                      <button className="button button--mini" onClick={handleOpen}>You have already written review and it is being reviewed. You can change your review</button>
-                    )
-                    :
-                    (
-                      <button className="button button--mini" onClick={handleOpen}>
-                        {alreadyReviewed ? "Edit Review" : "Make Review"}
-                      </button>
-                    )
-                  }
-                </div>
-              )
-              :
-              null
-            }
             {
               allReviews.map((review, i) => {
                 const imgLink = `${process.env.REACT_APP_API_URL}/${review.image ? review.image : "user.png"}`
@@ -154,7 +160,7 @@ const Comments = ({phoneId, page, setPage}) => {
         :
         <h3 className={classes.noComments}>Theres No Comments</h3>
       }
-      <ReviewModal clientId={clientId} phoneId={phoneId} open={openReviewModal} setOpen={setOpenReviewModal} alreadyReviewed={reviews.clientReview}/>
+      <ReviewModal clientId={clientId} phoneId={phoneId} open={openReviewModal} setOpen={setOpenReviewModal} alreadyReviewed={reviews.clientReview} setAlreadyReviewed={setAlreadyReviewed}/>
     </div>
   );
 };

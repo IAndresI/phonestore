@@ -1,9 +1,8 @@
 import React, {useState} from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import Modal from '@material-ui/core/Modal';
 import ReviewRating from './ReviewRating';
 import { useForm, Controller  } from "react-hook-form";
-import { TextField } from '@material-ui/core';
+import { DialogContent, DialogContentText, DialogTitle, TextField, Dialog, DialogActions, Button } from '@material-ui/core';
 import Alert from '@material-ui/lab/Alert';
 import { createReview, editReview } from '../../../http/phoneAPI';
 import Spinner from '../../Spinner';
@@ -25,6 +24,9 @@ const useStyles = makeStyles((theme) => ({
   alert: {
     marginTop: 20
   },
+  modalContainer: {
+    width:"70%"
+  },
   statusTitle: {
     fontSize: 35,
     textAlign: 'center',
@@ -40,7 +42,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-export default function ReviewModal({setOpen, open, phoneId, clientId, alreadyReviewed}) {
+export default function ReviewModal({setOpen, open, phoneId, clientId, alreadyReviewed, setAlreadyReviewed}) {
 
   const classes = useStyles();
 
@@ -70,6 +72,7 @@ export default function ReviewModal({setOpen, open, phoneId, clientId, alreadyRe
           setStatusMessage(data.message)
           setLoading(false)
           setError(null)
+          setAlreadyReviewed(true)
         })
         .catch(err => {
           setLoading(false)
@@ -88,6 +91,9 @@ export default function ReviewModal({setOpen, open, phoneId, clientId, alreadyRe
   const handleClose = () => {
     setError(null)
     setOpen(false);
+    setTimeout(() => {
+      setStatusMessage(null)
+    }, 400);
   };
 
   const errorHandler = (err) => {
@@ -113,42 +119,8 @@ export default function ReviewModal({setOpen, open, phoneId, clientId, alreadyRe
     return <Alert className={classes.alert} severity="error">{errorText}</Alert>
   }
 
-  const body = (
-    <div className={classes.paper}>
-      <h2 id="modal-title">{alreadyReviewed ? "Edit Your Review!" : "Make Your Review!"}</h2>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <Controller
-          name="rating"
-          control={control}
-          rules={{ required: true }}
-          render={({ field }) => <ReviewRating field={field}/>}
-        />
-        <Controller
-          name="comment"
-          control={control}
-          rules={{ required: true, minLength: 50 }}
-          defaultValue=""
-          render={({ field }) =><TextField
-            variant="outlined"
-            margin="normal"
-            fullWidth
-            name="Controller"
-            label="Comment"
-            type="text"
-            multiline
-            id="password"
-            {...field}
-          />}
-        />
-        <button type="submit" className="button">Submit</button>
-        {Object.keys(errors).length === 0 ? null : errorHandler(errors)}
-      </form>
-      <ReviewModal />
-    </div>
-  );
-
   const StatusMessage = ({text, success}) => (
-    <div style={{color: success ? '#4caf50' : "tomato"}} className={classes.paper}>
+    <div style={{color: success ? '#4caf50' : "tomato"}}>
       <div className={classes.statusTitle}>{text}</div>
       {
         success ? <p className={classes.statusText}>Your new review has been sent to our moderators for review, it will take some time before the new review appears in the feed.</p>
@@ -159,21 +131,66 @@ export default function ReviewModal({setOpen, open, phoneId, clientId, alreadyRe
   )
 
   return (
-    <div>
-      <Modal
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="modal-title"
-        aria-describedby="modal-form"
-      >
-        {
-          loading ?
-           <Spinner /> : 
-           error ? <StatusMessage text={error.message} /> : 
-            statusMessage ? <StatusMessage text={statusMessage} success/> :
-              body
-        }
-      </Modal>
-    </div>
+    <Dialog onClose={handleClose} open={open}>
+      <div style={{width: '100%'}}>
+        <DialogTitle id="alert-dialog-description">
+          {alreadyReviewed ? "Edit Your Review!" : "Make Your Review!"}
+        </DialogTitle>
+        <DialogContent>
+          {
+            loading ?
+             <Spinner /> : 
+             error ? <StatusMessage text={error.message} /> : 
+              statusMessage ? <StatusMessage text={statusMessage} success/> :
+                (
+                  <div>
+                    <form onSubmit={handleSubmit(onSubmit)}>
+                      <Controller
+                        name="rating"
+                        control={control}
+                        rules={{ required: true }}
+                        render={({ field }) => <ReviewRating field={field}/>}
+                      />
+                      <Controller
+                        name="comment"
+                        control={control}
+                        rules={{ required: true, minLength: 50 }}
+                        defaultValue=""
+                        render={({ field }) =><TextField
+                          variant="outlined"
+                          margin="normal"
+                          fullWidth
+                          name="Controller"
+                          label="Comment"
+                          type="text"
+                          multiline
+                          id="password"
+                          {...field}
+                        />}
+                      />
+                      <DialogActions>
+                        <Button
+                          type="submit"
+                          variant="contained"
+                        >
+                          Submit
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="contained"
+                          onClick={handleClose} 
+                          autoFocus
+                        >
+                          Close
+                        </Button>
+                      </DialogActions>
+                      {Object.keys(errors).length === 0 ? null : errorHandler(errors)}
+                    </form>
+                  </div>
+                )
+          }
+        </DialogContent>
+      </div>
+    </Dialog>
   );
 }

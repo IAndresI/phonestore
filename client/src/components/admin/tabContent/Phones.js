@@ -20,14 +20,17 @@ const Phones = ({makeAlert}) => {
 
   const refreshPage = async () => {
     const users = await getAllUsers(rowsPerPage, page);
-    setUsers(users)
+    setPhones(users)
   }
 
-  const [phones, setUsers, loading, error] = usePageDataLoad(() => getAllUsers(rowsPerPage, page));
+  const [phones, setPhones, loading, error] = usePageDataLoad(() => getAllUsers(rowsPerPage, page));
 
   useEffect(() => {
     getAllUsers(rowsPerPage, page)
-      .then(data => setUsers(data)) 
+      .then(data => {
+        setPhones(data);
+        console.log(data);
+      }) 
   }, [page, rowsPerPage])
 
   return (

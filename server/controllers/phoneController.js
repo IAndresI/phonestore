@@ -44,6 +44,20 @@ class PhoneController {
     }
   }
 
+  async getAllReviews(req, res,next) {
+    try {
+      const { limit, page } = req.query;
+
+      const offset = page*limit-limit;
+      const reviewsQuery = await db.query(`SELECT * FROM get_all_reviews($1, $2);`, [limit, offset]);
+      const reviewsCount = await db.query(`SELECT COUNT(*) FROM review;`);
+      return res.json({reviews: reviewsQuery.rows, count: reviewsCount.rows[0].count});
+    }
+    catch(err) {
+      return next(ApiError.badRequest(err.message));
+    }
+  }
+
   async createReview(req, res,next) {
     try {
       const {id} = req.params;
@@ -73,13 +87,31 @@ class PhoneController {
   async editReview(req, res,next) {
     try {
       const {id} = req.params;
-      const {rating, comment} = req.body;
+      const {rating, comment, status} = req.body;
       if(!id) {
         return next(ApiError.badRequest('Review Not Found'));
       }
-      await db.query(`UPDATE review SET rating=$1, "text"=$2, verified=false WHERE review_id=$3`, [rating, comment, id], (err) => {
+      await db.query(`UPDATE review SET rating=$1, "text"=$2, ${status ? `verified=${status}` : `verified=false`} WHERE review_id=$3`, [rating, comment, id], (err) => {
           if(!err) {
             return res.status(201).json({message:"Successfully edited"});;
+          }
+          else return next(ApiError.badRequest(err));
+        });
+    }
+    catch(err) {
+      return next(ApiError.badRequest(err.message));
+    }
+  }
+
+  async removeReview(req, res,next) {
+    try {
+      const {id} = req.params;
+      if(!id) {
+        return next(ApiError.badRequest('Review Not Found'));
+      }
+      await db.query(`DELETE FROM review WHERE review_id=${id}`, (err) => {
+          if(!err) {
+            return res.status(201).json({message:"Successfully removed"});;
           }
           else return next(ApiError.badRequest(err));
         });
