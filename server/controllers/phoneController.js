@@ -125,7 +125,7 @@ class PhoneController {
     try {
       const {page, limit, sort, color, manufacturers, price, ram,rom,camera, diagonal} = req.query;
       const offset = page*limit-limit;
-      const orderByArr = sort.split(' ')
+      const orderByArr = sort ? sort.split(' ') : null; 
       const orderBy = `${sort ? `ORDER BY ph.${orderByArr[0]} ${orderByArr[1]}` : ""}`;
       const whereColor = color ? `AND col_det.color_id IN(${color.join(',')})` : "";
       const whereManufacturer = manufacturers ? `AND ph.manufacturer_name IN(${manufacturers.map(e=>`'${e}'`).join(',')})` : "";

@@ -2,12 +2,18 @@ import React, {useEffect, useState} from 'react';
 import PhonesTable from '../components/PhonesTable';
 import {usePageDataLoad} from '../../../customHooks'
 import Spinner from '../../Spinner'
-import { getAllUsers } from '../../../http/userAPI';
+import { getAllPhones } from '../../../http/phoneAPI';
 
 const Phones = ({makeAlert}) => {
 
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+
+  const [phones, setPhones, loading, error] = usePageDataLoad(
+    () => getAllPhones(page+1, rowsPerPage, null, null, null, null, null, null, null, null),
+    500,
+    page+1, rowsPerPage
+  )
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -19,19 +25,9 @@ const Phones = ({makeAlert}) => {
   };
 
   const refreshPage = async () => {
-    const users = await getAllUsers(rowsPerPage, page);
-    setPhones(users)
+    const phone = await getAllPhones(rowsPerPage, page, null, null, null, null, null, null, null, null);
+    setPhones(phone)
   }
-
-  const [phones, setPhones, loading, error] = usePageDataLoad(() => getAllUsers(rowsPerPage, page));
-
-  useEffect(() => {
-    getAllUsers(rowsPerPage, page)
-      .then(data => {
-        setPhones(data);
-        console.log(data);
-      }) 
-  }, [page, rowsPerPage])
 
   return (
     <div className="admin">
@@ -41,7 +37,7 @@ const Phones = ({makeAlert}) => {
           error ? <h3>Some Error</h3> :
             loading ? <Spinner /> : 
               <PhonesTable 
-                users={phones?.data}
+                phones={phones?.phones}
                 count={phones?.count}
                 page={page}
                 refreshPage={refreshPage}

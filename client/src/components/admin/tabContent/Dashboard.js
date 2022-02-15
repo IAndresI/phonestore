@@ -30,6 +30,10 @@ const Dashboard = () => {
             <h4 className="admin__dashboard-counts-title">Sales</h4>
             <span className="admin__dashboard-counts-number">{dashboardCounts.sales}</span>
           </li>
+          <li className="admin__dashboard-counts-item">
+            <h4 className="admin__dashboard-counts-title">Reviews</h4>
+            <span className="admin__dashboard-counts-number">{dashboardCounts.reviews_count}</span>
+          </li>
         </ul>
       </div>
     </div>

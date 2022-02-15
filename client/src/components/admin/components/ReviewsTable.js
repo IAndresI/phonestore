@@ -105,12 +105,14 @@ function Row({review, refreshPage}) {
           </IconButton>
         </TableCell>
         <TableCell align="center" component="th" scope="row">
-          <Avatar alt={`${review.fio}`} src={imagePath} className={classes.large} />
-        </TableCell>
-        <TableCell align="center" component="th" scope="row">
           {review.review_id}
         </TableCell>
+        <TableCell align="center" component="th" scope="row">
+          <Avatar src={imagePath} className={classes.large} />
+          {review.fio}
+        </TableCell>
         <TableCell align="left">{review.comment}</TableCell>
+        <TableCell align="center">{new Date(review.created_at).toLocaleString().replace(',', " ")}</TableCell>
         <TableCell align="center"><Typography className={classes.emailColumn}>{review.rating}</Typography></TableCell>
         <TableCell align="center">
           <FormControl variant="outlined">
@@ -176,6 +178,7 @@ export default function ReviwesTable({
               <TableCell align="center">ID</TableCell>
               <TableCell align="center">User</TableCell>
               <TableCell align="center">Text</TableCell>
+              <TableCell align="center">Date of creation</TableCell>
               <TableCell align="center">Rating</TableCell>
               <TableCell align="center">Status</TableCell>
             </TableRow>
