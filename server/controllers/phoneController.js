@@ -125,8 +125,8 @@ class PhoneController {
     try {
       const {page, limit, sort, color, manufacturers, price, ram,rom,camera, diagonal} = req.query;
       const offset = page*limit-limit;
-      const orderByArr = sort ? sort.split(' ') : null; 
-      const orderBy = `${sort ? `ORDER BY ph.${orderByArr[0]} ${orderByArr[1]}` : ""}`;
+      const orderByArr = sort && sort !== "none" ? sort.split(' ') : null; 
+      const orderBy = `${sort && sort !== "none" ? `ORDER BY ph.${orderByArr[0]} ${orderByArr[1]}` : ""}`;
       const whereColor = color ? `AND col_det.color_id IN(${color.join(',')})` : "";
       const whereManufacturer = manufacturers ? `AND ph.manufacturer_name IN(${manufacturers.map(e=>`'${e}'`).join(',')})` : "";
       const wherePrice = price ? `AND ph.price >= ${price[0]}::money AND ph.price <= ${price[1]}::money` : "";
@@ -174,12 +174,12 @@ class PhoneController {
       const {searchText, limit, page} = req.query;
       const offset = page*limit-limit;
       const qeury = await db.query(`
-        select * from get_full_phones 
+        select * from get_full_phones, get_all_phone_colors(phone_id) AS "phone_colors"
         WHERE lower(phone_name) LIKE '%${searchText}%' 
         OR lower(manufacturer_name) LIKE '%${searchText}%' 
         LIMIT ${limit} OFFSET ${offset};`);
       const countQeury = await db.query(`
-        SELECT COUNT(*) FROM get_full_phones 
+        SELECT COUNT(*) FROM get_full_phones
         WHERE lower(phone_name) LIKE '%${searchText}%' 
         OR lower(manufacturer_name) LIKE '%${searchText}%'
         GROUP BY phone_id;

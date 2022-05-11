@@ -11,7 +11,9 @@ class CartController {
         return next(ApiError.badRequest('Enter ID!'))
       }
       const qeury = await db.query(`
-        SELECT ph.phone_id,ph.name,ph.price,cart_det.count, ph.image, (SELECT array_agg(ARRAY[col.color_id::TEXT, col.name::TEXT, col.code::TEXT]) FROM color col where col.color_id=cart_det.color_id) as "selectedColor" 
+        SELECT ph.phone_id,ph.name,ph.price,cart_det.count, ph.image, 
+          (SELECT array_agg(ARRAY[col.color_id::TEXT, col.name::TEXT, col.code::TEXT, col_det.count::TEXT]) FROM color col
+          INNER JOIN color_details col_det ON col.color_id=col_det.color_id where col.color_id=cart_det.color_id) as "selectedColor" 
         FROM cart_details cart_det 
         INNER JOIN phone ph ON ph.phone_id=cart_det.phone_id 
         WHERE cart_id=$1`, 
@@ -24,22 +26,22 @@ class CartController {
     }
   }
 
-  async changeCartItem(req, res,next) {
-    try {
-      const qeury = await db.query('SELECT MAX(price) FROM phone');
-      const [{max}] = qeury.rows
-      return res.json(max)
-    }
-    catch(err) {
-      return next(ApiError.badRequest(err.message));
-    }
-  }
-
   async changeCart(req, res,next) {
     try {
-      const qeury = await db.query('SELECT MAX(price) FROM phone');
-      const [{max}] = qeury.rows
-      return res.json(max)
+      const {id} = req.params;
+      const {phoneId, colorId, actionType} = req.body;
+      const count = req.body.count;
+      const qeury = await db.query(`call change_cart(${id}, ${phoneId}, ${colorId}, '${actionType}' ${count ? `, ${count}` : ''});`,
+        (err, response) => {
+          if(err) {
+            console.log({...err});
+            next(ApiError.badRequest(err.message));
+          }
+          else {
+            return res.status(200).json({message: "Successfull!"})
+          }
+        }
+      );
     }
     catch(err) {
       return next(ApiError.badRequest(err.message));

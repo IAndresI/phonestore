@@ -7,6 +7,7 @@ router.get('/locations', cartController.getLocations)
 router.get('/payment_method', cartController.getPaymentMethod)
 router.get('/:id',authMiddleware, cartController.getCart)
 router.post('/:id',authMiddleware, cartController.changeCart)
-router.put('/:id',authMiddleware, cartController.changeCartItem)
+router.delete('/:id',authMiddleware, cartController.changeCart)
+router.put('/:id',authMiddleware, cartController.changeCart)
 
 module.exports = router;

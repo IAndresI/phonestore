@@ -80,7 +80,10 @@ class UserController {
       const {email, password} = req.body;
       let client;
       const qeury = await db.query(`SELECT a.password,a.email,a.client_id,a.role, b.cart_id FROM client a INNER JOIN cart b ON b.client_id=a.client_id WHERE a.email=$1`,[email], async (err,resp) => {
-        if(err) return next(ApiError.internalError('Incorrect'))
+        if(err) {
+          console.log(err);
+          next(ApiError.internalError(err.message))
+        }
         if(resp.rows[0]) {
           client=resp.rows[0];
           if(bcrypt.compareSync(password, client.password || undefined)) {
