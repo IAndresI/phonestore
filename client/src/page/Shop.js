@@ -101,7 +101,7 @@ const Shop = () => {
 
   // sort
 
-  const [sort, setSort] = useState("");
+  const [sort, setSort] = useState("none");
 
   // On filter change
 
@@ -150,12 +150,13 @@ const Shop = () => {
             <div style={{display: 'flex', alignItems: 'center', marginTop: 20}}>
               <InputLabel className={classes.sortLabel} htmlFor="outlined-age-native-simple">Sort By</InputLabel>
                 <Select
-                className={classes.sort}
-                value={sort}
-                onChange={handleChange}
-                label="sort">
-                  <MenuItem value="">No sort</MenuItem>
-                  <MenuItem value="price ASC">TwentPrice: low to highy</MenuItem>
+                  className={classes.sort}
+                  value={sort}
+                  onChange={handleChange}
+                  label="sort"
+                >
+                  <MenuItem value="none"><em>None</em></MenuItem>
+                  <MenuItem value="price ASC">Price: low to high</MenuItem>
                   <MenuItem value="price DESC">Price: high to low</MenuItem>
                   <MenuItem value="phone_name ASC">Name: A-Z</MenuItem>
                   <MenuItem value="phone_name DESC">Name: Z-A</MenuItem>

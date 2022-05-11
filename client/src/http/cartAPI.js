@@ -8,14 +8,16 @@ export const getCart = async (id) => {
   return data;
 }
 
-export const changeCart = async (id) => {
-  const {data} = await $authHost.post('api/cart/'+id);
-  return data;
-}
-
-export const changeCartItem = async (id, changed) => {
-  const {data} = await $authHost.put('api/cart/'+id, {changed});
-  return data;
+export const changeCart = async (id, cartDetails) => {
+  switch(cartDetails.actionType) {
+    case "add_item":
+      return await $authHost.post('api/cart/'+id, {...cartDetails});
+    case "remove_item":
+      return await $authHost.delete('api/cart/'+id, {data: {...cartDetails}});
+    case "change_item":
+      return await $authHost.put('api/cart/'+id, {...cartDetails});
+    default: return;
+  }
 }
 
 export const getLocations = async () => {

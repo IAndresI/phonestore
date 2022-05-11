@@ -2,21 +2,38 @@ import React from 'react';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import {Link} from 'react-router-dom';
 import { Button, TextField } from '@material-ui/core';
-import {onChangeCartItem } from '../../store/actions';
-import { useDispatch } from 'react-redux';
+import {onChangeCart } from '../../store/actions';
+import { useDispatch, useSelector } from 'react-redux';
+import { changeCart } from '../../http/cartAPI';
 
 const ItemsList = ({cartItems, classes}) => {
 
   // Dispatch
 
   const dispatch = useDispatch()
+  const cartId = useSelector((state) => state.user.user.cart_id);
 
   // Change Phone In Cart Count
 
-  const countChange = (e, id, colorId) => {
+  const countChange = async (e, phone) => {
     const count = e.target.value;
-    dispatch(onChangeCartItem({phone_id: id, count, selectedColor:colorId}))
+    
+    if(count > 0) {
+      await changeCart(cartId, {phoneId: phone.phone_id, colorId: phone.selectedColor.id, actionType: 'change_item', count})
+      .then(() => {
+        dispatch(onChangeCart({
+          phone_id: phone.phone_id,
+          name: phone.name,
+          price: phone.price,
+          image: phone.image,
+          selectedColor: phone.selectedColor,
+          count
+        }))
+      })
+    }
   }
+
+  console.log(cartItems[0]);
 
   return (
     <>
@@ -26,7 +43,19 @@ const ItemsList = ({cartItems, classes}) => {
           return (
             <div key={item.phone_id} className={classes.item} >
               <Button 
-                onClick={() => countChange({target:{value: -1}}, item.phone_id, item.selectedColor)}
+                onClick={async () => {
+                  await changeCart(cartId, {phoneId: item.phone_id, colorId: item.selectedColor.id, actionType: 'remove_item'})
+                  .then(() => {
+                    dispatch(onChangeCart({
+                      phone_id: item.phone_id,
+                      name: item.name,
+                      price: item.price,
+                      image: item.image,
+                      selectedColor: item.selectedColor,
+                      count: -1
+                    }))
+                  })
+                }}
                 className={classes.removeButton}>
                 <HighlightOffIcon />
               </Button>
@@ -50,12 +79,12 @@ const ItemsList = ({cartItems, classes}) => {
               <div>
                 <TextField
                   className={classes.count}
-                  onChange={(e) => countChange(e, item.phone_id)}
+                  onChange={(e) => countChange(e, item)}
                   id={`count-input-${item.phone_id}`}
                   type="number"
                   name="min"
                   defaultValue={item.count}
-                  inputProps={{ max: 100, step: 1}}
+                  inputProps={{ max: 100, step: 1, min: 1}}
                   variant="outlined"
                 />
               </div>

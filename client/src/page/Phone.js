@@ -8,13 +8,14 @@ import AddShoppingCartIcon from '@material-ui/icons/AddShoppingCart';
 import { useHistory, useParams } from 'react-router-dom';
 import { getOnePhones } from '../http/phoneAPI';
 import { useDispatch, useSelector } from 'react-redux';
-import { addCompareItem, removeCompareItem, onChangeCartItem } from '../store/actions';
+import { addCompareItem, removeCompareItem, onChangeCart } from '../store/actions';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 import CompareIcon from '@material-ui/icons/Compare';
 import { usePageDataLoad } from '../customHooks';
 import Spinner from '../components/Spinner';
 import ColorPicker from '../components/ColorPicker';
 import Tab from '../components/phone/tabs';
+import { changeCart } from '../http/cartAPI';
 
 const useStyles = makeStyles({
   media: {
@@ -22,6 +23,15 @@ const useStyles = makeStyles({
     backgroundSize: "contain !important",
     marginBottom: 30
   },
+  btnDisabled: {
+    backgroundColor: "#ffffff",
+    color: "#ffffff",
+    border: "1px solid rgba(0, 0, 0, 0.26);",
+    textTransform: 'uppercase',
+    marginBottom: 30,
+    marginRight: 30,
+    minWidth: 200
+  }
 });
 
 export default function Phone(props) {
@@ -38,17 +48,21 @@ export default function Phone(props) {
   const dispatch = useDispatch();
   const cartList = useSelector(state => state.cart.cartList);
   const compareList = useSelector(state => state.compare.items);
+  const cartId = useSelector(state => state.user.user.cart_id);
 
   const [color, setColor] = useState(null)
 
   useEffect(() => {
-    setColor(selectedColor || phone?.colors ? {id: phone?.colors[0][0], name: phone?.colors[0][1], code: phone?.colors[0][2]} : false)
+    if(phone?.colors) {
+      const firstAviableColor = phone.colors.filter(color => color[3] != 0);
+      setColor(selectedColor || (firstAviableColor.length ? {id: firstAviableColor[0][0], name: firstAviableColor[0][1], code: firstAviableColor[0][2]} : false))
+    }
   }, [phone?.colors])
 
   const inCart = cartList.find(e => e.phone_id===phone?.phone_id && (color?.id ? e.selectedColor?.id === color?.id : true))
   const isInCompare = compareList.find(e => +e === phone?.phone_id);
 
-  const removeFromCart = (phone) => dispatch(onChangeCartItem({
+  const removeFromCart = (phone) => dispatch(onChangeCart({
     ...phone,
     count: -1
   }))
@@ -72,34 +86,80 @@ export default function Phone(props) {
           />
         </Grid>
         {
-          inCart ? 
-          (
-            <Button
-            onClick={() => {
-              removeFromCart({phone_id: phone.phone_id, name: phone.name, price: phone.price, image: phone.image, selectedColor:color});
-            }}
-            style={{backgroundColor:"tomato", marginBottom: 30, marginRight: 30}}
-            variant="contained"
-            color="primary"
-            size="large"
-            endIcon={<ShoppingCartIcon/>}>
-              Remove From Cart
-            </Button>
-          )
+          phone.colors ?
+            inCart ? 
+            (
+              <Button
+              onClick={async () => {
+                if(cartId) {
+                  await changeCart(cartId, {phoneId: phone.phone_id, colorId: color.id, actionType: 'remove_item'})
+                  .then(() => {
+                    dispatch(onChangeCart({
+                      phone_id: phone.phone_id,
+                      name: phone.name,
+                      price: phone.price,
+                      image: phone.image,
+                      selectedColor:color,
+                      count: -1
+                    }))
+                  })
+                }
+                else {
+                  dispatch(onChangeCart({
+                    phone_id: phone.phone_id,
+                    name: phone.name,
+                    price: phone.price,
+                    image: phone.image,
+                    selectedColor:color,
+                    count: -1
+                  }))
+                }
+              }}
+              style={{backgroundColor:"tomato", marginBottom: 30, marginRight: 30}}
+              variant="contained"
+              color="primary"
+              size="large"
+              endIcon={<ShoppingCartIcon/>}>
+                Remove From Cart
+              </Button>
+            )
+            :
+            (
+              <Button
+              onClick={async () => {
+                if(cartId) {
+                  await changeCart(cartId, {phoneId: phone.phone_id, colorId: color.id, actionType: 'add_item'})
+                  .then(() => {
+                    dispatch(onChangeCart({
+                      phone_id: phone.phone_id,
+                      name: phone.name,
+                      price: phone.price,
+                      image: phone.image,
+                      selectedColor: color
+                    }))
+                  })
+                }else {
+                  dispatch(onChangeCart({
+                    phone_id: phone.phone_id,
+                    name: phone.name,
+                    price: phone.price,
+                    image: phone.image,
+                    selectedColor: color
+                  }))
+                }
+              }}
+              style={{marginBottom: 30, marginRight: 30}}
+              variant="contained"
+              color="primary"
+              size="large"
+              endIcon={<AddShoppingCartIcon>Add To Cart</AddShoppingCartIcon>}>
+                Add To Cart
+              </Button>
+            )
           :
-          (
-            <Button
-            onClick={() => {
-              dispatch(onChangeCartItem({phone_id: phone.phone_id, name: phone.name, price: phone.price, image: phone.image, selectedColor: color}));
-            }}
-            style={{marginBottom: 30, marginRight: 30}}
-            variant="contained"
-            color="primary"
-            size="large"
-            endIcon={<AddShoppingCartIcon>Add To Cart</AddShoppingCartIcon>}>
-              Add To Cart
-            </Button>
-          )
+          <Button disabled className={classes.btnDisabled}>
+            Not Aviable
+          </Button>
         }
 
         {

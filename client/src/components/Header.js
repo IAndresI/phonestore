@@ -155,7 +155,7 @@ export default withRouter(function PrimarySearchAppBar({history}) {
       }}>Profile</MenuItem>
       <MenuItem onClick={() => {
         dispatch(onLogout());
-        dispatch(setCart(JSON.parse(localStorage.getItem('cart') || [])))
+        dispatch(setCart(JSON.parse(localStorage.getItem('cart') || "[]")))
         handleMenuClose();
         history.push("/");
       }}>Log Out</MenuItem>

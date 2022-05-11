@@ -39,7 +39,7 @@ const useStyles = makeStyles((theme) => ({
     textAlign: 'center',
     color: 'inherit',
     fontWeight: 600
-  }
+  },
 }));
 
 export default function ReviewModal({setOpen, open, phoneId, clientId, alreadyReviewed, setAlreadyReviewed}) {
@@ -132,7 +132,7 @@ export default function ReviewModal({setOpen, open, phoneId, clientId, alreadyRe
 
   return (
     <Dialog onClose={handleClose} open={open}>
-      <div style={{width: '100%'}}>
+      <div style={{width: '100%', minWidth: 600}}>
         <DialogTitle id="alert-dialog-description">
           {alreadyReviewed ? "Edit Your Review!" : "Make Your Review!"}
         </DialogTitle>

@@ -60,22 +60,26 @@ export default function MiniColorPicker({colors, selected, setSelected, id}) {
   return (
     <div className={classes.radioContainer}>
       {
-        colors.map(e => (
-          <span key={id+e[0]}>
-            <input
-              checked={e[1] === selected.name}
-              className={classes.radio}
-              onChange={() => setSelected({id:e[0],name:e[1],code: e[2]})}
-              name={id}
-              id={id+e[0]}
-              value={e[1]}
-              type="radio"
-            />
-            <label className={`${classes.radioLabel} ${e[0] === selected.id ? classes.radioIsChecked : classes.radioNotChecked}`} htmlFor={id+e[0]}>
-              <div className={classes.radioCheck} style={{backgroundColor: e[2]}}></div>
-            </label>
-          </span>
-        ))
+        colors.map(e => {
+          if (e[3] != 0) {
+            return (
+              <span key={id+e[0]}>
+                <input
+                  checked={e[1] === selected.name}
+                  className={classes.radio}
+                  onChange={() => setSelected({id:e[0],name:e[1],code: e[2]})}
+                  name={id}
+                  id={id+e[0]}
+                  value={e[1]}
+                  type="radio"
+                />
+                <label className={`${classes.radioLabel} ${e[0] === selected.id ? classes.radioIsChecked : classes.radioNotChecked}`} htmlFor={id+e[0]}>
+                  <div className={classes.radioCheck} style={{backgroundColor: e[2]}}></div>
+                </label>
+              </span>
+            )
+          }
+        })
       }
     </div>
   );

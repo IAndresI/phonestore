@@ -1,6 +1,6 @@
-const onChangeCartItem = (phone) => {
+const onChangeCart = (phone) => {
   return {
-    type: "CHANGE_CART_ITEM",
+    type: "CHANGE_CART",
     payload: phone
   };
 };
@@ -9,20 +9,6 @@ const setCart = (cart) => {
   return {
     type: "SET_CART",
     payload: cart
-  };
-};
-
-const onRemoveItemFromCart = (id) => {
-  return {
-    type: "DELETE_CART_ITEM",
-    payload: id
-  };
-};
-
-const onRemoveItemAllFromCart = (id) => {
-  return {
-    type: "DELETE_ALL_CART_ITEM",
-    payload: id
   };
 };
 
@@ -184,9 +170,7 @@ const removeCompareItem = (id) => {
 export {
   removeCompareItem,
   addCompareItem,
-  onChangeCartItem,
-  onRemoveItemFromCart,
-  onRemoveItemAllFromCart,
+  onChangeCart,
   onManufacturerChange,
   onColorChange,
   onPriceChange,

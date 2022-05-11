@@ -14,7 +14,7 @@ export default function cartReducer(state, action) {
         cartList: action.payload,
         totalPrice: getTotalPrice(action.payload) 
       }
-    case "CHANGE_CART_ITEM":
+    case "CHANGE_CART":
       return updateCart(action.payload, state);
     case "DELETE_ALL_CART_ITEM":
       const cart = [...state.cart.cartList];
@@ -59,8 +59,8 @@ function getTotalPrice(cart) {
   return cart.reduce((acc, curr) => acc+parseFloat(curr.price.slice(1, curr.price.length).replace(",",""))*curr.count,0)
 }
 
-function setLocalStorageCart(state, newCart) {
-  state.user.isAuth ? localStorage.setItem("userCart", JSON.stringify(newCart)) : localStorage.setItem("cart", JSON.stringify(newCart))
+function setLocalStorageCart(newCart) {
+  localStorage.setItem("cart", JSON.stringify(newCart))
 }
 
 function updateCart(payload, state) {
@@ -75,7 +75,7 @@ function updateCart(payload, state) {
     newCart = [...stateCartList.slice(0,oldIndex),oldCartItem,...stateCartList.slice(oldIndex+1,stateCartList.length+1)]
     if(oldCartItem.count < 1) {
       newCart.splice(oldIndex, 1);
-      setLocalStorageCart(state, newCart)
+      if(!state.user.isAuth) setLocalStorageCart(newCart)
       return {
         ...state.cart,
         cartList: newCart,
@@ -83,7 +83,7 @@ function updateCart(payload, state) {
       }
     }
     else {
-      setLocalStorageCart(state, newCart)
+      if(!state.user.isAuth) setLocalStorageCart(newCart)
       return {
         ...state.cart,
         cartList: newCart,
@@ -94,7 +94,7 @@ function updateCart(payload, state) {
   else {
     const newCartItem = {...payload, count: 1};
     newCart = [...stateCartList, newCartItem];
-    setLocalStorageCart(state, newCart)
+    if(!state.user.isAuth) setLocalStorageCart(newCart)
     return {
       ...state.cart,
       cartList: newCart,

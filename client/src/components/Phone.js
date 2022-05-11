@@ -8,10 +8,162 @@ import {Link } from 'react-router-dom'
 import { PHONE_ROUTE } from '../utils/consts';
 import { Button } from '@material-ui/core';
 import { useDispatch, useSelector } from 'react-redux';
-import { onChangeCartItem } from '../store/actions';
+import { onChangeCart } from '../store/actions';
 import MiniColorPicker from './MiniColorPicker'
 import ReviewRating from './phone/components/ReviewRating';
 import SmsIcon from '@material-ui/icons/Sms';
+import { changeCart } from '../http/cartAPI';
+
+export default function Phone({phone}) {
+
+  const {image, phone_name: name, price, manufacturer_name, phone_id, phone_colors, rating, review_count} = phone;
+
+  const isAviable = phone_colors ? phone_colors.reduce((acc, curr) => acc += +curr[3], 0) : false
+
+  const dispatch = useDispatch()
+  const classes = useStyles();
+
+  const firstAviableColor = phone_colors?.filter(color => color[3] != 0);
+  const [selectedColor, setSelectedColor] = useState(firstAviableColor?.length ? {id: firstAviableColor[0][0], name: firstAviableColor[0][1]} : false)
+  const [loading, setLoading] = useState(false)
+
+  // phones in cart
+
+  const phonesInCart = useSelector(state => state.cart.cartList);
+  const cartId = useSelector(state => state.user.user.cart_id);
+  const inCart=phonesInCart.find(e => e.phone_id===phone_id && (selectedColor.id ? e.selectedColor.id === selectedColor.id : true))
+
+  const imagePath = `${process.env.REACT_APP_API_URL}/${image ? image : "phone.jpg"}`
+  const addToCart = async () => {
+    setLoading(true);
+    if(cartId) {
+      await changeCart(cartId, {phoneId: phone_id, colorId: selectedColor.id, actionType: 'add_item'})
+      .then(() => {
+        dispatch(onChangeCart({
+          phone_id,
+          name,
+          price,
+          image,
+          selectedColor
+        }))
+      })
+    }else {
+      dispatch(onChangeCart({
+        phone_id,
+        name,
+        price,
+        image,
+        selectedColor
+      }))
+    }
+    setLoading(false);
+  }
+
+  const removeFromCart = async () => {
+    setLoading(true);
+    if(cartId) {
+      await changeCart(cartId, {phoneId: phone_id, colorId: selectedColor.id, actionType: 'remove_item'})
+      .then(() => {
+        dispatch(onChangeCart({
+          phone_id,
+          name,
+          price,
+          image,
+          selectedColor,
+          count: -1
+        }))
+      })
+    }
+    else {
+      dispatch(onChangeCart({
+        phone_id,
+        name,
+        price,
+        image,
+        selectedColor,
+        count: -1
+      }))
+    }
+    setLoading(false);
+  }
+
+
+  const phoneLink = {
+    pathname: `${PHONE_ROUTE}/${phone_id}`,
+    state: { selectedColor }
+  }
+
+  return (
+    <Card className={classes.root}>
+      <Link to={phoneLink}>
+        <CardMedia
+          width={300}
+          height={300}
+          className={classes.media}
+          image={imagePath}
+          title={name}
+        />
+      </Link>
+      <CardContent>
+        <Link className={classes.name_link} to={phoneLink}>
+          <Typography className={classes.name} gutterBottom variant="h5" component="h2">
+            {name}
+          </Typography>
+        </Link>
+        <Typography variant="body2" color="textSecondary" component="p">
+          {manufacturer_name}
+        </Typography>
+        {
+          <div className={classes.colors}>
+            <Typography variant="body2" color="textSecondary" component="p">
+              Colors:
+            </Typography>
+            {
+              phone_colors ? 
+                <MiniColorPicker id={phone_id} colors={phone_colors} selected={selectedColor} setSelected={setSelectedColor}/>
+              :
+                null
+            }
+          </div>
+          
+        }
+        <div className={classes.ratingContainer}>
+          <div>
+            <ReviewRating readOnly defaultValue={rating}/>
+          </div>
+          <div className={classes.reviewContainer}>
+            <SmsIcon size="small" color="primary"/>
+            {review_count}
+          </div>
+        </div>
+        <div className={classes.footer}>
+          <Typography className={classes.price} variant="body2" color="textSecondary" component="p">
+            {price}
+          </Typography>
+          {
+            isAviable ?
+              inCart ? 
+              (
+                <Button disabled={loading} onClick={removeFromCart} className={classes.btnInCart}>
+                  Already In Cart
+                </Button>
+              )
+              :
+              (
+                <Button disabled={loading} onClick={addToCart} className={classes.btn}>
+                  Add To Cart
+                </Button>
+              )
+            :
+            <Button disabled className={classes.btnDisabled}>
+              Not Aviable
+            </Button>
+          }
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 const useStyles = makeStyles({
   root: {
@@ -72,6 +224,12 @@ const useStyles = makeStyles({
       backgroundColor: "green",
     }
   },
+  btnDisabled: {
+    backgroundColor: "#ffffff",
+    color: "#ffffff",
+    border: "1px solid rgba(0, 0, 0, 0.26);",
+    textTransform: 'none',
+  },
   name_link: {
     textDecoration: 'none',
     transition: "all 500ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;",
@@ -91,7 +249,8 @@ const useStyles = makeStyles({
   colors: {
     display: "flex",
     justifyContent: "space-between",
-    alignItems: "center"
+    alignItems: "center",
+    minHeight: 53
   },
   ratingContainer: {
     display: "flex",
@@ -104,106 +263,3 @@ const useStyles = makeStyles({
     alignItems: "center",
   }
 });
-
-export default function Phone({phone}) {
-
-  const {image, phone_name: name, price, manufacturer_name, phone_id, phone_colors, rating, review_count} = phone
-
-  const dispatch = useDispatch()
-  const classes = useStyles();
-
-  const [selectedColor, setSelectedColor] = useState(phone_colors ? {id: phone_colors[0][0], name: phone_colors[0][1]} : false)
-
-  // phones in cart
-
-  const phonesInCart = useSelector(state => state.cart.cartList);
-  const inCart=phonesInCart.find(e => e.phone_id===phone_id && (selectedColor.id ? e.selectedColor.id === selectedColor.id : true))
-
-  const imagePath = `${process.env.REACT_APP_API_URL}/${image ? image : "phone.jpg"}`
-  const addToCart = () => dispatch(onChangeCartItem({
-    phone_id,
-    name,
-    price,
-    image,
-    selectedColor
-  }))
-
-  const removeFromCart = () => dispatch(onChangeCartItem({
-    phone_id,
-    name,
-    price,
-    image,
-    selectedColor,
-    count: -1
-  }))
-
-
-  const phoneLink = {
-    pathname: `${PHONE_ROUTE}/${phone_id}`,
-    state: { selectedColor }
-  }
-
-  return (
-    <Card className={classes.root}>
-      <Link to={phoneLink}>
-        <CardMedia
-          width={300}
-          height={300}
-          className={classes.media}
-          image={imagePath}
-          title={name}
-        />
-      </Link>
-      <CardContent>
-        <Link className={classes.name_link} to={phoneLink}>
-          <Typography className={classes.name} gutterBottom variant="h5" component="h2">
-            {name}
-          </Typography>
-        </Link>
-        <Typography variant="body2" color="textSecondary" component="p">
-          {manufacturer_name}
-        </Typography>
-        {
-          phone_colors ? 
-          <div className={classes.colors}>
-            <Typography variant="body2" color="textSecondary" component="p">
-              Colors:
-            </Typography>
-            <MiniColorPicker id={phone_id} colors={phone_colors} selected={selectedColor} setSelected={setSelectedColor}/>
-          </div>
-          :
-          null
-        }
-        <div className={classes.ratingContainer}>
-          <div>
-            <ReviewRating readOnly defaultValue={rating}/>
-          </div>
-          <div className={classes.reviewContainer}>
-            <SmsIcon size="small" color="primary"/>
-            {review_count}
-          </div>
-        </div>
-        <div className={classes.footer}>
-          <Typography className={classes.price} variant="body2" color="textSecondary" component="p">
-            {price}
-          </Typography>
-          {
-            inCart ? 
-            (
-              <Button onClick={removeFromCart} className={classes.btnInCart}>
-                Already In Cart
-              </Button>
-            )
-            :
-            (
-              <Button onClick={addToCart} className={classes.btn}>
-                Add To Cart
-              </Button>
-            )
-          }
-          
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
