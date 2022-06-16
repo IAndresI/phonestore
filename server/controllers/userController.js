@@ -34,7 +34,7 @@ class UserController {
       
       const qeury = await db.query(`INSERT INTO public.client(
         password, date_of_birth, email, phone, first_name, last_name, gender, image)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8);`, [hashedPassword, date_of_birth, email, phone, first_name, last_name, gender, filename], (err) => {
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8);`, [hashedPassword, date_of_birth, email, phone || null, first_name, last_name, gender, filename], (err) => {
           if(!err) {
             if(filename)img.mv(path.resolve(__dirname, '..','static', filename))
             return res.json(req.body)
@@ -57,7 +57,7 @@ class UserController {
 
       const qeury = await db.query(
         `SELECT create_empty_client AS "client_id" FROM create_empty_client($1, $2, $3, $4, $5);`, 
-        [hashedPassword, email, firstName, lastName, phone],
+        [hashedPassword, email, firstName, lastName, phone || null],
         (err, response) => {
           if(err) {
             if(err.code==="23505") next(ApiError.duplicateError("This email already exists! Please, login before creating order!"));

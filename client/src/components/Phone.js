@@ -24,14 +24,14 @@ export default function Phone({phone}) {
   const classes = useStyles();
 
   const firstAviableColor = phone_colors?.filter(color => color[3] != 0);
-  const [selectedColor, setSelectedColor] = useState(firstAviableColor?.length ? {id: firstAviableColor[0][0], name: firstAviableColor[0][1]} : false)
+  const [selectedColor, setSelectedColor] = useState(firstAviableColor?.length ? {id: firstAviableColor[0][0], name: firstAviableColor[0][1], code: firstAviableColor[0][2], count: firstAviableColor[0][3] } : false)
   const [loading, setLoading] = useState(false)
 
   // phones in cart
 
   const phonesInCart = useSelector(state => state.cart.cartList);
   const cartId = useSelector(state => state.user.user.cart_id);
-  const inCart=phonesInCart.find(e => e.phone_id===phone_id && (selectedColor.id ? e.selectedColor.id === selectedColor.id : true))
+  const inCart=phonesInCart.find(e => e.phone_id===phone_id && (selectedColor.id ? e.selectedColor.id == selectedColor.id : true));
 
   const imagePath = `${process.env.REACT_APP_API_URL}/${image ? image : "phone.jpg"}`
   const addToCart = async () => {

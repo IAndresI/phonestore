@@ -21,8 +21,7 @@ function App() {
       dispatch(onLogin(data));
       
       getCart(data.cart_id).then(data => {
-        console.log(data);
-        dispatch(setCart(data.map((el, i) => ({...el, selectedColor: {id: el.selectedColor[0][0], name: el.selectedColor[0][1], code: el.selectedColor[0][2]}}))))
+        dispatch(setCart(data.map((el, i) => ({...el, selectedColor: {id: el.color_id, name: el.name, code: el.code, count: el.inStock}}))))
       })
     })
     .catch(error => {

@@ -67,7 +67,7 @@ export default function MiniColorPicker({colors, selected, setSelected, id}) {
                 <input
                   checked={e[1] === selected.name}
                   className={classes.radio}
-                  onChange={() => setSelected({id:e[0],name:e[1],code: e[2]})}
+                  onChange={() => setSelected({id:e[0],name:e[1],code: e[2], count: e[3]})}
                   name={id}
                   id={id+e[0]}
                   value={e[1]}

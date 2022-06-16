@@ -11,14 +11,22 @@ class CartController {
         return next(ApiError.badRequest('Enter ID!'))
       }
       const qeury = await db.query(`
-        SELECT ph.phone_id,ph.name,ph.price,cart_det.count, ph.image, 
-          (SELECT array_agg(ARRAY[col.color_id::TEXT, col.name::TEXT, col.code::TEXT, col_det.count::TEXT]) FROM color col
-          INNER JOIN color_details col_det ON col.color_id=col_det.color_id where col.color_id=cart_det.color_id) as "selectedColor" 
-        FROM cart_details cart_det 
-        INNER JOIN phone ph ON ph.phone_id=cart_det.phone_id 
-        WHERE cart_id=$1`, 
+      SELECT ph.phone_id,ph.name,ph.price,cart_det.count, ph.image, col.color_id, col.name, col.code
+      FROM cart_details cart_det 
+      INNER JOIN phone ph ON ph.phone_id=cart_det.phone_id 
+  INNER JOIN color col ON col.color_id=cart_det.color_id
+      WHERE cart_id=$1;`, 
         [id]);
       const data = qeury.rows
+
+      for (let i = 0; i < data.length; i++) {
+        const qeuryAviableCount = await db.query(`
+          SELECT "count" FROM color_details WHERE color_id=$1 AND phone_id=$2;`, 
+        [data[i].color_id, data[i].phone_id]);
+        data[i].inStock = qeuryAviableCount.rows[0].count;
+      }
+
+
       return res.json(data)
     }
     catch(err) {
@@ -34,7 +42,6 @@ class CartController {
       const qeury = await db.query(`call change_cart(${id}, ${phoneId}, ${colorId}, '${actionType}' ${count ? `, ${count}` : ''});`,
         (err, response) => {
           if(err) {
-            console.log({...err});
             next(ApiError.badRequest(err.message));
           }
           else {

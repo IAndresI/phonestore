@@ -48,7 +48,7 @@ const ColorPicker = ({colors, currentColor, setColor}) => {
           colors.map(e => 
             <MenuItem
               key={e[0]} 
-              onClick={() => setColor({id: e[0],name: e[1], code: e[2]})}
+              onClick={() => setColor({id: e[0],name: e[1], code: e[2], count: e[3]})}
               value={+e[0]}
               disabled={e[3] == 0}
             >

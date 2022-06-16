@@ -69,7 +69,10 @@ const Comments = ({phoneId, page, setPage}) => {
     const reviews = await getReviews(phoneId, clientId || -1, limit, page);
     setReviews(reviews);
   }, [alreadyReviewed])
-  
+
+  useEffect(() => {
+    setAlreadyReviewed(!!reviews?.clientReview);
+  }, [!!reviews?.clientReview])
   
   const paginationChange = (event, value) => {
     setPage(value)
@@ -160,7 +163,7 @@ const Comments = ({phoneId, page, setPage}) => {
         :
         <h3 className={classes.noComments}>Theres No Comments</h3>
       }
-      <ReviewModal clientId={clientId} phoneId={phoneId} open={openReviewModal} setOpen={setOpenReviewModal} alreadyReviewed={reviews.clientReview} setAlreadyReviewed={setAlreadyReviewed}/>
+      <ReviewModal setReviews={setReviews} refetchData={{phoneId, clientId, limit, page}} clientId={clientId} phoneId={phoneId} open={openReviewModal} setOpen={setOpenReviewModal} alreadyReviewed={reviews.clientReview} setAlreadyReviewed={setAlreadyReviewed}/>
     </div>
   );
 };

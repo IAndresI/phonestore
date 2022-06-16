@@ -42,19 +42,7 @@ const OrdersTable = ({history}) => {
       label: 'Status',
       minWidth: 150,
       align: 'center',
-      format: (value) => {
-        if(value) {
-          const statusesArray = value.filter(el => el);
-          const statusCode = statusesArray ? statusesArray.length : 0;
-          switch(statusCode) {
-            case 0: return "Expectation"
-            case 1: return "Processed"
-            case 2: return "Courier sent"
-            case 3: return "Delivered"
-            default: return "In consideration"
-          }
-        }
-      }
+      format: (value) => value
     }
   ];
 
@@ -79,9 +67,9 @@ const OrdersTable = ({history}) => {
           </TableHead>
           <TableBody>
             {
-              history.map((row) => {
+              history.map((row, i) => {
                 return (
-                  <TableRow key={row.order_id} hover role="checkbox" tabIndex={-1}>
+                  <TableRow key={i} hover role="checkbox" tabIndex={-1}>
                     {columns.map((column) => {
                       const value = row[column.id];
                       return (

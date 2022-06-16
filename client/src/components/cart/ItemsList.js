@@ -14,13 +14,23 @@ const ItemsList = ({cartItems, classes}) => {
   const cartId = useSelector((state) => state.user.user.cart_id);
 
   // Change Phone In Cart Count
-
   const countChange = async (e, phone) => {
     const count = e.target.value;
-    
     if(count > 0) {
-      await changeCart(cartId, {phoneId: phone.phone_id, colorId: phone.selectedColor.id, actionType: 'change_item', count})
-      .then(() => {
+      if(cartId) {
+        await changeCart(cartId, {phoneId: phone.phone_id, colorId: phone.selectedColor.id, actionType: 'change_item', count})
+        .then(() => {
+          dispatch(onChangeCart({
+            phone_id: phone.phone_id,
+            name: phone.name,
+            price: phone.price,
+            image: phone.image,
+            selectedColor: phone.selectedColor,
+            count
+          }))
+        })
+      }
+      else {
         dispatch(onChangeCart({
           phone_id: phone.phone_id,
           name: phone.name,
@@ -29,11 +39,10 @@ const ItemsList = ({cartItems, classes}) => {
           selectedColor: phone.selectedColor,
           count
         }))
-      })
+      }
+      
     }
   }
-
-  console.log(cartItems[0]);
 
   return (
     <>
@@ -44,17 +53,29 @@ const ItemsList = ({cartItems, classes}) => {
             <div key={item.phone_id} className={classes.item} >
               <Button 
                 onClick={async () => {
-                  await changeCart(cartId, {phoneId: item.phone_id, colorId: item.selectedColor.id, actionType: 'remove_item'})
-                  .then(() => {
+                  if(cartId) {
+                    await changeCart(cartId, {phoneId: item.phone_id, colorId: item.selectedColor.id, actionType: 'remove_item'})
+                    .then(() => {
+                      dispatch(onChangeCart({
+                        phone_id: item.phone_id,
+                        name: item.name,
+                        price: item.price,
+                        image: item.image,
+                        selectedColor: item.selectedColor,
+                        count: -1
+                      }))
+                    })
+                  }
+                  else {
                     dispatch(onChangeCart({
                       phone_id: item.phone_id,
-                      name: item.name,
-                      price: item.price,
-                      image: item.image,
-                      selectedColor: item.selectedColor,
-                      count: -1
+                        name: item.name,
+                        price: item.price,
+                        image: item.image,
+                        selectedColor: item.selectedColor,
+                        count: -1
                     }))
-                  })
+                  }
                 }}
                 className={classes.removeButton}>
                 <HighlightOffIcon />
@@ -65,6 +86,7 @@ const ItemsList = ({cartItems, classes}) => {
                 </Link>
                 <div>
                   <Link className={classes.nameContainer} to={`/phone/${item.phone_id}`}><h3 className={classes.name}>{item.name}</h3></Link>
+                  <span>{item.selectedColor.count} in stock</span>
                   {
                     item.selectedColor ? 
                     <div className={classes.color}><span className={classes.colorDot} style={{backgroundColor: item.selectedColor.code}}/>{item.selectedColor.name}</div>
@@ -84,7 +106,7 @@ const ItemsList = ({cartItems, classes}) => {
                   type="number"
                   name="min"
                   defaultValue={item.count}
-                  inputProps={{ max: 100, step: 1, min: 1}}
+                  inputProps={{ max: item.selectedColor.count, step: 1, min: 1}}
                   variant="outlined"
                 />
               </div>

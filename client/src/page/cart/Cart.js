@@ -72,7 +72,7 @@ const Cart = () => {
     if(formData.deliveryAvenue && wayToGet==='delivery') {
       const fragmentedAddress = formData.deliveryAvenue.split(',')
       const countryAndCity = fragmentedAddress.splice(fragmentedAddress.length - 2)
-      clientAddress = `${fragmentedAddress.join(',')}, room ${formData.room},${countryAndCity.join(',')}`;
+      clientAddress = `${formData.deliveryAvenue}, room ${formData.room}${formData.entrance ? `, entrance ${formData.entrance}` : null}${formData.floor ? `, floor ${formData.floor}` : null}`;
     }
 
     if(unregistred) {
@@ -148,7 +148,7 @@ const Cart = () => {
         try {
 
           const orderDetails = getFullData(data, true)
-          const details = await createUnregistredUserOrder(orderDetails.orderDeatils, orderDetails.clientDeatils)
+          const details = await createUnregistredUserOrder(orderDetails.orderDeatils, orderDetails.clientDeatils);
 
           history.push({
             pathname: ORDER_STATUS,
@@ -208,11 +208,11 @@ const Cart = () => {
   const successPaymentHandler = async (details, data) => {
     if(isAuth) {
       try {
-        const orderId = await createRegistredUserOrder(tempUserData)
+        const orderId = await createRegistredUserOrder(tempUserData);
         setApiErrors({})
         history.push({
           pathname: ORDER_STATUS,
-          state: { detail: orderId }
+          state: { details: orderId }
         })
       }
       catch(err) {
@@ -223,10 +223,10 @@ const Cart = () => {
     }
     else {
       try {
-        const details = await createUnregistredUserOrder(tempUserData.orderDeatils, tempUserData.clientDeatils)
+        const details = await createUnregistredUserOrder(tempUserData.orderDeatils, tempUserData.clientDeatils);
         history.push({
           pathname: ORDER_STATUS,
-          state: { detail: {order: details.order.data} }
+          state: {details}
         })
       }
       catch(err) {

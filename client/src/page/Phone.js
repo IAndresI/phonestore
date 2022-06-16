@@ -55,7 +55,7 @@ export default function Phone(props) {
   useEffect(() => {
     if(phone?.colors) {
       const firstAviableColor = phone.colors.filter(color => color[3] != 0);
-      setColor(selectedColor || (firstAviableColor.length ? {id: firstAviableColor[0][0], name: firstAviableColor[0][1], code: firstAviableColor[0][2]} : false))
+      setColor(selectedColor || (firstAviableColor.length ? {id: firstAviableColor[0][0], name: firstAviableColor[0][1], code: firstAviableColor[0][2], count: firstAviableColor[0][3]} : false))
     }
   }, [phone?.colors])
 
@@ -86,7 +86,7 @@ export default function Phone(props) {
           />
         </Grid>
         {
-          phone.colors ?
+          phone?.colors?.some(color => color[3] !== '0') ?
             inCart ? 
             (
               <Button

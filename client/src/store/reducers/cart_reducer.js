@@ -65,6 +65,8 @@ function setLocalStorageCart(newCart) {
 
 function updateCart(payload, state) {
 
+  console.log(payload);
+
   const stateCartList = state.cart.cartList;
   const phoneInCart = stateCartList.find(e => e.phone_id === payload.phone_id && (payload.selectedColor?.id ? payload.selectedColor.id === e.selectedColor.id : true));
   let newCart;

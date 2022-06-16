@@ -16,7 +16,7 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: "space-between",
   },
   deliveryInfoItem: {
-    margin: "0 10px",
+    margin: "30px 10px 0",
     "&:first-child": {
       marginLeft: 0
     },
@@ -67,7 +67,20 @@ export default function LocationSearchInput({defaultAddress, setValue, control})
 
   return (
     <div className={classes.delivery}>
-      <PlacesAutocomplete
+      <Controller
+        name="deliveryAvenue"
+        control={control}
+        rules={{ required: true }}
+        render={({ field }) => <TextField
+          className="select-point"
+          id="outlined-required"
+          label="Delivery Address"
+          placeholder="Enter Address"
+          variant="outlined"
+          {...field }
+        />}
+      />
+      {/* <PlacesAutocomplete
       value={address}
       onChange={handleChange}
       onSelect={handleSelect}
@@ -100,7 +113,7 @@ export default function LocationSearchInput({defaultAddress, setValue, control})
             />
           )
         }
-      </PlacesAutocomplete>
+      </PlacesAutocomplete> */}
       <div className={classes.deliveryInfo}>
         <Controller
           name="room"

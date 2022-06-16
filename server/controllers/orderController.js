@@ -7,7 +7,7 @@ class OrderController {
     try {
 
       const {clientId, dateOrderPaid, total, paymentMethod, pickupPoint, deliveryAddress, items } = req.body;
-
+      
       await db.query(
         `call create_order(
           ($1, $2, $3::money, $4, $5, $6),
@@ -114,18 +114,25 @@ class OrderController {
     }
   }
 
-  async getHistory(req, res) {
+  async getHistory(req, res, next) {
     try {
       const {id} = req.params;
       if(!id) {
         return next(ApiError.badRequest('Enter ID!'))
       }
-      const query = await db.query(`SELECT * FROM get_order_history($1)`, [id])
+      const query = await db.query(`SELECT ord.date_up, case
+      when processed  = true then 'Processed'
+      when sent_for_delivery   = true then 'Sent for delivery'
+      when delivered   = true then 'Delivered'
+      when rejected = true then 'Rejected'
+  end AS "status"
+FROM order_history ord
+WHERE order_id=$1;`, [id])
       const data = query.rows;
       return res.json(data)
     }
     catch(err) {
-      return next(new ApiError.badRequest(err.message));
+      return next(ApiError.badRequest(err.message));
     }
   }
 

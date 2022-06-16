@@ -1,10 +1,11 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import { makeStyles } from '@material-ui/core/styles';
+import Modal from '@material-ui/core/Modal';
 import ReviewRating from './ReviewRating';
 import { useForm, Controller  } from "react-hook-form";
-import { DialogContent, DialogContentText, DialogTitle, TextField, Dialog, DialogActions, Button } from '@material-ui/core';
+import { TextField } from '@material-ui/core';
 import Alert from '@material-ui/lab/Alert';
-import { createReview, editReview } from '../../../http/phoneAPI';
+import { createReview, editReview, getReviews } from '../../../http/phoneAPI';
 import Spinner from '../../Spinner';
 
 const useStyles = makeStyles((theme) => ({
@@ -16,16 +17,13 @@ const useStyles = makeStyles((theme) => ({
     border: '2px solid #000',
     boxShadow: theme.shadows[5],
     padding: theme.spacing(2, 4, 3),
-    top: `50%`,
-    left: `50%`,
-    transform: `translate(-50%, -50%)`,
+    top: '50%',
+    left: '50%',
+    transform: "translate(-50%, -50%)",
     textAlign: 'center'
   },
   alert: {
     marginTop: 20
-  },
-  modalContainer: {
-    width:"70%"
   },
   statusTitle: {
     fontSize: 35,
@@ -39,40 +37,50 @@ const useStyles = makeStyles((theme) => ({
     textAlign: 'center',
     color: 'inherit',
     fontWeight: 600
-  },
+  }
 }));
 
-export default function ReviewModal({setOpen, open, phoneId, clientId, alreadyReviewed, setAlreadyReviewed}) {
+export default function ReviewModal({setOpen, open, phoneId, clientId, alreadyReviewed, refetchData, setReviews}) {
 
   const classes = useStyles();
 
   const { control, setValue, handleSubmit, formState: { errors } } = useForm({defaultValues: {rating: alreadyReviewed?.rating || 4.5, comment: alreadyReviewed?.comment}});
 
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
-  const [statusMessage, setStatusMessage] = useState(null)
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [statusMessage, setStatusMessage] = useState(null);
+
+  useEffect(() => {
+    return () => {
+      setStatusMessage(null)
+    }
+  }, [open])
+  
 
   const onSubmit = (data) => {
     setLoading(true)
     if(alreadyReviewed?.review_id) {
       editReview(alreadyReviewed.review_id, data)
         .then(data => {
-          setStatusMessage(data.message)
-          setLoading(false)
-          setError(null)
+          setStatusMessage(data.message);
+          setLoading(false);
+          setError(null);
+          getReviews(refetchData.phoneId, refetchData.clientId, refetchData.limit, refetchData.page)
+            .then(data => setReviews(data))
         })
         .catch(err => {
-          setLoading(false)
-          setError(err?.response?.data || err)
+          setLoading(false);
+          setError(err?.response?.data || err);
         })
     }
     else {
       createReview(phoneId, {...data, clientId, phoneId})
         .then(data => {
-          setStatusMessage(data.message)
-          setLoading(false)
-          setError(null)
-          setAlreadyReviewed(true)
+          setStatusMessage(data.message);
+          setLoading(false);
+          setError(null);
+          getReviews(refetchData.phoneId, refetchData.clientId, refetchData.limit, refetchData.page)
+            .then(data => setReviews(data))
         })
         .catch(err => {
           setLoading(false)
@@ -91,9 +99,6 @@ export default function ReviewModal({setOpen, open, phoneId, clientId, alreadyRe
   const handleClose = () => {
     setError(null)
     setOpen(false);
-    setTimeout(() => {
-      setStatusMessage(null)
-    }, 400);
   };
 
   const errorHandler = (err) => {
@@ -104,7 +109,7 @@ export default function ReviewModal({setOpen, open, phoneId, clientId, alreadyRe
       case 'comment':
         switch (err[errorType].type) {
           case "minLength":
-            errorText = "Comment length should be more than 50 characters!"
+            errorText = "Comment lengthshould be more than 50 characters!"
             break;
           default:
             errorText = "Comment is required!"
@@ -119,8 +124,42 @@ export default function ReviewModal({setOpen, open, phoneId, clientId, alreadyRe
     return <Alert className={classes.alert} severity="error">{errorText}</Alert>
   }
 
+const body = (
+    <div className={classes.paper}>
+      <h2 id="modal-title">{alreadyReviewed ? "Edit Your Review!" : "Make Your Review!"}</h2>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <Controller
+          name="rating"
+          control={control}
+          rules={{ required: true }}
+          render={({ field }) => <ReviewRating field={field}/>}
+        />
+        <Controller
+          name="comment"
+          control={control}
+          rules={{ required: true, minLength: 50 }}
+          defaultValue=""
+          render={({ field }) =><TextField
+            variant="outlined"
+            margin="normal"
+            fullWidth
+            name="Controller"
+            label="Comment"
+            type="text"
+            multiline
+            id="password"
+            {...field}
+          />}
+        />
+        <button type="submit" className="button">Submit</button>
+        {Object.keys(errors).length === 0 ? null : errorHandler(errors)}
+      </form>
+      <ReviewModal />
+    </div>
+  );
+
   const StatusMessage = ({text, success}) => (
-    <div style={{color: success ? '#4caf50' : "tomato"}}>
+    <div style={{color: success ? '#4caf50' : "tomato"}} className={classes.paper}>
       <div className={classes.statusTitle}>{text}</div>
       {
         success ? <p className={classes.statusText}>Your new review has been sent to our moderators for review, it will take some time before the new review appears in the feed.</p>
@@ -131,66 +170,21 @@ export default function ReviewModal({setOpen, open, phoneId, clientId, alreadyRe
   )
 
   return (
-    <Dialog onClose={handleClose} open={open}>
-      <div style={{width: '100%', minWidth: 600}}>
-        <DialogTitle id="alert-dialog-description">
-          {alreadyReviewed ? "Edit Your Review!" : "Make Your Review!"}
-        </DialogTitle>
-        <DialogContent>
-          {
-            loading ?
-             <Spinner /> : 
-             error ? <StatusMessage text={error.message} /> : 
-              statusMessage ? <StatusMessage text={statusMessage} success/> :
-                (
-                  <div>
-                    <form onSubmit={handleSubmit(onSubmit)}>
-                      <Controller
-                        name="rating"
-                        control={control}
-                        rules={{ required: true }}
-                        render={({ field }) => <ReviewRating field={field}/>}
-                      />
-                      <Controller
-                        name="comment"
-                        control={control}
-                        rules={{ required: true, minLength: 50 }}
-                        defaultValue=""
-                        render={({ field }) =><TextField
-                          variant="outlined"
-                          margin="normal"
-                          fullWidth
-                          name="Controller"
-                          label="Comment"
-                          type="text"
-                          multiline
-                          id="password"
-                          {...field}
-                        />}
-                      />
-                      <DialogActions>
-                        <Button
-                          type="submit"
-                          variant="contained"
-                        >
-                          Submit
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="contained"
-                          onClick={handleClose} 
-                          autoFocus
-                        >
-                          Close
-                        </Button>
-                      </DialogActions>
-                      {Object.keys(errors).length === 0 ? null : errorHandler(errors)}
-                    </form>
-                  </div>
-                )
-          }
-        </DialogContent>
-      </div>
-    </Dialog>
+    <div>
+      <Modal
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="modal-title"
+        aria-describedby="modal-form"
+      >
+        {
+          loading ?
+           <Spinner /> : 
+           error ? <StatusMessage text={error.message} /> : 
+            statusMessage ? <StatusMessage text={statusMessage} success/> :
+              body
+        }
+      </Modal>
+    </div>
   );
 }

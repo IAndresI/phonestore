@@ -53,7 +53,7 @@ function setStatusName(statusCode) {
       return "delivered";
     case 3: 
       return "rejected";
-    default: throw new Error("Unkniwn status!")
+    default: throw new Error("Unknown status!")
   }
 }
 

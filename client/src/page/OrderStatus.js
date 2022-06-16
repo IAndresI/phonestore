@@ -20,8 +20,6 @@ const OrderStatus = (props) => {
   const history = useHistory()
 
   const classes = useStyles()
-
-  console.log(history.location?.state?.details);
   
   return (
     <section className="page">
